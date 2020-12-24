@@ -7,7 +7,6 @@ class AE_LOSSES:
     """
     Provide some loss functions for autoencoder attacker
     """
-
     CROSS_ENTROPY = 'identity'
     RE_RANK = 're_rank'
 
