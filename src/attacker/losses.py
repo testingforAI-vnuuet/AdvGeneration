@@ -19,6 +19,7 @@ class AE_LOSSES:
         :param epsilon: balance between target and L2 distance
         :return: loss
         """
+
         def loss(origin_image, generated_image):
             return (1 - epsilon) * keras.losses.mean_squared_error(origin_image, generated_image) + \
                    epsilon * keras.losses.categorical_crossentropy(classifier(generated_image)[0], target_label)
