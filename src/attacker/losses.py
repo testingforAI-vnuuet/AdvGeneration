@@ -11,7 +11,7 @@ class AE_LOSSES:
     RE_RANK = 're_rank'
 
     @staticmethod
-    def cross_entropy_loss(classifier, target_label, epsilon=0.003):
+    def cross_entropy_loss(classifier, target_label, epsilon):
         """
 
         :param classifier: classification model

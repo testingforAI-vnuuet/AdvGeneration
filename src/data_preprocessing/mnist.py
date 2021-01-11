@@ -26,8 +26,8 @@ class mnist_preprocessing:
         :param data: input data
         :return: array of one-hot vector
         """
-        print(int(np.max(data)))
-        print(data.shape[0])
+        # print(int(np.max(data)))
+        # print(data.shape[0])
         data = np.array(data, dtype='float32')
         result = np.zeros(shape=(data.shape[0], int(np.max(data)) + 1))
         result[np.arange(data.shape[0]), np.array(data, dtype='int32')] = 1
