@@ -9,18 +9,22 @@ from data_preprocessing.mnist import mnist_preprocessing
 from utility.statistics import *
 from matplotlib import pyplot as plt
 import keras.losses
+import pandas as pd
+import math
 
 logger = MyLogger.getLog()
 
 if __name__ == '__main__':
+    TARGET = 7
     START_SEED = 0
-    END_SEED = 100
+    END_SEED = 1000
     AUTOENCODER = CLASSIFIER_PATH + '/autoencoder_mnist.h5'
     AE_LOSS = AE_LOSSES.cross_entropy_loss
     ATTACKED_CNN_MODEL = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
+    OUT_IMGAGES = '/Users/ducanhnguyen/Documents/PycharmProjects/AdvGeneration/data/mnist'
 
     # load autoencoder model
-    autoencoder = keras.models.load_model(filepath= AUTOENCODER,
+    autoencoder = keras.models.load_model(filepath=AUTOENCODER,
                                           custom_objects={'loss': AE_LOSS})
     logger.debug("Type: %s", type(autoencoder))
     autoencoder.summary()
@@ -35,32 +39,46 @@ if __name__ == '__main__':
     pre_mnist = mnist_preprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, None)
     trainX, trainY, testX, testY = pre_mnist.get_preprocess_data()
 
-    nCol = 6
-    # nRow = np.round((END_SEED - START_SEED + 1) / nCol * 2).astype(np.int32)
-    nRow = 10
-    f = plt.figure()
-    pos = 1
+    summary = pd.DataFrame(columns=["index", "l2", "origin", "predict"])
     for index in range(START_SEED, END_SEED + 1):
-        # logger.debug(index)
         img = trainX[index]
         yLabel = np.argmax(trainY[index])
         original = img.reshape((28, 28))
         trueLabel = np.argmax(trainY[index])
 
         reconstruction = autoencoder.predict(img.reshape(-1, MNIST_IMG_ROWS, MNIST_IMG_COLS, 1))
-        predictionLabel = np.argmax(cnn.predict(reconstruction)[0])
+        reconstructedLabel = np.argmax(cnn.predict(reconstruction)[0])
 
-        if trueLabel != predictionLabel:
-            logger.debug("Found one")
-            # add to plot
-            f.add_subplot(nRow, nCol, pos)
+        if trueLabel != TARGET and reconstructedLabel == TARGET:
+            logger.debug("Found index " + str(index))
+
+            # full figure
+            logger.debug("Export image")
+            f = plt.figure()
+            f.add_subplot(1, 2, 1)
             plt.imshow(original, cmap='gray')
             plt.xlabel("origin: " + str(trueLabel))
 
-            f.add_subplot(nRow, nCol, pos + 1)
+            f.add_subplot(1, 2, 2)
             plt.imshow(reconstruction.reshape((28, 28)), cmap='gray')
-            plt.xlabel("adv: " + str(predictionLabel))
+            plt.xlabel("adv: " + str(reconstructedLabel))
 
-            pos = pos + 2
             plt.subplots_adjust(wspace=1, hspace=1)
-    plt.show(block=True)
+            plt.savefig(OUT_IMGAGES + '/' + str(index) + '.png', bbox_inches='tight')
+
+            # export
+            logger.debug("Export sample")
+            original = original.reshape(-1)
+            dataframe_array = pd.DataFrame(original)
+            dataframe_array.to_csv(OUT_IMGAGES + '/' + str(index) + '_original.csv')
+
+            reconstruction = reconstruction.reshape(-1)
+            dataframe_array = pd.DataFrame(reconstruction)
+            dataframe_array.to_csv(OUT_IMGAGES + '/' + str(index) + '_modified.csv')
+
+            l2 = math.dist(original, reconstruction)
+            summary = summary.append(
+                {"index": index, "l2": l2, "origin": trueLabel, "predict": reconstructedLabel,
+                 }, ignore_index=True)
+    summary.to_csv(OUT_IMGAGES + '/summary.csv')
+    logger.debug("DONE")

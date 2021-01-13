@@ -48,7 +48,7 @@ class Auto_encoder:
             self.get_architecture()
 
         adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
-        self.auto_encoder.compile(optimizer=adam, loss=loss(classifier, self.target_label_onehot, epsilon=0.003))
+        self.auto_encoder.compile(optimizer=adam, loss=loss(classifier, self.target_label_onehot, epsilon=0.001))
         self.is_compiled = True
 
     def fit(self, epochs, batch_size):
@@ -92,4 +92,4 @@ if __name__ == '__main__':
     auto_encoder.fit(epochs=300, batch_size=512)
 
     logger.debug("Export the trained auto-encoder to file")
-    auto_encoder.auto_encoder.save(AE_MODEL);
+    auto_encoder.auto_encoder.save(AE_MODEL)
