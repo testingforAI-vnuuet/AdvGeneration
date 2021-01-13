@@ -22,10 +22,13 @@ if __name__ == '__main__':
     AE_LOSS = AE_LOSSES.cross_entropy_loss
     ATTACKED_CNN_MODEL = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
 
+    # create folder to save image
     ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    OUT_IMGAGES =  ROOT + '/data/mnist/'
-    os.mkdir(ROOT + '/data/')
-    os.mkdir(ROOT + '/data/mnist/')
+    if not os.path.exists(ROOT + '/data/'):
+        os.mkdir(ROOT + '/data/')
+    OUT_IMGAGES = ROOT + '/data/mnist/'
+    if not os.path.exists(OUT_IMGAGES):
+        os.mkdir(OUT_IMGAGES)
 
     # load autoencoder model
     autoencoder = keras.models.load_model(filepath=AUTOENCODER,
