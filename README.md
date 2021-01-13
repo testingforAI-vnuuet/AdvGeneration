@@ -19,9 +19,9 @@ Assume you want to run autoencoder.py
 Just run directly on GUI
 
 ### 2.2. Terminal (such as HPC system)
-- Step 1. Set up PYTHONPATH to update search path for module files. Without this command, python will struggle with finding import modules. Command: **export PYTHONPATH=/home/anhnd/AdvGeneration/src:$PYTHONPATH**
-
-- Step 2. Change directory to the folder containing the executing file, then type: **python autoencoder.py**
+- Step 1. Set up PYTHONPATH to update search path for module files. Without this command, python will struggle with finding import modules. For example, execute **export PYTHONPATH=/home/anhnd/AdvGeneration/src:$PYTHONPATH** to add **home/anhnd/AdvGeneration/src** to search path.
+- Step 2. Change directory to the folder containing the executing file
+- Step 3. Type: **python autoencoder.py**
 
 ## 3. Experimental results
 AE4DNN is compared with FGSM, l.l. class, box-constrained L-BFGS,  Carnili-Wagner <img src="https://render.githubusercontent.com/render/math?math=||L||_2"> attack, and AAE to demonstrate how it mitigates the trade-off and unstable transferable rate. Specifically, the experiment addresses the following research questions:
