@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 import keras.losses
 import pandas as pd
 import math
-
+import os
 logger = MyLogger.getLog()
 
 if __name__ == '__main__':
@@ -21,7 +21,11 @@ if __name__ == '__main__':
     AUTOENCODER = CLASSIFIER_PATH + '/autoencoder_mnist.h5'
     AE_LOSS = AE_LOSSES.cross_entropy_loss
     ATTACKED_CNN_MODEL = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
-    OUT_IMGAGES = '/Users/ducanhnguyen/Documents/PycharmProjects/AdvGeneration/data/mnist'
+
+    ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    OUT_IMGAGES =  ROOT + '/data/mnist/'
+    os.mkdir(ROOT + '/data/')
+    os.mkdir(ROOT + '/data/mnist/')
 
     # load autoencoder model
     autoencoder = keras.models.load_model(filepath=AUTOENCODER,
