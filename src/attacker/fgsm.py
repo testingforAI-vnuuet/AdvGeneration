@@ -18,7 +18,7 @@ class FGSM:
         self.target_label = keras.utils.to_categorical(target, num_classes=MNIST_NUM_CLASSES).reshape((1, MNIST_NUM_CLASSES))
 
     @staticmethod
-    def create_adversarial_pattern(input_image, target_label, pretrained_model):
+    def create_adversarial_pattern(input_image, target_label, pretrained_model, get_sign = True):
         """
         compute gradient of pretrained model output respect to input_image
         :param input_image: a input image
@@ -33,7 +33,7 @@ class FGSM:
             prediction = pretrained_model(input)
             loss = loss_object(target_label, prediction)
         gradient = tape.gradient(loss, input)
-        sign = tf.sign(gradient)
+        sign = tf.sign(gradient) if get_sign == True else gradient
         return sign
 
     def create_adversaries(self, images):
