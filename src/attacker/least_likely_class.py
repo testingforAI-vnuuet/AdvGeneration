@@ -37,11 +37,11 @@ if __name__ == '__main__':
     trainX, trainY, testX, testY = pre_mnist.get_preprocess_data()
 
     logger.debug('Creating adversarial examples: ')
-    lbfgs = least_likely_class(classifier=classifier, target=TARGET)
-    result_imgs = lbfgs.create_adversaries(trainX)
+    llc = least_likely_class(classifier=classifier, target=TARGET)
+    result_imgs = llc.create_adversaries(trainX)
     result_origin_imgs, result_origin_confidients, result_gen_imgs, result_gen_confidents = filter_advs(classifier,
                                                                                                         trainX,
                                                                                                         result_imgs,
                                                                                                         TARGET)
 
-    logger.debug('L-BFGS done')
+    logger.debug('Least_likely_class done')
