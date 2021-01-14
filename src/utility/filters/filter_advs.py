@@ -15,5 +15,5 @@ def filter_advs(classifier, origin_images, generated_imgs, target):
             result_origin_confidients.append(origin_confidents[i])
             result_gen_imgs.append(generated_imgs[i])
             result_gen_confidents.append(gen_confidents[i])
-    return result_origin_imgs, result_origin_confidients, result_gen_imgs, result_gen_confidents
+    return map(lambda data: np.array(data), [result_origin_imgs, result_origin_confidients, result_gen_imgs, result_gen_confidents])
 
