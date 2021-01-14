@@ -15,7 +15,7 @@ class L_BFGS:
     def __init__(self, classifier, epsilon=0.1, target=7, num_iters=20, weight=0.1):
         """
 
-        :param classifier: cnn model
+        :param classifier: target cnn model
         :param epsilon: learning rate
         :param target: target attack
         :param num_iters: number of iterations

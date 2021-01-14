@@ -12,6 +12,13 @@ logger = MyLogger.getLog()
 
 class FGSM:
     def __init__(self, classifier, epsilon=0.1, target=7):
+        """
+
+        :param classifier: target cnn model
+        :param epsilon: epsilon
+        :param target: target class
+        """
+
         self.epsilon = epsilon
         self.target = target
         self.classifier = classifier
