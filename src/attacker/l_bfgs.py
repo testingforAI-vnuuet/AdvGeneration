@@ -12,7 +12,7 @@ logger = MyLogger.getLog()
 
 
 class L_BFGS:
-    def __init__(self, classifier, epsilon=0.1, target=7, num_iters=20, weight=0.1):
+    def __init__(self, classifier, epsilon=0.5, target=7, num_iters=20, weight=0.1):
         """
 
         :param classifier: target cnn model
@@ -51,6 +51,7 @@ class L_BFGS:
             grad = self.create_adversarial_pattern_two_losses(tf.convert_to_tensor(gen_img, dtype='double'), image,
                                                               self.target_label, self.classifier, self.weight)
             gen_img -= self.epsilon * grad
+            gen_img = np.clip(gen_img, 0, 1)
         return gen_img
 
     def create_adversaries(self, images):
