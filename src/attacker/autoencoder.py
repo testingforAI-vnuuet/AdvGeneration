@@ -12,6 +12,7 @@ logger = MyLogger.getLog()
 class Auto_encoder:
 
     def __init__(self, train_data, target, nClasses):
+
         """
 
         :param target: target class in attack
