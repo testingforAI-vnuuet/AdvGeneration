@@ -18,7 +18,7 @@ class RANKING_ALGORITHM(enum.Enum):
     CO = 3
 
 
-class PIXEL_RANKER:
+class feature_ranker:
     def __init__(self):
         return
 
@@ -43,10 +43,10 @@ class PIXEL_RANKER:
         return gradient
 
     @staticmethod
-    def find_important_pixels(gradient: np.ndarray,
-                              input_image: np.ndarray,
-                              n_rows: int, n_cols: int, n_channels: int, n_important_features: int,
-                              algorithm: enum.Enum):
+    def find_important_features(gradient: np.ndarray,
+                                input_image: np.ndarray,
+                                n_rows: int, n_cols: int, n_channels: int, n_important_features: int,
+                                algorithm: enum.Enum):
         """Apply ABS algorithm to find the most important features.
 
         Args:
@@ -58,11 +58,11 @@ class PIXEL_RANKER:
             input_image: shape = `[height, width, channel`]
             algorithm:
         Returns:
-            positions: ndarray (shape=`[index_row, index_col, index_channel`])
+            positions: ndarray (shape=`[row, col, channel`])
         """
         input_image = input_image.copy()  # avoid modifying on the original one
         gradient = gradient.copy()
-        positions = np.ndarray(shape=(1, 3), dtype=int)
+        important_features = np.ndarray(shape=(1, 3), dtype=int)
         foundSet = {}
 
         # find the position of the highest value in the gradient
@@ -98,25 +98,30 @@ class PIXEL_RANKER:
                             max_col = cdx
                             max_channel = chdx
 
-            # after iterating all pixels
+            # after iterating all features
             if max_row is not None:
-                positions = np.append(positions, [[max_row, max_col, max_channel]], axis=0)
+                important_features = np.append(important_features, [[max_row, max_col, max_channel]], axis=0)
                 input_image[max_row, max_col, max_channel] = np.max(gradient) + 2
 
-        positions = np.delete(positions, 0, axis=0)
-        return positions
+        important_features = np.delete(important_features, 0, axis=0) # the first row is redundant
+        return important_features
 
     @staticmethod
-    def display(positions, input_image):
+    def highlight_important_features(important_features: np.ndarray, input_image: np.ndarray):
+        """Highlight important features
+            :param important_features: shape = '[ row, col, channel']. Each row stores the position of its feature on input image
+            :param input_image: shape = `[ height, width, channel`]
+        :return: None
+        """
         input_image = input_image.copy()
         max = np.max(input_image)
         ROW_IDX = 0
         COL_IDX = 1
         CHANNEL_INDEX = 2
-        for idx in range(0, positions.shape[0]):
-            row = positions[idx, ROW_IDX]
-            col = positions[idx, COL_IDX]
-            channel = positions[idx, CHANNEL_INDEX]
+        for idx in range(0, important_features.shape[0]):
+            row = important_features[idx, ROW_IDX]
+            col = important_features[idx, COL_IDX]
+            channel = important_features[idx, CHANNEL_INDEX]
             input_image[row, col, channel] = max + 2
         plt.imshow(input_image, cmap='gray')
         plt.title("Most important features are highlighted")
@@ -138,13 +143,13 @@ if __name__ == '__main__':
         trueLabel = np.argmax(trainY[INDEX])
         logger.debug("True label: " + str(trueLabel))
 
-        # gradient the neuron output corresponding to the true label w.r.t features
-        gradient = PIXEL_RANKER.compute_gradient_wrt_features(
+        # compute gradient
+        gradient = feature_ranker.compute_gradient_wrt_features(
             input=tf.convert_to_tensor([input_image]),
             target_neuron=trueLabel,
             classifier=classifier)
 
-        positions = PIXEL_RANKER.find_important_pixels(
+        important_features = feature_ranker.find_important_features(
             gradient=gradient,
             n_rows=MNIST_IMG_ROWS,
             n_cols=MNIST_IMG_COLS,
@@ -153,5 +158,5 @@ if __name__ == '__main__':
             n_important_features=10,
             algorithm=RANKING_ALGORITHM.CO
         )
-        logger.debug("Important positions: " + str(positions))
-        PIXEL_RANKER.display(positions, input_image.copy())
+        logger.debug("Important positions: " + str(important_features))
+        feature_ranker.highlight_important_features(important_features, input_image.copy())
