@@ -36,7 +36,7 @@ The research chooses MNIST which is a popular publicly-available dataset for eva
 ### 3.1. Quality of adversaries in terms of <img src="https://render.githubusercontent.com/render/math?math=||L||_2"> distance. 
 In practice, machine learning testers have no idea about the best value of configurations. Therefore, the testers usually use the strategy try-and-check until they find out the optimal configuration. The experiment in this section follows this strategy. For FGSM, the value of 𝜖 changed from 0.1 to 0.3 with a step of 0.05. For least likely class, the value of 𝜖 changed from 0.1 to 0.3 with a step of 0.03 and the number of iterations is 4. Concerning box-constrained L-BFGS, the value of 𝜖  changed from 0.001 to 0.0035 with a step of 0.0005 and the number of iterations is 20.
 
-![box plots](./images/box_plots.png)
+![box plots](./images/box_plotsv2.png)
 
 ### 3.2. Examples
 
