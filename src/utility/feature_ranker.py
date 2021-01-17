@@ -46,7 +46,8 @@ class feature_ranker:
     def find_important_features_of_a_sample(input_image: np.ndarray,
                                             n_rows: int, n_cols: int, n_channels: int, n_important_features: int,
                                             algorithm: enum.Enum,
-                                            trueLabel: int):
+                                            gradient_label: int,
+                                            classifier: keras.Sequential):
         """Apply ABS algorithm to find the most important features.
 
         Args:
@@ -56,13 +57,15 @@ class feature_ranker:
             n_important_features: a positive number
             input_image: shape = `[height, width, channel`]
             algorithm:
+            classifier:
+            gradient_label: any label
         Returns:
             positions: ndarray (shape=`[row, col, channel`])
         """
         input_image = input_image.copy()  # avoid modifying on the original one
         gradient = feature_ranker.compute_gradient_wrt_features(
             input=tf.convert_to_tensor([input_image]),
-            target_neuron=trueLabel,
+            target_neuron=gradient_label,
             classifier=classifier)
         important_features = np.ndarray(shape=(1, 3), dtype=int)
         foundSet = {}
@@ -112,7 +115,8 @@ class feature_ranker:
     def find_important_features_of_samples(input_images: np.ndarray,
                                            n_rows: int, n_cols: int, n_channels: int, n_important_features: int,
                                            algorithm: enum.Enum,
-                                           trueLabel: int):
+                                           gradient_label: int,
+                                           classifier: keras.Sequential):
         """Apply ranking algorithm to find the most important features.
 
         Args:
@@ -128,10 +132,6 @@ class feature_ranker:
         final_important_features = np.ndarray(shape=(1, 3), dtype=int)
         for index in range(0, len(input_images)):
             input_image = input_images[index]
-            gradient = feature_ranker.compute_gradient_wrt_features(
-                input=tf.convert_to_tensor([input_image]),
-                target_neuron=trueLabel,
-                classifier=classifier)
             important_features = feature_ranker.find_important_features_of_a_sample(
                 n_rows=n_rows,
                 n_cols=n_cols,
@@ -139,7 +139,8 @@ class feature_ranker:
                 input_image=input_image,
                 n_important_features=n_important_features,
                 algorithm=algorithm,
-                trueLabel = trueLabel)
+                gradient_label=gradient_label,
+                classifier=classifier)
             final_important_features = np.concatenate(
                 (final_important_features, important_features),
                 axis=0)
@@ -190,20 +191,21 @@ if __name__ == '__main__':
         trainX, trainY, _, _ = pre_mnist.get_preprocess_data()
 
         # consider an input vector
-        # important_features = feature_ranker.find_important_features_of_a_sample(
-        #     input_image=trainX[0],
-        #     n_rows=MNIST_IMG_ROWS,
-        #     n_cols=MNIST_IMG_COLS,
-        #     n_channels=MNIST_IMG_CHL,
-        #     n_important_features=50,
-        #     algorithm=RANKING_ALGORITHM.ABS,
-        #     trueLabel=3
-        # )
-        # logger.debug(important_features.shape)
-        # feature_ranker.highlight_important_features(
-        #     important_features=important_features,
-        #     input_image=trainX[0]
-        # )
+        important_features = feature_ranker.find_important_features_of_a_sample(
+            input_image=trainX[0],
+            n_rows=MNIST_IMG_ROWS,
+            n_cols=MNIST_IMG_COLS,
+            n_channels=MNIST_IMG_CHL,
+            n_important_features=50,
+            algorithm=RANKING_ALGORITHM.ABS,
+            gradient_label=3,
+            classifier=classifier
+        )
+        logger.debug(important_features.shape)
+        feature_ranker.highlight_important_features(
+            important_features=important_features,
+            input_image=trainX[0]
+        )
 
         # consider input vectors
         important_features = feature_ranker.find_important_features_of_samples(
@@ -213,7 +215,8 @@ if __name__ == '__main__':
             n_channels=MNIST_IMG_CHL,
             n_important_features=3,
             algorithm=RANKING_ALGORITHM.COI,
-            trueLabel=1
+            gradient_label=1,
+            classifier=classifier
         )
         logger.debug(important_features.shape)
         feature_ranker.highlight_important_features(
