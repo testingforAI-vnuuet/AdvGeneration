@@ -18,9 +18,10 @@ if __name__ == '__main__':
     TARGET = 7
     START_SEED = 0
     END_SEED = 1000
-    AUTOENCODER = CLASSIFIER_PATH + '/autoencoder_mnist.h5'
+    AUTOENCODER = CLASSIFIER_PATH + '/autoencoder_mnist_relu_same.h5'
     AE_LOSS = AE_LOSSES.cross_entropy_loss
     ATTACKED_CNN_MODEL = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
+    SHOULD_CLIPPING = False
 
     # create folder to save image
     ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
@@ -54,6 +55,16 @@ if __name__ == '__main__':
         trueLabel = np.argmax(trainY[index])
 
         reconstruction = autoencoder.predict(img.reshape(-1, MNIST_IMG_ROWS, MNIST_IMG_COLS, 1))
+
+        # clipping all pixels to the range of [0..1]
+        if SHOULD_CLIPPING:
+            reconstruction = reconstruction.reshape(MNIST_IMG_ROWS* MNIST_IMG_COLS)
+            for index2 in range(len(reconstruction)):
+                if reconstruction[index2] > 1:
+                    reconstruction[index2] = 1
+            reconstruction = reconstruction.reshape(-1, MNIST_IMG_ROWS, MNIST_IMG_COLS, 1)
+
+        # predict
         reconstructedLabel = np.argmax(cnn.predict(reconstruction)[0])
 
         if trueLabel != TARGET and reconstructedLabel == TARGET:
