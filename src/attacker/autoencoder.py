@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from tensorflow.keras.datasets import mnist
+from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 from attacker.constants import *
 from attacker.losses import *
 from data_preprocessing.mnist import mnist_preprocessing
@@ -8,6 +9,7 @@ import matplotlib.pyplot as plt
 
 logger = MyLogger.getLog()
 
+AE_MODEL = CLASSIFIER_PATH + '/autoencoder_mnist_relu_default.h5'
 
 class Auto_encoder:
 
@@ -59,7 +61,12 @@ class Auto_encoder:
         """
         if not self.is_compiled:
             raise ValueError("Compile the autoencoder first")
-        self.auto_encoder.fit(self.get_seed_images(), self.get_seed_images(), epochs=epochs, batch_size=batch_size)
+
+        # save the best model during training
+        earlyStopping = EarlyStopping(monitor='loss', patience=30, verbose=0, mode='min')
+        mcp_save = ModelCheckpoint(AE_MODEL, save_best_only=True, monitor='loss', mode='min')
+        self.auto_encoder.fit(self.get_seed_images(), self.get_seed_images(), epochs=epochs, batch_size=batch_size,
+                              callbacks=[earlyStopping, mcp_save])
         self.plot(self.auto_encoder.history)
 
     def plot(self, history):
@@ -76,7 +83,7 @@ if __name__ == '__main__':
     END_SEED = 1000
     TARGET = 7
     ATTACKED_CNN_MODEL = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
-    AE_MODEL = CLASSIFIER_PATH + '/autoencoder_mnist.h5'
+
     AE_LOSS = AE_LOSSES.cross_entropy_loss
 
     # load dataset
@@ -89,7 +96,4 @@ if __name__ == '__main__':
     classifier = keras.models.load_model(ATTACKED_CNN_MODEL)
     auto_encoder = Auto_encoder(train_data=trainX, target=TARGET, nClasses=MNIST_NUM_CLASSES)
     auto_encoder.compile(classifier=classifier, loss=AE_LOSS)
-    auto_encoder.fit(epochs=300, batch_size=512)
-
-    logger.debug("Export the trained auto-encoder to file")
-    auto_encoder.auto_encoder.save(AE_MODEL)
+    auto_encoder.fit(epochs=400, batch_size=256)
