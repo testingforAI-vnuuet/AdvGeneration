@@ -1,6 +1,8 @@
 # AdvGeneration
 Contain source code of adversarial example generation methods. We try to re-implement existing adversarial example generation methods, then compare these methods with our proposed method. For simplicity, the proposed method is named AE4DNN (Autoencoder For attack Deep Neural Network).
 
+If you have any questions, please contact me via nguyenducanh@vnu.edu.vn.
+
 ## 1. Installation
 Before running, it is mandatory to install necessary packages, which is defined in requirements.txt. Depending on your preference, there are two main ways:
 ### 1.1. PyCharm
