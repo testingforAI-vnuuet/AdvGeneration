@@ -33,8 +33,8 @@ if __name__ == '__main__':
 
     (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
 
-    pre_mnist = mnist_preprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
-    trainX, trainY, testX, testY = pre_mnist.get_preprocess_data()
+    pre_mnist = MnistPreprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
+    trainX, trainY, testX, testY = pre_mnist.preprocess_data()
 
     logger.debug('Creating adversarial examples: ')
     llc = least_likely_class(classifier=classifier, target=TARGET)

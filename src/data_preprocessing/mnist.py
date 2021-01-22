@@ -3,7 +3,7 @@ import numpy as np
 from .constants import *
 
 
-class mnist_preprocessing:
+class MnistPreprocessing:
 
     def __init__(self, trainX, trainY, testX, testY, start, end, removed_labels):
         """
@@ -37,22 +37,10 @@ class mnist_preprocessing:
         result[np.arange(data.shape[0]), np.array(data, dtype='int32')] = 1
         return result
 
-    def preprocess_data(self, trainX, trainY, is_processed):
-        """
-        preprocess mnist data
-        :return: null
-        """
-        trainX = trainX.reshape((-1, MNIST_IMG_ROWS, MNIST_IMG_ROWS, MNIST_IMG_CHL))
-        if not is_processed:
-            trainX = trainX / 255.0
-            trainY = self.convert_to_onehot_vector(trainY)
-            is_processed = True
-        return trainX, trainY, is_processed
-
     def remove_label_and_update(self, target):
-        self.trainX, self.trainY = self.removeLabel(self.trainX, self.trainY, target)
+        self.trainX, self.trainY = self.remove_label(self.trainX, self.trainY, target)
 
-    def removeLabel(self, trainX, trainY, target: int):
+    def remove_label(self, trainX: np.ndarray, trainY: np.ndarray, target: int):
         removedColIdx = 0  # first dimension
 
         obj = []
@@ -67,19 +55,28 @@ class mnist_preprocessing:
     def cutoff(self, start, end, trainX, trainY):
         return trainX[start: end + 1], trainY[start: end + 1]
 
-    def get_preprocess_data(self):
-        """
-        Get mnist data after preprocessing
-        :return: preprocessed data
+    def preprocess_data(self):
+        """Get mnist data after preprocessing
         """
         assert self.trainY is not None
         assert self.trainX is not None
 
+        # cut off samples
         if self.start is not None and self.end is not None:
             self.trainX, self.trainY = self.cutoff(self.start, self.end, self.trainX, self.trainY)
+
+        # remove labels
         if self.removed_labels is not None:
-            for remove in self.removed_labels:
-                self.trainX, self.trainY = self.removeLabel(self.trainX, self.trainY, remove)
-        self.trainX, self.trainY, self.is_processed = \
-            self.preprocess_data(self.trainX, self.trainY, self.is_processed)
+            if isinstance(self.removed_labels, int):
+                self.trainX, self.trainY = self.remove_label(self.trainX, self.trainY, self.removed_labels)
+            else:
+                for remove in self.removed_labels:
+                    self.trainX, self.trainY = self.remove_label(self.trainX, self.trainY, remove)
+
+        # normalize
+        self.trainX = self.trainX.reshape((-1, MNIST_IMG_ROWS, MNIST_IMG_ROWS, MNIST_IMG_CHL))
+        self.trainX = self.trainX / 255.0
+
+        self.trainY = self.convert_to_onehot_vector(self.trainY)
+
         return self.trainX, self.trainY, self.testX, self.testY

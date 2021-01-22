@@ -2,7 +2,7 @@ from tensorflow import keras
 from tensorflow.python.keras import Sequential
 from attacker.constants import MNIST_IMG_ROWS, MNIST_IMG_COLS, CLASSIFIER_PATH, MNIST_IMG_CHL
 from tensorflow.keras.datasets import mnist
-from data_preprocessing.mnist import mnist_preprocessing
+from data_preprocessing.mnist import MnistPreprocessing
 from utility.mylogger import MyLogger
 import tensorflow as tf
 import numpy as np
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     if isinstance(classifier, Sequential):
         # get a seed
         (trainX, trainY), (testX, testY) = mnist.load_data()
-        pre_mnist = mnist_preprocessing(
+        pre_mnist = MnistPreprocessing(
             trainX=trainX,
             trainY=trainY,
             testX=testX,
@@ -188,7 +188,7 @@ if __name__ == '__main__':
             start=0,
             end=100,
             removed_labels=None)
-        trainX, trainY, _, _ = pre_mnist.get_preprocess_data()
+        trainX, trainY, _, _ = pre_mnist.preprocess_data()
 
         # consider an input vector
         important_features = feature_ranker.find_important_features_of_a_sample(

@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 from attacker.constants import *
-from data_preprocessing.mnist import mnist_preprocessing
+from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
 from utility.filters.filter_advs import *
 logger = MyLogger.getLog()
@@ -58,8 +58,8 @@ if __name__ == '__main__':
 
     (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
 
-    pre_mnist = mnist_preprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
-    trainX, trainY, testX, testY = pre_mnist.get_preprocess_data()
+    pre_mnist = MnistPreprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
+    trainX, trainY, testX, testY = pre_mnist.preprocess_data()
 
     logger.debug('Evaluating classifier on seed_images: ')
     classifier.evaluate(trainX, trainY)

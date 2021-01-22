@@ -9,35 +9,43 @@ import keras.losses
 import pandas as pd
 from matplotlib import pyplot as plt
 from tensorflow.keras.datasets import mnist
+from tensorflow.python.keras import Model
 
 from attacker.constants import *
 from attacker.losses import AE_LOSSES
-from data_preprocessing.mnist import mnist_preprocessing
+from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
 
 logger = MyLogger.getLog()
 
 
-def generate_adv(autoencoder, loss, cnn_model, trainX, trainY, should_clipping, target, out_image):
-    autoencoder = keras.models.load_model(filepath=autoencoder,
-                                          custom_objects={'loss': loss})
-    logger.debug("Type: %s", type(autoencoder))
-    autoencoder.summary()
+def generate_adv(auto_encoder_path: str,
+                 loss,
+                 cnn_model_path: str,
+                 train_X: np.ndarray,
+                 train_Y: np.ndarray,
+                 should_clipping: bool,
+                 target: int,
+                 out_image: str):
+    auto_encoder = keras.models.load_model(filepath=auto_encoder_path,
+                                           custom_objects={'loss': loss})
+    logger.debug("Type: %s", type(auto_encoder))
+    auto_encoder.summary()
 
     # load cnn model
-    cnn = keras.models.load_model(filepath=cnn_model)
+    cnn = keras.models.load_model(filepath=cnn_model_path)
     logger.debug("Type: %s", type(cnn))
     cnn.summary()
 
     # try with some samples on the training set
     summary = pd.DataFrame(columns=["index", "l2", "origin", "predict"])
-    for index in range(len(trainX)):
-        img = trainX[index]
-        yLabel = np.argmax(trainY[index])
+    for index in range(len(train_X)):
+        img = train_X[index]
+        yLabel = np.argmax(train_Y[index])
         original = img.reshape((28, 28))
-        trueLabel = np.argmax(trainY[index])
+        trueLabel = np.argmax(train_Y[index])
 
-        reconstruction = autoencoder.predict(img.reshape(-1, MNIST_IMG_ROWS, MNIST_IMG_COLS, 1))
+        reconstruction = auto_encoder.predict(img.reshape(-1, MNIST_IMG_ROWS, MNIST_IMG_COLS, 1))
 
         # clipping all pixels to the range of [0..1]
         if should_clipping:
@@ -86,6 +94,19 @@ def generate_adv(autoencoder, loss, cnn_model, trainX, trainY, should_clipping, 
 
 
 if __name__ == '__main__':
+    START_SEED, END_SEED = 0, 1000
+    TARGET = 7
+    AE_LOSS = AE_LOSSES.cross_entropy_loss
+    CNN_MODEL = keras.models.load_model(CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5')
+    AE_MODEL = CLASSIFIER_PATH + '/xxxx.h5'
+    FIG_PATH = CLASSIFIER_PATH + '/xxxx.png'
+
+    # load dataset
+    (train_X, train_Y), (test_X, test_Y) = mnist.load_data()
+    pre_mnist = MnistPreprocessing(train_X, train_Y, test_X, test_Y, START_SEED, END_SEED, TARGET)
+    train_X, train_Y, test_X, test_Y = pre_mnist.preprocess_data()
+    countSamples(probability_vector=train_Y, n_class=MNIST_NUM_CLASSES)
+
     # create folder to save image
     ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     if not os.path.exists(ROOT + '/data/'):
@@ -95,11 +116,11 @@ if __name__ == '__main__':
         os.mkdir(OUT_IMGAGES)
 
     # load autoencoder model
-    generate_adv(autoencoder= CLASSIFIER_PATH + '/autoencoder_mnist.h5',
+    generate_adv(auto_encoder_path=CLASSIFIER_PATH + '/autoencoder_mnist.h5',
                  loss=AE_LOSSES.cross_entropy_loss,
-                 cnn_model= CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5',
-                 start_seed=0,
-                 end_seed=1000,
+                 cnn_model_path=CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5',
                  should_clipping=True,
                  target=7,
-                 out_image=OUT_IMGAGES)
+                 out_image=OUT_IMGAGES,
+                 train_X=train_X,
+                 train_Y=train_Y)
