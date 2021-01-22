@@ -187,7 +187,7 @@ if __name__ == '__main__':
             testY=testY,
             start=0,
             end=100,
-            target=None)
+            removed_labels=None)
         trainX, trainY, _, _ = pre_mnist.get_preprocess_data()
 
         # consider an input vector

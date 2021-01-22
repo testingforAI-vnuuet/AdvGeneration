@@ -18,11 +18,13 @@ class Auto_encoder:
 
         :param target: target class in attack
         """
+        self.output_file = None
         self.auto_encoder = None
         self.target = target
         self.target_label_onehot = keras.utils.to_categorical(target, nClasses, dtype='float32')
         self.train_data = train_data
         self.is_compiled = False
+        self.loss_fig = None
 
     def get_seed_images(self):
         """
@@ -50,7 +52,7 @@ class Auto_encoder:
             self.get_architecture()
 
         adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
-        self.auto_encoder.compile(optimizer=adam, loss=loss(classifier, self.target_label_onehot, epsilon=0.001))
+        self.auto_encoder.compile(optimizer=adam, loss=loss(classifier, self.target_label_onehot, epsilon=0.01637))
         self.is_compiled = True
 
     def fit(self, epochs, batch_size):
@@ -64,7 +66,7 @@ class Auto_encoder:
 
         # save the best model during training
         earlyStopping = EarlyStopping(monitor='loss', patience=30, verbose=0, mode='min')
-        mcp_save = ModelCheckpoint(AE_MODEL, save_best_only=True, monitor='loss', mode='min')
+        mcp_save = ModelCheckpoint(self.get_output_file(), save_best_only=True, monitor='loss', mode='min')
         self.auto_encoder.fit(self.get_seed_images(), self.get_seed_images(), epochs=epochs, batch_size=batch_size,
                               callbacks=[earlyStopping, mcp_save])
         self.plot(self.auto_encoder.history)
@@ -75,8 +77,20 @@ class Auto_encoder:
         plt.ylabel('loss')
         plt.xlabel('epoch')
         # plt.legend(['train', 'test'], loc='upper left')
-        plt.show()
+        # plt.show()
+        plt.savefig(self.get_loss_fig())
 
+    def set_output_file(self, output_file):
+        self.output_file = output_file
+
+    def get_output_file(self):
+        return self.output_file
+
+    def set_loss_fig(self, loss_fig):
+        self.loss_fig = loss_fig
+
+    def get_loss_fig(self):
+        return self.loss_fig
 
 if __name__ == '__main__':
     START_SEED = 0

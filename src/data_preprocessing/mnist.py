@@ -1,10 +1,11 @@
 import numpy as np
+
 from .constants import *
 
 
 class mnist_preprocessing:
 
-    def __init__(self, trainX, trainY, testX, testY, start, end, target):
+    def __init__(self, trainX, trainY, testX, testY, start, end, removed_labels):
         """
         Initialize training and testing data
         All input in numpy array
@@ -20,7 +21,7 @@ class mnist_preprocessing:
         self.is_processed = False
         self.start = start
         self.end = end
-        self.target = target
+        self.removed_labels = removed_labels
 
     @staticmethod
     def convert_to_onehot_vector(data):
@@ -48,12 +49,19 @@ class mnist_preprocessing:
             is_processed = True
         return trainX, trainY, is_processed
 
-    def removeLabel(self, trainX, trainY, target):
-        removedColIdx = 0 # first dimension
+    def remove_label_and_update(self, target):
+        self.trainX, self.trainY = self.removeLabel(self.trainX, self.trainY, target)
+
+    def removeLabel(self, trainX, trainY, target: int):
+        removedColIdx = 0  # first dimension
+
+        obj = []
         for index in range(len(trainX) - 1, -1, -1):
             if trainY[index] == target:
-                trainX = np.delete(trainX, index, removedColIdx)
-                trainY = np.delete(trainY, index)
+                obj.append(index)
+
+        trainX = np.delete(trainX, obj, removedColIdx)
+        trainY = np.delete(trainY, obj)
         return trainX, trainY
 
     def cutoff(self, start, end, trainX, trainY):
@@ -69,8 +77,9 @@ class mnist_preprocessing:
 
         if self.start is not None and self.end is not None:
             self.trainX, self.trainY = self.cutoff(self.start, self.end, self.trainX, self.trainY)
-        if self.target is not None:
-            self.trainX, self.trainY = self.removeLabel(self.trainX, self.trainY, self.target)
+        if self.removed_labels is not None:
+            for remove in self.removed_labels:
+                self.trainX, self.trainY = self.removeLabel(self.trainX, self.trainY, remove)
         self.trainX, self.trainY, self.is_processed = \
             self.preprocess_data(self.trainX, self.trainY, self.is_processed)
         return self.trainX, self.trainY, self.testX, self.testY
