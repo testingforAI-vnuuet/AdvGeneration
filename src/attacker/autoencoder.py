@@ -58,7 +58,7 @@ class MnistAutoEncoder:
         x = keras.layers.UpSampling2D((2, 2))(x)
         x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
         x = keras.layers.UpSampling2D((2, 2))(x)
-        decoded = keras.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
+        decoded = keras.layers.Conv2D(1, (3, 3), activation='relu', padding='same')(x)
         return keras.models.Model(input_img, decoded)
 
     def compute_balanced_point(self,

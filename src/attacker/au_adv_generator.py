@@ -9,10 +9,10 @@ import keras.losses
 import pandas as pd
 from matplotlib import pyplot as plt
 from tensorflow.keras.datasets import mnist
-from tensorflow.python.keras import Model
 
 from attacker.constants import *
 from attacker.losses import AE_LOSSES
+from attacker.matrix_attack import get_mnist_output, generate_name_for_model
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
 
@@ -94,33 +94,45 @@ def generate_adv(auto_encoder_path: str,
 
 
 if __name__ == '__main__':
-    START_SEED, END_SEED = 0, 1000
-    TARGET = 7
+    START_ATTACK_SEED, END_ATTACK_SEED = 10000, 12000
+    SOURCE_LABEL = 0
+    TARGET = 1
     AE_LOSS = AE_LOSSES.cross_entropy_loss
-    CNN_MODEL = keras.models.load_model(CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5')
-    AE_MODEL = CLASSIFIER_PATH + '/xxxx.h5'
-    FIG_PATH = CLASSIFIER_PATH + '/xxxx.png'
+    CNN_MODEL_PATH = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
+    AE_MODEL = '/Users/ducanhnguyen/Documents/PycharmProjects/AdvGeneration/data/mnist/model/0_to_1.h5'
 
     # load dataset
     (train_X, train_Y), (test_X, test_Y) = mnist.load_data()
-    pre_mnist = MnistPreprocessing(train_X, train_Y, test_X, test_Y, START_SEED, END_SEED, TARGET)
+    pre_mnist = MnistPreprocessing(train_X, train_Y, test_X, test_Y, START_ATTACK_SEED, END_ATTACK_SEED, TARGET)
     train_X, train_Y, test_X, test_Y = pre_mnist.preprocess_data()
     countSamples(probability_vector=train_Y, n_class=MNIST_NUM_CLASSES)
 
     # create folder to save image
-    ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    if not os.path.exists(ROOT + '/data/'):
-        os.mkdir(ROOT + '/data/')
-    OUT_IMGAGES = ROOT + '/data/mnist/'
+    get_mnist_output()
+
+    # load autoencoder model
+    OUT_IMGAGES = get_mnist_output() + '/' + generate_name_for_model(SOURCE_LABEL, TARGET)
     if not os.path.exists(OUT_IMGAGES):
         os.mkdir(OUT_IMGAGES)
 
-    # load autoencoder model
-    generate_adv(auto_encoder_path=CLASSIFIER_PATH + '/autoencoder_mnist.h5',
-                 loss=AE_LOSSES.cross_entropy_loss,
-                 cnn_model_path=CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5',
+    #
+    removed_labels = []
+    for i in range(MNIST_NUM_CLASSES):
+        if i != SOURCE_LABEL:
+            removed_labels.append(i)
+    #
+    (train_X2, train_Y2), (test_X2, test_Y2) = mnist.load_data()
+    pre_mnist2 = MnistPreprocessing(train_X2, train_Y2, test_X2, test_Y2, START_ATTACK_SEED,
+                                    END_ATTACK_SEED,
+                                    removed_labels=removed_labels)
+    train_X2, train_Y2, _, _ = pre_mnist2.preprocess_data()
+    countSamples(probability_vector=train_Y2, n_class=MNIST_NUM_CLASSES)
+
+    generate_adv(auto_encoder_path=AE_MODEL,
+                 loss=AE_LOSS,
+                 cnn_model_path=CNN_MODEL_PATH,
+                 train_X=train_X2,
+                 train_Y=train_Y2,
                  should_clipping=True,
-                 target=7,
-                 out_image=OUT_IMGAGES,
-                 train_X=train_X,
-                 train_Y=train_Y)
+                 target=TARGET,
+                 out_image=OUT_IMGAGES)
