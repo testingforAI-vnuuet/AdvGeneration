@@ -12,7 +12,7 @@ from tensorflow.keras.datasets import mnist
 
 from attacker.constants import *
 from attacker.losses import AE_LOSSES
-from attacker.matrix_attack import get_mnist_output, generate_name_for_model
+from attacker.mnist_utils import get_mnist_output
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
 
@@ -94,12 +94,13 @@ def generate_adv(auto_encoder_path: str,
 
 
 if __name__ == '__main__':
-    START_ATTACK_SEED, END_ATTACK_SEED = 10000, 12000
+    START_ATTACK_SEED, END_ATTACK_SEED = 10000, 20000
     SOURCE_LABEL = 0
-    TARGET = 1
+    TARGET = 2
     AE_LOSS = AE_LOSSES.cross_entropy_loss
     CNN_MODEL_PATH = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
-    AE_MODEL = '/Users/ducanhnguyen/Documents/PycharmProjects/AdvGeneration/data/mnist/model/0_to_1.h5'
+    AE_MODEL = '/Users/ducanhnguyen/Documents/PycharmProjects/AdvGeneration/data/mnist/0_to_2_adaptive/0_to_2.h5'
+    OUT_IMGAGES = '/Users/ducanhnguyen/Documents/PycharmProjects/AdvGeneration/data/mnist/0_to_2_adaptive'  # get_mnist_output() + '/' + generate_name_for_model(SOURCE_LABEL, TARGET)
 
     # load dataset
     (train_X, train_Y), (test_X, test_Y) = mnist.load_data()
@@ -109,11 +110,8 @@ if __name__ == '__main__':
 
     # create folder to save image
     get_mnist_output()
-
-    # load autoencoder model
-    OUT_IMGAGES = get_mnist_output() + '/' + generate_name_for_model(SOURCE_LABEL, TARGET)
     if not os.path.exists(OUT_IMGAGES):
-        os.mkdir(OUT_IMGAGES)
+        os.makedirs(OUT_IMGAGES)
 
     #
     removed_labels = []

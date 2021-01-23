@@ -1,73 +1,27 @@
 from __future__ import absolute_import
 
 import json
-import os
-import shutil
 
 from tensorflow.keras.datasets import mnist
 from tensorflow.python.keras.callbacks import History
 
+from attacker.au_adv_generator import generate_adv
 from attacker.autoencoder import MnistAutoEncoder
 from attacker.constants import *
 from attacker.losses import *
+from attacker.mnist_utils import get_history_path, load_history_of_attack, generate_identity_for_model, \
+    get_autoencoder_output_path, get_loss_output_path, get_image_output, plot
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
 
 logger = MyLogger.getLog()
 
-run_on_hpc = False
-
-history = {}
-
-
-def get_root():
-    if run_on_hpc:
-        return "/home/anhnd/AdvGeneration"
-    else:
-        return os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-
-
-def get_autoencoder_output_path(name: str):
-    return get_mnist_output() + '/model/' + name + '.h5'
-
-
-def get_loss_output_path(name: str):
-    return get_mnist_output() + '/model/' + name + '.png'
-
-
-def get_mnist_output():
-    """
-    :return: `{root}/data/mnist`
-    """
-    mnist_out = get_root() + '/data/mnist/'
-    if not os.path.exists(mnist_out):
-        os.makedirs(mnist_out)
-    return mnist_out
-
-
-def get_history_path():
-    return get_mnist_output() + '/history.pkl'
-
-
-def load_history_of_attack():
-    path = get_history_path()
-    if os.path.exists(path):
-        his = json.load(open(path))
-    else:
-        his = dict()
-    return his
-
-
-def generate_name_for_model(source_label: str,
-                            target_label: str):
-    return str(source_label) + '_to_' + str(target_label)
-
 
 def attack(source_label: int,
            target_label: int,
            history: History,
-           OUTPUT_AE_MODEL_PATH: str,
-           OUTPUT_LOSS_FIG_PATH: str,
+           output_ae_model_path: str,
+           output_loss_fig_path: str,
            ae_loss,
            cnn_model,
            name_model: str,
@@ -88,34 +42,43 @@ def attack(source_label: int,
         # train an autoencoder
         ae_trainer = MnistAutoEncoder()
         ae = ae_trainer.get_architecture()
-        balanced_point = ae_trainer.compute_balanced_point(auto_encoder=ae,
-                                                           attacked_classifier=cnn_model,
-                                                           loss=ae_loss,
-                                                           train_data=train_X,
-                                                           target_label=target_label)
-        logger.debug("balanced_point = " + str(balanced_point))
-        ae_trainer.train(
-            auto_encoder=ae,
-            attacked_classifier=cnn_model,
-            loss=ae_loss,
-            epochs=epoch,
-            batch_size=batch,
-            training_set=train_X,
-            epsilon=balanced_point / 4,
-            output_model_path=OUTPUT_AE_MODEL_PATH,
-            output_loss_fig_path=OUTPUT_LOSS_FIG_PATH,
-            target_label=target_label)
-        history[name] = 1
+
+        N_ITER = 4
+        losses = []
+        for i in range(N_ITER):
+            logger.debug("Iterate " + str(i))
+            balanced_point = ae_trainer.compute_balanced_point(auto_encoder=ae,
+                                                               attacked_classifier=cnn_model,
+                                                               loss=ae_loss,
+                                                               train_data=train_X,
+                                                               target_label=target_label)
+            logger.debug("balanced_point = " + str(balanced_point))
+            ae = ae_trainer.train(
+                auto_encoder=ae,
+                attacked_classifier=cnn_model,
+                loss=ae_loss,
+                epochs=int(epoch / N_ITER),
+                batch_size=batch,
+                training_set=train_X,
+                epsilon=balanced_point,
+                output_model_path=output_ae_model_path,
+                target_label=target_label)
+            losses.append(ae.history.history['loss'])
+
+        plot(losses, output_loss_fig_path)
+        history[identity] = 1
         json.dump(history, open(get_history_path(), 'w'))
 
 
 if __name__ == '__main__':
+    START_ATTACK_SEED, END_ATTACK_SEED = 10000, 12000
+
     START_SEED = 0
     END_SEED = 10000
     CNN_MODEL_PATH = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
     CNN_MODEL = keras.models.load_model(CNN_MODEL_PATH)
     AE_LOSS = AE_LOSSES.cross_entropy_loss
-    EPOCH = 400
+    EPOCH = 8
     BATCH = 1024
     history = load_history_of_attack()
 
@@ -126,16 +89,34 @@ if __name__ == '__main__':
             if label != source_label:
                 removed_labels.append(label)
 
+        #
         for target_label in range(0, MNIST_NUM_CLASSES):
             if source_label != target_label:
-                name = generate_name_for_model(source_label, target_label)
+                identity = generate_identity_for_model(source_label, target_label)
                 attack(source_label=source_label,
                        target_label=target_label,
                        history=history,
-                       OUTPUT_AE_MODEL_PATH=get_autoencoder_output_path(name),
-                       OUTPUT_LOSS_FIG_PATH=get_loss_output_path(name),
+                       output_ae_model_path=get_autoencoder_output_path(identity),
+                       output_loss_fig_path=get_loss_output_path(identity),
                        ae_loss=AE_LOSS,
                        cnn_model=CNN_MODEL,
-                       name_model=name,
+                       name_model=identity,
                        batch=BATCH,
                        epoch=EPOCH)
+
+                #
+                (train_X2, train_Y2), (test_X2, test_Y2) = mnist.load_data()
+                pre_mnist2 = MnistPreprocessing(train_X2, train_Y2, test_X2, test_Y2, START_ATTACK_SEED,
+                                                END_ATTACK_SEED,
+                                                removed_labels=removed_labels)
+                train_X2, train_Y2, _, _ = pre_mnist2.preprocess_data()
+                countSamples(probability_vector=train_Y2, n_class=MNIST_NUM_CLASSES)
+
+                generate_adv(auto_encoder_path=get_autoencoder_output_path(identity),
+                             loss=AE_LOSS,
+                             cnn_model_path=CNN_MODEL_PATH,
+                             train_X=train_X2,
+                             train_Y=train_Y2,
+                             should_clipping=True,
+                             target=target_label,
+                             out_image=get_image_output(identity))

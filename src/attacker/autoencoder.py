@@ -26,7 +26,6 @@ class MnistAutoEncoder:
               epsilon: int,
               target_label: int,
               training_set: np.ndarray,
-              output_loss_fig_path: str,
               output_model_path: str):
         # save the best model during training
         adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
@@ -44,7 +43,6 @@ class MnistAutoEncoder:
                          epochs=epochs,
                          batch_size=batch_size,
                          callbacks=[earlyStopping, mcp_save])
-        self.plot(auto_encoder.history, output_loss_fig_path)
         return auto_encoder
 
     def get_architecture(self):
