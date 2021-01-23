@@ -63,7 +63,8 @@ def attack(source_label: int,
                 epsilon=balanced_point,
                 output_model_path=output_ae_model_path,
                 target_label=target_label)
-            losses.append(ae.history.history['loss'])
+            for item in ae.history.history['loss']:
+                losses.append(item)
 
         plot(losses, output_loss_fig_path)
         history[identity] = 1
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     CNN_MODEL_PATH = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
     CNN_MODEL = keras.models.load_model(CNN_MODEL_PATH)
     AE_LOSS = AE_LOSSES.cross_entropy_loss
-    EPOCH = 8
+    EPOCH = 400
     BATCH = 1024
     history = load_history_of_attack()
 

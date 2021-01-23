@@ -1,14 +1,10 @@
 import json
 import os
-import os
 from matplotlib import pyplot as plt
-from numpy.core.multiarray import ndarray
 
 from numpy.core.multiarray import ndarray
 
-run_on_hpc = False
-
-history = {}
+run_on_hpc = True
 
 
 def get_root():
