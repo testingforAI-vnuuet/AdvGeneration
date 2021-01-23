@@ -83,10 +83,10 @@ if __name__ == '__main__':
                     logger.debug("Exist. Move the next attack!")
                 else:
                     # create folder to save image
-                    OUTPUT_AE_MODEL_PATH = CLASSIFIER_PATH + '/' + name + '.h5'
-                    OUTPUT_LOSS_FIG_PATH = CLASSIFIER_PATH + '/' + name + '.png'
+                    OUTPUT_AE_MODEL_PATH = get_mnist() + '/' + name + '.h5'
+                    OUTPUT_LOSS_FIG_PATH = get_mnist() + '/' + name + '.png'
 
-                    OUT_IMGAGES = get_root() + '/data/mnist/' + name
+                    OUT_IMGAGES = get_mnist() + name
                     if os.path.exists(OUT_IMGAGES):
                         logger.debug("Clean " + OUT_IMGAGES)
                         shutil.rmtree(OUT_IMGAGES)
@@ -94,10 +94,10 @@ if __name__ == '__main__':
 
                     # process data
                     logger.debug("preprocess mnist")
-                    (train_X, trainY), (testX, testY) = mnist.load_data()
-                    pre_mnist = MnistPreprocessing(train_X, trainY, testX, testY, START_SEED, END_SEED,
+                    (train_X, trainY), (test_X, test_Y) = mnist.load_data()
+                    pre_mnist = MnistPreprocessing(train_X, trainY, test_X, test_Y, START_SEED, END_SEED,
                                                    removed_labels=removed_labels)
-                    train_X, trainY, testX, testY = pre_mnist.preprocess_data()
+                    train_X, trainY, test_X, test_Y = pre_mnist.preprocess_data()
                     countSamples(probability_vector=trainY, n_class=MNIST_NUM_CLASSES)
 
                     # train an autoencoder
@@ -122,21 +122,21 @@ if __name__ == '__main__':
                         target_label=target_label)
 
                     # attack
-                    logger.debug("attack")
-                    (train_X2, train_Y2), (test_X2, test_Y2) = mnist.load_data()
-                    pre_mnist2 = MnistPreprocessing(train_X2, train_Y2, test_X2, test_Y2, START_ATTACK_SEED,
-                                                    END_ATTACK_SEED,
-                                                    removed_labels=removed_labels)
-                    train_X2, train_Y2, _, _ = pre_mnist2.preprocess_data()
-                    countSamples(probability_vector=train_Y2, n_class=MNIST_NUM_CLASSES)
-
-                    generate_adv(auto_encoder_path=OUTPUT_AE_MODEL_PATH,
-                                 loss=AE_LOSS,
-                                 cnn_model_path=CNN_MODEL_PATH,
-                                 train_X=train_X2,
-                                 train_Y=train_Y2,
-                                 should_clipping=True,
-                                 target=target_label,
-                                 out_image=OUT_IMGAGES)
+                    # logger.debug("attack")
+                    # (train_X2, train_Y2), (test_X2, test_Y2) = mnist.load_data()
+                    # pre_mnist2 = MnistPreprocessing(train_X2, train_Y2, test_X2, test_Y2, START_ATTACK_SEED,
+                    #                                 END_ATTACK_SEED,
+                    #                                 removed_labels=removed_labels)
+                    # train_X2, train_Y2, _, _ = pre_mnist2.preprocess_data()
+                    # countSamples(probability_vector=train_Y2, n_class=MNIST_NUM_CLASSES)
+                    #
+                    # generate_adv(auto_encoder_path=OUTPUT_AE_MODEL_PATH,
+                    #              loss=AE_LOSS,
+                    #              cnn_model_path=CNN_MODEL_PATH,
+                    #              train_X=train_X2,
+                    #              train_Y=train_Y2,
+                    #              should_clipping=True,
+                    #              target=target_label,
+                    #              out_image=OUT_IMGAGES)
                     history[name] = 1
                     json.dump(history, open(get_history_path(), 'w'))

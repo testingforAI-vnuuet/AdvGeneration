@@ -102,6 +102,7 @@ class MnistAutoEncoder:
         # plt.legend(['train', 'test'], loc='upper left')
         # plt.show()
         plt.savefig(path)
+        plt.clf()
 
 
 if __name__ == '__main__':
