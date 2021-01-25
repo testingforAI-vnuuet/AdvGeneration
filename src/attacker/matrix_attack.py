@@ -30,6 +30,7 @@ def attack(source_label: int,
     logger.debug("target label = " + str(target_label) + "; source label = " + str(source_label))
     if history.get(name_model) is not None:
         logger.debug("Exist. Move the next attack!")
+        return False
     else:
         # process data
         logger.debug("preprocess mnist")
@@ -69,6 +70,7 @@ def attack(source_label: int,
         plot(losses, output_loss_fig_path)
         history[identity] = 1
         json.dump(history, open(get_history_path(), 'w'))
+        return True
 
 
 if __name__ == '__main__':
@@ -94,30 +96,31 @@ if __name__ == '__main__':
         for target_label in range(0, MNIST_NUM_CLASSES):
             if source_label != target_label:
                 identity = generate_identity_for_model(source_label, target_label)
-                attack(source_label=source_label,
-                       target_label=target_label,
-                       history=history,
-                       output_ae_model_path=get_autoencoder_output_path(identity),
-                       output_loss_fig_path=get_loss_output_path(identity),
-                       ae_loss=AE_LOSS,
-                       cnn_model=CNN_MODEL,
-                       name_model=identity,
-                       batch=BATCH,
-                       epoch=EPOCH)
+                be_attacked = attack(source_label=source_label,
+                                     target_label=target_label,
+                                     history=history,
+                                     output_ae_model_path=get_autoencoder_output_path(identity),
+                                     output_loss_fig_path=get_loss_output_path(identity),
+                                     ae_loss=AE_LOSS,
+                                     cnn_model=CNN_MODEL,
+                                     name_model=identity,
+                                     batch=BATCH,
+                                     epoch=EPOCH)
 
                 #
-                (train_X2, train_Y2), (test_X2, test_Y2) = mnist.load_data()
-                pre_mnist2 = MnistPreprocessing(train_X2, train_Y2, test_X2, test_Y2, START_ATTACK_SEED,
-                                                END_ATTACK_SEED,
-                                                removed_labels=removed_labels)
-                train_X2, train_Y2, _, _ = pre_mnist2.preprocess_data()
-                countSamples(probability_vector=train_Y2, n_class=MNIST_NUM_CLASSES)
+                if (be_attacked):
+                    (train_X2, train_Y2), (test_X2, test_Y2) = mnist.load_data()
+                    pre_mnist2 = MnistPreprocessing(train_X2, train_Y2, test_X2, test_Y2, START_ATTACK_SEED,
+                                                    END_ATTACK_SEED,
+                                                    removed_labels=removed_labels)
+                    train_X2, train_Y2, _, _ = pre_mnist2.preprocess_data()
+                    countSamples(probability_vector=train_Y2, n_class=MNIST_NUM_CLASSES)
 
-                generate_adv(auto_encoder_path=get_autoencoder_output_path(identity),
-                             loss=AE_LOSS,
-                             cnn_model_path=CNN_MODEL_PATH,
-                             train_X=train_X2,
-                             train_Y=train_Y2,
-                             should_clipping=True,
-                             target=target_label,
-                             out_image=get_image_output(identity))
+                    generate_adv(auto_encoder_path=get_autoencoder_output_path(identity),
+                                 loss=AE_LOSS,
+                                 cnn_model_path=CNN_MODEL_PATH,
+                                 train_X=train_X2,
+                                 train_Y=train_Y2,
+                                 should_clipping=True,
+                                 target=target_label,
+                                 out_image=get_image_output(identity))
