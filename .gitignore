@@ -85,4 +85,4 @@ fabric.properties
 pyvenv.cfg
 .venv
 pip-selfcheck.json
-
+src/classifier/pretrained_models/*.h5
