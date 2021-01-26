@@ -191,10 +191,10 @@ if __name__ == '__main__':
     pre_mnist = MnistPreprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
     trainX, trainY, testX, testY = pre_mnist.preprocess_data()
 
-    ae_weights = [0.1, 0.2, 0.3, 0.4]
+    ae_weights = [0.1, 0.2, 0.3]
 
     AE = AEs(trainX[START_SEED:END_SEED], trainY[START_SEED:END_SEED], weights=ae_weights, target=TARGET)
-    AE.train(loss=AE_LOSS, epochs=1, batch_size=256, classifier=CNN_MODEL)
+    AE.train(loss=AE_LOSS, epochs=400, batch_size=256, classifier=CNN_MODEL)
 
     # Getting pretrained models
     pretrained_model_names = ['Alexnet', 'Lenet', 'vgg13', 'vgg16']
