@@ -6,3 +6,10 @@ MNIST_NUM_CLASSES = 10
 
 CLASSIFIER_PATH = '../classifier'
 
+AUTOENCODER_FILE_FORMAT = 'autoencoder_{index}_weight={weight}.h5'
+
+L2FORMAT = '{min}/{max}/{avg}'
+
+NODATA = '#'
+
+ANALYSED_FILE_NANE_FORMAT = '{name}_{num_model}.csv'

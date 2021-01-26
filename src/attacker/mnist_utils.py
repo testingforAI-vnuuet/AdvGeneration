@@ -1,9 +1,9 @@
 import json
 import os
+
 from matplotlib import pyplot as plt
-
 from numpy.core.multiarray import ndarray
-
+import numpy as np
 run_on_hpc = True
 
 
@@ -66,3 +66,26 @@ def plot(losses: ndarray, path: str):
     # plt.show()
     plt.savefig(path)
     plt.clf()
+
+
+def get_advs(model, train, generated_img, target=7):
+    # generated_img = autoencoder.predict(trainX_noise)
+    confident = model.predict(train)
+    gen_confident = model.predict(generated_img)
+    generated_img_new = []
+    confident_new = []
+    gen_confident_new = []
+    trainX_new = []
+    for i in range(train.shape[0]):
+        if np.argmax(confident[i]) != target and np.argmax(gen_confident[i]) == target:
+            generated_img_new.append(generated_img[i])
+            confident_new.append(confident[i])
+            gen_confident_new.append(gen_confident[i])
+            trainX_new.append(train[i])
+    return generated_img_new, gen_confident_new, trainX_new, confident_new
+
+def reject_outliers(data):
+    u = np.mean(data)
+    s = np.std(data)
+    filtered = [e for e in data if (u - 2 * s < e < u + 2 * s)]
+    return filtered

@@ -16,3 +16,4 @@ def countSamples(probability_vector, n_class):
     for item in range(0, n_class):
         logger.debug("\tLabel %s: %s samples (%s percentage)", item, table[item], table[item] / len(
             table))
+
