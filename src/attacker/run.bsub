@@ -1,0 +1,6 @@
+
+#BSUB -q gpu
+#BSUB -e std.err
+#BSUB -o std.out
+
+python3 ases.py
