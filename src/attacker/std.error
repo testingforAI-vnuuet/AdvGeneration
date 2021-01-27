@@ -1,0 +1,235 @@
+2021-01-27 14:19:33.820083: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-01-27 14:19:33.820126: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2021-01-27 14:19:35.709927: I tensorflow/compiler/jit/xla_cpu_device.cc:41] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-01-27 14:19:35.710855: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcuda.so.1
+2021-01-27 14:19:36.115795: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:05:00.0 name: Tesla K40m computeCapability: 3.5
+coreClock: 0.745GHz coreCount: 15 deviceMemorySize: 11.92GiB deviceMemoryBandwidth: 268.58GiB/s
+2021-01-27 14:19:36.115896: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-01-27 14:19:36.115953: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublas.so.11'; dlerror: libcublas.so.11: cannot open shared object file: No such file or directory
+2021-01-27 14:19:36.116006: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublasLt.so.11'; dlerror: libcublasLt.so.11: cannot open shared object file: No such file or directory
+2021-01-27 14:19:36.117317: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcufft.so.10
+2021-01-27 14:19:36.117985: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcurand.so.10
+2021-01-27 14:19:36.119667: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusolver.so.10
+2021-01-27 14:19:36.119735: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcusparse.so.11'; dlerror: libcusparse.so.11: cannot open shared object file: No such file or directory
+2021-01-27 14:19:36.119790: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-01-27 14:19:36.119801: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1757] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-01-27 14:19:36.121899: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-01-27 14:19:36.121925: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-01-27 14:19:36.121931: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,00025.h5[0m
+2021-01-27 14:19:36.726806: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:116] None of the MLIR optimization passes are enabled (registered 2)
+2021-01-27 14:19:36.727210: I tensorflow/core/platform/profile_utils/cpu_utils.cc:112] CPU Frequency: 2300115000 Hz
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,00025.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,0005.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,0005.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,005.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,005.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,00025.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,00025.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,0005.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,0005.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,005.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,005.h5[0m
+2021-01-27 15:50:23.353987: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-01-27 15:50:23.354032: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+2021-01-27 15:50:25.142351: I tensorflow/compiler/jit/xla_cpu_device.cc:41] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-01-27 15:50:25.143219: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcuda.so.1
+2021-01-27 15:50:25.540111: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:05:00.0 name: Tesla K40m computeCapability: 3.5
+coreClock: 0.745GHz coreCount: 15 deviceMemorySize: 11.92GiB deviceMemoryBandwidth: 268.58GiB/s
+2021-01-27 15:50:25.540191: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-01-27 15:50:25.540248: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublas.so.11'; dlerror: libcublas.so.11: cannot open shared object file: No such file or directory
+2021-01-27 15:50:25.540300: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublasLt.so.11'; dlerror: libcublasLt.so.11: cannot open shared object file: No such file or directory
+2021-01-27 15:50:25.541551: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcufft.so.10
+2021-01-27 15:50:25.542223: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcurand.so.10
+2021-01-27 15:50:25.543884: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusolver.so.10
+2021-01-27 15:50:25.543951: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcusparse.so.11'; dlerror: libcusparse.so.11: cannot open shared object file: No such file or directory
+2021-01-27 15:50:25.544005: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-01-27 15:50:25.544039: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1757] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-01-27 15:50:25.546087: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-01-27 15:50:25.546129: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-01-27 15:50:25.546135: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,001.h5[0m
+2021-01-27 15:50:26.135285: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:116] None of the MLIR optimization passes are enabled (registered 2)
+2021-01-27 15:50:26.135698: I tensorflow/core/platform/profile_utils/cpu_utils.cc:112] CPU Frequency: 2300115000 Hz
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,001.h5[0m
+2021-01-27 16:17:25.003739: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-01-27 16:17:25.003781: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+WARNING:tensorflow:From ases.py:14: experimental_run_functions_eagerly (from tensorflow.python.eager.def_function) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.config.run_functions_eagerly` instead of the experimental version.
+2021-01-27 16:17:26.861576: I tensorflow/compiler/jit/xla_cpu_device.cc:41] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-01-27 16:17:26.862520: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcuda.so.1
+2021-01-27 16:17:27.275866: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:05:00.0 name: Tesla K40m computeCapability: 3.5
+coreClock: 0.745GHz coreCount: 15 deviceMemorySize: 11.92GiB deviceMemoryBandwidth: 268.58GiB/s
+2021-01-27 16:17:27.275967: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-01-27 16:17:27.276032: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublas.so.11'; dlerror: libcublas.so.11: cannot open shared object file: No such file or directory
+2021-01-27 16:17:27.276089: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublasLt.so.11'; dlerror: libcublasLt.so.11: cannot open shared object file: No such file or directory
+2021-01-27 16:17:27.277389: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcufft.so.10
+2021-01-27 16:17:27.278088: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcurand.so.10
+2021-01-27 16:17:27.279789: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusolver.so.10
+2021-01-27 16:17:27.279860: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcusparse.so.11'; dlerror: libcusparse.so.11: cannot open shared object file: No such file or directory
+2021-01-27 16:17:27.279916: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-01-27 16:17:27.279928: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1757] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-01-27 16:17:27.282145: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-01-27 16:17:27.282172: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-01-27 16:17:27.282179: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,001.h5[0m
+2021-01-27 16:17:28.002433: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:116] None of the MLIR optimization passes are enabled (registered 2)
+2021-01-27 16:17:28.002831: I tensorflow/core/platform/profile_utils/cpu_utils.cc:112] CPU Frequency: 2300115000 Hz
+/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/data/ops/dataset_ops.py:3504: UserWarning: Even though the tf.config.experimental_run_functions_eagerly option is set, this option does not apply to tf.data functions. tf.data functions are still traced and executed as graphs.
+  "Even though the tf.config.experimental_run_functions_eagerly "
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mautoencoderanalyzing...[0m
+  [37mDEBUG   [0m | [37mautoencodersaving file ...[0m
+  [37mDEBUG   [0m | [37mautoencodercomplete[0m
+  [37mDEBUG   [0m | [37mautoencodersaving file ...[0m
+  [37mDEBUG   [0m | [37mautoencodercomplete[0m
+  [37mDEBUG   [0m | [37mruning autoencoder_rr[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_0_weight=0,04.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_0_weight=0,04.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_1_weight=0,04.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_1_weight=0,04.h5[0m
+  [37mDEBUG   [0m | [37mautoencoderRRanalyzing...[0m
+  [37mDEBUG   [0m | [37mautoencoderRRsaving file ...[0m
+  [37mDEBUG   [0m | [37mautoencoderRRcomplete[0m
+Traceback (most recent call last):
+  File "ases.py", line 220, in <module>
+    AERR.analyze(CNN_MODEL, trainX, pretrained_models)
+  File "ases.py", line 146, in analyze
+    generated_img_org)
+  File "/home/khamd/AdvGeneration/src/attacker/mnist_utils.py", line 77, in get_advs
+    gen_confident = model.predict(generated_img)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/training.py", line 1629, in predict
+    tmp_batch_outputs = self.predict_function(iterator)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/training.py", line 1478, in predict_function
+    return step_function(self, iterator)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/training.py", line 1468, in step_function
+    outputs = model.distribute_strategy.run(run_step, args=(data,))
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/distribute/distribute_lib.py", line 1259, in run
+    return self._extended.call_for_each_replica(fn, args=args, kwargs=kwargs)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/distribute/distribute_lib.py", line 2730, in call_for_each_replica
+    return self._call_for_each_replica(fn, args, kwargs)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/distribute/distribute_lib.py", line 3417, in _call_for_each_replica
+    return fn(*args, **kwargs)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/autograph/impl/api.py", line 572, in wrapper
+    return func(*args, **kwargs)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/training.py", line 1461, in run_step
+    outputs = model.predict_step(data)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/training.py", line 1434, in predict_step
+    return self(x, training=False)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/base_layer.py", line 1012, in __call__
+    outputs = call_fn(inputs, *args, **kwargs)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/sequential.py", line 375, in call
+    return super(Sequential, self).call(inputs, training=training, mask=mask)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/functional.py", line 425, in call
+    inputs, training=training, mask=mask)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/functional.py", line 560, in _run_internal_graph
+    outputs = node.layer(*args, **kwargs)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/engine/base_layer.py", line 1012, in __call__
+    outputs = call_fn(inputs, *args, **kwargs)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/keras/layers/pooling.py", line 300, in call
+    data_format=conv_utils.convert_data_format(self.data_format, 4))
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/util/dispatch.py", line 201, in wrapper
+    return target(*args, **kwargs)
+  File "/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/ops/nn_ops.py", line 4593, in max_pool
+    channel_index = 1 if data_format.startswith("NC") else 3
+KeyboardInterrupt
+2021-01-27 16:40:04.997000: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-01-27 16:40:04.997044: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+WARNING:tensorflow:From ases.py:14: experimental_run_functions_eagerly (from tensorflow.python.eager.def_function) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use `tf.config.run_functions_eagerly` instead of the experimental version.
+2021-01-27 16:40:06.830407: I tensorflow/compiler/jit/xla_cpu_device.cc:41] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-01-27 16:40:06.831389: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcuda.so.1
+2021-01-27 16:40:07.239311: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1720] Found device 0 with properties: 
+pciBusID: 0000:05:00.0 name: Tesla K40m computeCapability: 3.5
+coreClock: 0.745GHz coreCount: 15 deviceMemorySize: 11.92GiB deviceMemoryBandwidth: 268.58GiB/s
+2021-01-27 16:40:07.239414: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudart.so.11.0'; dlerror: libcudart.so.11.0: cannot open shared object file: No such file or directory
+2021-01-27 16:40:07.239472: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublas.so.11'; dlerror: libcublas.so.11: cannot open shared object file: No such file or directory
+2021-01-27 16:40:07.239525: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcublasLt.so.11'; dlerror: libcublasLt.so.11: cannot open shared object file: No such file or directory
+2021-01-27 16:40:07.240822: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcufft.so.10
+2021-01-27 16:40:07.241508: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcurand.so.10
+2021-01-27 16:40:07.243178: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcusolver.so.10
+2021-01-27 16:40:07.243247: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcusparse.so.11'; dlerror: libcusparse.so.11: cannot open shared object file: No such file or directory
+2021-01-27 16:40:07.243302: W tensorflow/stream_executor/platform/default/dso_loader.cc:60] Could not load dynamic library 'libcudnn.so.8'; dlerror: libcudnn.so.8: cannot open shared object file: No such file or directory
+2021-01-27 16:40:07.243313: W tensorflow/core/common_runtime/gpu/gpu_device.cc:1757] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+2021-01-27 16:40:07.245335: I tensorflow/compiler/jit/xla_gpu_device.cc:99] Not creating XLA devices, tf_xla_enable_xla_devices not set
+2021-01-27 16:40:07.245363: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1261] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-01-27 16:40:07.245371: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1267]      
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,00025.h5[0m
+2021-01-27 16:40:07.947411: I tensorflow/compiler/mlir/mlir_graph_optimization_pass.cc:116] None of the MLIR optimization passes are enabled (registered 2)
+2021-01-27 16:40:07.947807: I tensorflow/core/platform/profile_utils/cpu_utils.cc:112] CPU Frequency: 2300115000 Hz
+/home/khamd/anaconda3/envs/my_env/lib/python3.7/site-packages/tensorflow/python/data/ops/dataset_ops.py:3504: UserWarning: Even though the tf.config.experimental_run_functions_eagerly option is set, this option does not apply to tf.data functions. tf.data functions are still traced and executed as graphs.
+  "Even though the tf.config.experimental_run_functions_eagerly "
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,00025.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,0005.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,0005.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,002.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,002.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,003.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,003.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,004.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,004.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_0_weight=0,005.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_0_weight=0,005.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,00025.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,00025.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,0005.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,0005.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,001.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,002.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,002.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,003.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,003.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,004.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,004.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoder_1_weight=0,005.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoder_1_weight=0,005.h5[0m
+  [37mDEBUG   [0m | [37mautoencoderanalyzing...[0m
+  [37mDEBUG   [0m | [37mautoencodersaving file ...[0m
+  [37mDEBUG   [0m | [37mautoencodercomplete[0m
+  [37mDEBUG   [0m | [37mautoencodersaving file ...[0m
+  [37mDEBUG   [0m | [37mautoencodercomplete[0m
+  [37mDEBUG   [0m | [37mrunning autoencoder_rr[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_0_weight=0,01.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_0_weight=0,01.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_0_weight=0,02.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_0_weight=0,02.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_0_weight=0,03.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_0_weight=0,03.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_0_weight=0,04.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_0_weight=0,04.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_0_weight=0,05.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_0_weight=0,05.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_1_weight=0,01.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_1_weight=0,01.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_1_weight=0,02.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_1_weight=0,02.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_1_weight=0,03.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_1_weight=0,03.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_1_weight=0,04.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_1_weight=0,04.h5[0m
+  [37mDEBUG   [0m | [37mTraining model: saved_models/autoencoderRR_1_weight=0,05.h5[0m
+  [37mDEBUG   [0m | [37mComplete training model: saved_models/autoencoderRR_1_weight=0,05.h5[0m
+  [37mDEBUG   [0m | [37mautoencoderRRanalyzing...[0m
+  [37mDEBUG   [0m | [37mautoencoderRRsaving file ...[0m
+  [37mDEBUG   [0m | [37mautoencoderRRcomplete[0m
+  [37mDEBUG   [0m | [37mautoencoderRRsaving file ...[0m
+  [37mDEBUG   [0m | [37mautoencoderRRcomplete[0m
+  [37mDEBUG   [0m | [37mDONE[0m
