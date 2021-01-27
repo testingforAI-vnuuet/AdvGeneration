@@ -3,4 +3,5 @@
 #BSUB -e std.err
 #BSUB -o std.out
 
+export PYTHONPATH=/home/khamd/AdvGeneration/src:$PYTHONPATH
 python3 ases.py
