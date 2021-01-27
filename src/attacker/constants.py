@@ -6,7 +6,7 @@ MNIST_NUM_CLASSES = 10
 
 CLASSIFIER_PATH = '../classifier'
 
-AUTOENCODER_FILE_FORMAT = 'autoencoder_{index}_weight={weight}.h5'
+AUTOENCODER_FILE_FORMAT = '_{index}_weight={weight}.h5'
 
 L2FORMAT = '{min}/{max}/{avg}'
 

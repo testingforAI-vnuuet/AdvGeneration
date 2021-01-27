@@ -11,7 +11,7 @@ class AE_LOSSES:
     RE_RANK = 're_rank'
 
     @staticmethod
-    def cross_entropy_loss(classifier, target_label, epsilon):
+    def cross_entropy_loss(classifier, target_label, weight):
         """
 
         :param classifier: classification model
@@ -21,13 +21,13 @@ class AE_LOSSES:
         """
 
         def loss(origin_image, generated_image):
-            return (1 - epsilon) * keras.losses.mean_squared_error(origin_image, generated_image) + \
-                   epsilon * keras.losses.categorical_crossentropy(classifier(generated_image)[0], target_label)
+            return (1 - weight) * keras.losses.mean_squared_error(origin_image, generated_image) + \
+                   weight * keras.losses.categorical_crossentropy(classifier(generated_image)[0], target_label)
 
         return loss
 
     @staticmethod
-    def re_rank_loss(classifier, target_label, weight, alpha):
+    def re_rank_loss(classifier, target_label, weight, alpha=1.5):
         """
 
         :param classifier: classification model

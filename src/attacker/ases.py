@@ -8,14 +8,14 @@ from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 from attacker.losses import *
 from attacker.mnist_utils import get_advs, reject_outliers, preprocess_data
 from constants import *
-from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
 
 logger = MyLogger.getLog()
-
+tf.config.experimental_run_functions_eagerly(True)
 
 class AEs:
-    def __init__(self, train_images, train_labels, weights, input_shape=(MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL),
+    def __init__(self, train_images, train_labels, weights, name,
+                 input_shape=(MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL),
                  target=7):
         self.input_shape = input_shape
         self.ae_list = []
@@ -23,6 +23,7 @@ class AEs:
         self.target_label = keras.utils.to_categorical(target, MNIST_NUM_CLASSES, dtype='float32')
         self.train_images = train_images
         self.train_labels = train_labels
+        self.name = name
         self.weights = weights
 
     def get_architecture_1(self):
@@ -83,14 +84,16 @@ class AEs:
 
     def train(self, loss, epochs, batch_size, classifier):
         if len(self.ae_list) < 1:
-            self.ae_list = [self.get_architecture_1()]
+            self.ae_list = [self.get_architecture_1(), self.get_architecture_2()]
 
         for i, model in enumerate(self.ae_list):
             model_list_with_weights = []
             for weight in self.weights:
-                output_model_path = 'saved_models/' + AUTOENCODER_FILE_FORMAT.format(index=i,
-                                                                                     weight=str(weight).replace('.',
-                                                                                                                ','))
+                output_model_path = 'saved_models/' + self.name + AUTOENCODER_FILE_FORMAT.format(index=i,
+                                                                                                 weight=str(
+                                                                                                     weight).replace(
+                                                                                                     '.',
+                                                                                                     ','))
                 logger.debug("Training model: " + output_model_path)
 
                 cloned_model = keras.models.clone_model(model)
@@ -102,7 +105,7 @@ class AEs:
                 cloned_model.compile(optimizer=adam,
                                      loss=loss(
                                          classifier=classifier,
-                                         epsilon=weight,
+                                         weight=weight,
                                          target_label=self.target_label))
                 cloned_model.fit(self.train_images, self.train_images, epochs=epochs, batch_size=batch_size,
                                  callbacks=[earlyStopping, mcp_save])
@@ -112,9 +115,9 @@ class AEs:
         return
 
     def analyze(self, classifier, trainX, pretrained_models, name='aae'):
-
+        logger.debug(self.name + "analyzing...")
         for i, model_weights in enumerate(self.trained_ae_list):
-            file_name = ANALYSED_FILE_NANE_FORMAT.format(name=name, num_model=str(i))
+            file_name = ANALYSED_FILE_NANE_FORMAT.format(name=self.name, num_model=str(i))
             result = []
             result.append(['weight', '#adv (success_rate)', 'L2'])
 
@@ -159,7 +162,8 @@ class AEs:
                 for index, model_weight in enumerate(model_weights):
                     row_each_general = []
                     generated_img_org = model_weight.predict(self.train_images)
-                    generated_img, gen_confident, trainX_new, confident_new = get_advs(pretrained_model, self.train_images,
+                    generated_img, gen_confident, trainX_new, confident_new = get_advs(pretrained_model,
+                                                                                       self.train_images,
                                                                                        generated_img_org)
                     l2 = np.array([np.linalg.norm(origin.flatten() - reconstruct.flatten()) for origin, reconstruct in
                                    zip(trainX_new, generated_img)])
@@ -173,11 +177,11 @@ class AEs:
                     row_each_general.append(len(generated_img) / 1000)
                     row_each_general.append(l2txt)
                     result.append(row_each_general)
-
-
+            logger.debug(self.name + 'saving file ...')
             with open(file_name, 'w') as csvfile:
                 csvwriter = csv.writer(csvfile)
                 csvwriter.writerows(result)
+            logger.debug(self.name + 'complete')
         return
 
 
@@ -195,7 +199,8 @@ if __name__ == '__main__':
     testX, testY = preprocess_data(testX, testY)
     ae_weights = [0.001]
 
-    AE = AEs(trainX[START_SEED:END_SEED], trainY[START_SEED:END_SEED], weights=ae_weights, target=TARGET)
+    AE = AEs(trainX[START_SEED:END_SEED], trainY[START_SEED:END_SEED], weights=ae_weights, name='autoencoder',
+             target=TARGET)
     AE.train(loss=AE_LOSS, epochs=400, batch_size=256, classifier=CNN_MODEL)
 
     # Getting pretrained models
@@ -203,7 +208,15 @@ if __name__ == '__main__':
     pretrained_models = []
     for pretrained_model_name in pretrained_model_names:
         pretrained_models.append(
-            keras.models.load_model(CLASSIFIER_PATH + '/pretrained_models/'+pretrained_model_name+'.h5'))
+            keras.models.load_model(CLASSIFIER_PATH + '/pretrained_models/' + pretrained_model_name + '.h5'))
     AE.analyze(CNN_MODEL, trainX, pretrained_models)
-    print('done')
 
+    logger.debug('runing autoencoder_rr')
+    aerr_weights = [0.04]
+    AERR_LOSS = AE_LOSSES.re_rank_loss
+    AERR = AEs(trainX[START_SEED:END_SEED], trainY[START_SEED:END_SEED], weights=aerr_weights, name='autoencoderRR',
+               target=TARGET)
+    AERR.train(loss=AERR_LOSS, epochs=400, batch_size=256, classifier=CNN_MODEL)
+    AERR.analyze(CNN_MODEL, trainX, pretrained_models)
+    logger.debug('DONE')
+    print('DONE')
