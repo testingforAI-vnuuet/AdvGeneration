@@ -197,7 +197,7 @@ if __name__ == '__main__':
 
     trainX, trainY = preprocess_data(trainX, trainY)
     testX, testY = preprocess_data(testX, testY)
-    ae_weights = [0.001]
+    ae_weights = [0.00025, 0.0005, 0.001, 0.002, 0.003, 0.004, 0.005]
 
     AE = AEs(trainX[START_SEED:END_SEED], trainY[START_SEED:END_SEED], weights=ae_weights, name='autoencoder',
              target=TARGET)
@@ -211,8 +211,8 @@ if __name__ == '__main__':
             keras.models.load_model(CLASSIFIER_PATH + '/pretrained_models/' + pretrained_model_name + '.h5'))
     AE.analyze(CNN_MODEL, trainX, pretrained_models)
 
-    logger.debug('runing autoencoder_rr')
-    aerr_weights = [0.04]
+    logger.debug('running autoencoder_rr')
+    aerr_weights = [0.01, 0.02, 0.03, 0.04, 0.05]
     AERR_LOSS = AE_LOSSES.re_rank_loss
     AERR = AEs(trainX[START_SEED:END_SEED], trainY[START_SEED:END_SEED], weights=aerr_weights, name='autoencoderRR',
                target=TARGET)
