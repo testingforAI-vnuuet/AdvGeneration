@@ -1,5 +1,4 @@
 
-#BSUB -q gpu
 #BSUB -e std.err
 #BSUB -o std.out
 
