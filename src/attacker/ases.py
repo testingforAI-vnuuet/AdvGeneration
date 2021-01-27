@@ -6,7 +6,7 @@ from tensorflow.keras import backend as K
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 from attacker.losses import *
-from attacker.mnist_utils import get_advs, reject_outliers
+from attacker.mnist_utils import get_advs, reject_outliers, preprocess_data
 from constants import *
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
@@ -83,7 +83,7 @@ class AEs:
 
     def train(self, loss, epochs, batch_size, classifier):
         if len(self.ae_list) < 1:
-            self.ae_list = [self.get_architecture_1(), self.get_architecture_2()]
+            self.ae_list = [self.get_architecture_1()]
 
         for i, model in enumerate(self.ae_list):
             model_list_with_weights = []
@@ -159,7 +159,7 @@ class AEs:
                 for index, model_weight in enumerate(model_weights):
                     row_each_general = []
                     generated_img_org = model_weight.predict(self.train_images)
-                    generated_img, gen_confident, trainX_new, confident_new = get_advs(classifier, self.train_images,
+                    generated_img, gen_confident, trainX_new, confident_new = get_advs(pretrained_model, self.train_images,
                                                                                        generated_img_org)
                     l2 = np.array([np.linalg.norm(origin.flatten() - reconstruct.flatten()) for origin, reconstruct in
                                    zip(trainX_new, generated_img)])
@@ -170,7 +170,7 @@ class AEs:
                         l2 = reject_outliers(l2)
                         l2txt = L2FORMAT.format(min=min(l2), max=max(l2), avg=np.average(l2))
                     row_each_general.append(self.weights[index])
-                    row_each_general.append(len(generated_img) / float(num_img))
+                    row_each_general.append(len(generated_img) / 1000)
                     row_each_general.append(l2txt)
                     result.append(row_each_general)
 
@@ -188,10 +188,12 @@ if __name__ == '__main__':
     CNN_MODEL = keras.models.load_model(CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5')
 
     (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
-    pre_mnist = MnistPreprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
-    trainX, trainY, testX, testY = pre_mnist.preprocess_data()
+    # pre_mnist = MnistPreprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
+    # trainX, trainY, testX, testY = pre_mnist.preprocess_data()
 
-    ae_weights = [0.00025, 0.0005, 0.001, 0.005]
+    trainX, trainY = preprocess_data(trainX, trainY)
+    testX, testY = preprocess_data(testX, testY)
+    ae_weights = [0.001]
 
     AE = AEs(trainX[START_SEED:END_SEED], trainY[START_SEED:END_SEED], weights=ae_weights, target=TARGET)
     AE.train(loss=AE_LOSS, epochs=400, batch_size=256, classifier=CNN_MODEL)

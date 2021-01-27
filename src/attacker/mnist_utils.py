@@ -1,9 +1,12 @@
 import json
 import os
 
+import numpy as np
 from matplotlib import pyplot as plt
 from numpy.core.multiarray import ndarray
-import numpy as np
+import tensorflow as tf
+from constants import *
+
 run_on_hpc = True
 
 
@@ -84,8 +87,16 @@ def get_advs(model, train, generated_img, target=7):
             trainX_new.append(train[i])
     return generated_img_new, gen_confident_new, trainX_new, confident_new
 
+
 def reject_outliers(data):
     u = np.mean(data)
     s = np.std(data)
     filtered = [e for e in data if (u - 2 * s < e < u + 2 * s)]
     return filtered
+
+
+def preprocess_data(images, label, num_classes=MNIST_NUM_CLASSES, rols=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
+                    chl=MNIST_IMG_CHL):
+    images = images.astype('float32') / 255.
+    return images.reshape((len(images), rols, cols, chl)), \
+           tf.keras.utils.to_categorical(label, num_classes)
