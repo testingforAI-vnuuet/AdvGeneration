@@ -172,7 +172,8 @@ class AEs:
 
                     if l2.shape[0] > 0:
                         l2 = reject_outliers(l2)
-                        l2txt = L2FORMAT.format(min=min(l2), max=max(l2), avg=np.average(l2))
+                        if l2.shape[0] > 0:
+                            l2txt = L2FORMAT.format(min=min(l2), max=max(l2), avg=np.average(l2))
                     row_each_general.append(self.weights[index])
                     row_each_general.append(len(generated_img) / 1000)
                     row_each_general.append(l2txt)
