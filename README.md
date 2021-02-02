@@ -91,22 +91,22 @@ The average||L||2 distance and the corresponding number of adversaries with diff
 | AVG L2 | 6.11 | 6.32 | 6.47 | 6.49 | 6.65 |
 |  # adv |  99  |  652 |  827 |  843 |  879 |
 
-The comparison betweenAE4DNNand AAE in terms of generalization. Target label is 7. Better values are marked in bold. The
+The comparison between AE4DNN and AAE in terms of generalization. Target label is 7. Better values are marked in bold. The
 total time to perform 10k-attack, 20k-attack, and 40k-attack are approximate to 1.6 seconds, 3.1 seconds, and 6.3
 second, respectively.These attacks do not need to train the autoencoder.
 
-| Config |      0.02      |
+| Config |      (β, φ)      |
 |:------:|:--------------:|
 |    A   | (0.0005, 0.03) |
 |    B   |  (0.0005, 0.04 |
 |    C   |  (0.002, 0.05) |
 
-| Config |        | Average L2 | Average Adversarial rate (%) |      |
+| Config |    Average L2    |  | Average Adversarial rate (%) |      |
 |:------:|--------|:----------:|------------------------------|------|
 |        | AE4DNN | AAE        | AE4DNN                       | AAE  |
-|    A   | 6.49   |    6.57    | 82.8                         | 82.9 |
-|    B   | 6.49   |     6.6    | 82.8                         | 84.4 |
-|    C   | 6.7    |    6.76    | 88.7                         | 89.1 |
+|    A   | **6.49**   |    6.57    | 82.8                         | **82.9** |
+|    B   | **6.49**   |     6.6    | 82.8                         | **84.4** |
+|    C   | **6.7**    |    6.76    | 88.7                         | **89.1** |
 
 The transferable rate between AE4DNN and AAE with different DNN models. Better values are marked in bold
 
@@ -117,7 +117,7 @@ The transferable rate between AE4DNN and AAE with different DNN models. Better v
 |    B   | 18         | 36.4 | 21.2       | 43.5 | 11.8        | 11.7 | 0.2          | 2.6 |
 |    C   | 27         | 51.6 | 30.4       | 36.4 | 2.9         | 4.9  | 3.9          | 0.9 |
 
-3.2.2 Autoencoder 2
+#### 3.2.2 Autoencoder 2
 
 The architecture is described as follow:
 
@@ -136,7 +136,7 @@ The average||L||2 distance and the corresponding number of adversaries with diff
 | AVG L2 | 4.25 | 4.92 | 6.16 | 7.55 | 8.12 |
 |  # adv |  39  |  159 |  607 |  782 |  883 |
 
-The comparison betweenAE4DNNand AAE in terms of generalization. Target label is 7. Better values are marked in bold. The
+The comparison between AE4DNN and AAE in terms of generalization. Target label is 7. Better values are marked in bold. The
 total time to perform 10k-attack, 20k-attack, and 40k-attack are approximate to 1.6 seconds, 3.1 seconds, and 6.3
 second, respectively.These attacks do not need to train the autoencoder.
 
@@ -147,7 +147,7 @@ second, respectively.These attacks do not need to train the autoencoder.
 |    C   |  (0.004, 0.04) |
 
 
-| Config |        | Average L2 |        | Average Adversarial rate (%) |
+| Config | Average L2|            |   Average Adversarial rate (%)     |  |
 |:------:|:------:|:----------:|:------:|:----------------------------:|
 |        | AE4DNN |     AAE    | AE4DNN |              AAE             |
 |    A   |  **4.99**  |    5.14    |  **55.35** |             16.37            |
@@ -159,9 +159,9 @@ The transferable rate between AE4DNN and AAE with different DNN models. Better v
 | Config | VGG-13 (%) |      | VGG-16 (%) |      | LeNet-5 (%) |      | AlextNet (%) |     |
 |:------:|------------|:----:|------------|------|-------------|------|--------------|-----|
 |        | AE4DNN     | AAE  | AE4DNN     | AAE  | AE4DNN      | AAE  | AE4DNN       | AAE |
-|    A   | **18.5**   | 12.3 | **43.8**   | **16**   | 4.3        | 3.3  | 18.1          | 12.2 |
-|    B   | **67.3**   | 44.1 | **77.5**   | **54.1** | 10.8        | 5.7 | 59.5          | 44.6 |
-|    C   | 40.8       | **44.1** | **81.8**| **54.1** | 4.5         | 5.7  | 55.25          | 54.9 |
+|    A   | **18.5**   | 12.3 | **43.8**   | 16   | **4.3**        | 3.3  | **18.1**          | 12.2 |
+|    B   | **67.3**   | 44.1 | **77.5**   | 54.1 | **10.8**        | 5.7 | **59.5**          | 44.6 |
+|    C   | 40.8       | **44.1** | **81.8**| 54.1 | 4.5         | **5.7**  | **55.25**          | 44.6 |
 
 ### 3.3. Examples
 
