@@ -42,146 +42,212 @@ to add **home/anhnd/AdvGeneration/src** to search path.
 - Step 2. Change directory to the folder containing the executing file
 - Step 3. Type: **python autoencoder.py**
 
-## 3. Experimental results
+## 3. Additional experiment.
 
-AE4DNN is compared with FGSM, l.l. class, box-constrained L-BFGS,
-Carnili-Wagner <img src="https://render.githubusercontent.com/render/math?math=||L||_2"> attack, and AAE to demonstrate
-how it mitigates the trade-off and unstable transferable rate. Specifically, the experiment addresses the following
-research questions:
+Please read this document ([additional_experiment.pdf](additional_experiment.pdf)) for additional experiment.
 
-- Does AE4DNN produce high quality of adversaries compared to other methods? (RQ1)
-- Does AE4DNN require low computational cost compared to other methods? (RQ2)
-- Does AE4DNN effectively when dealing with a set of new input vectors? (generalization ability) (RQ3)
-- Does the generated adversaries from AE4DNN benefit for attacking other models? (transferable ability) (RQ4)
+[comment]: <> (## 3. Experimental results)
 
-The research chooses MNIST which is a popular publicly-available dataset for evaluation. The training set contains
-50,000 samples. The test set has 10,000 samples. Each sample on the dataset is an image with 28 pixels in width and 28
-pixels in height. The value of each pixel is in range of 0 and 255, which indicates the lightness or darkness of that
-pixel. Adversarial example in this experiment is called adversarial image for simplicity.
+[comment]: <> (AE4DNN is compared with FGSM, l.l. class, box-constrained L-BFGS,)
 
-### 3.1. Quality of adversaries in terms of <img src="https://render.githubusercontent.com/render/math?math=||L||_2"> distance.
+[comment]: <> (Carnili-Wagner <img src="https://render.githubusercontent.com/render/math?math=||L||_2"> attack, and AAE to demonstrate)
 
-In practice, machine learning testers have no idea about the best value of configurations. Therefore, the testers
-usually use the strategy try-and-check until they find out the optimal configuration. The experiment in this section
-follows this strategy. For FGSM, the value of 𝜖 changed from 0.1 to 0.3 with a step of 0.05. For least likely class,
-the value of 𝜖 changed from 0.1 to 0.3 with a step of 0.03 and the number of iterations is 4. Concerning
-box-constrained L-BFGS, the value of 𝜖 changed from 0.001 to 0.0035 with a step of 0.0005 and the number of iterations
-is 20.
+[comment]: <> (how it mitigates the trade-off and unstable transferable rate. Specifically, the experiment addresses the following)
 
-![box plots](./images/box_plotsv3.png)
+[comment]: <> (research questions:)
 
-### 3.2 Experiment with other autoencoder architectures
+[comment]: <> (- Does AE4DNN produce high quality of adversaries compared to other methods? &#40;RQ1&#41;)
 
-#### 3.2.1 Autoencoder 1
+[comment]: <> (- Does AE4DNN require low computational cost compared to other methods? &#40;RQ2&#41;)
 
-The architecture is described as follow:
+[comment]: <> (- Does AE4DNN effectively when dealing with a set of new input vectors? &#40;generalization ability&#41; &#40;RQ3&#41;)
 
-The average||L||2 distance and the corresponding number of adversaries with different values of β in AE4DNN. Good values
-of β are marked in bold
+[comment]: <> (- Does the generated adversaries from AE4DNN benefit for attacking other models? &#40;transferable ability&#41; &#40;RQ4&#41;)
 
-|     β   | 0.0005 | 0.001 | 0.002 | 0.003 | 0.004 | 0.005 |
-|:------:|:------:|:-----:|:-----:|:-----:|:-----:|:-----:|
-| AVG L2 |   6.4  |  6.4  |  6.62 |  6.71 |  6.6  |  6.73 |
-|  # adv |   825  |  856  |  876  |  883  |  883  |  882  |
+[comment]: <> (The research chooses MNIST which is a popular publicly-available dataset for evaluation. The training set contains)
 
-The average||L||2 distance and the corresponding number of adversaries with different values of φ (AAE).
+[comment]: <> (50,000 samples. The test set has 10,000 samples. Each sample on the dataset is an image with 28 pixels in width and 28)
 
-|     φ   | 0.01 | 0.02 | 0.03 | 0.04 | 0.05 |
-|:------:|:----:|:----:|:----:|:----:|:----:|
-| AVG L2 | 6.11 | 6.32 | 6.47 | 6.49 | 6.65 |
-|  # adv |  99  |  652 |  827 |  843 |  879 |
+[comment]: <> (pixels in height. The value of each pixel is in range of 0 and 255, which indicates the lightness or darkness of that)
 
-The comparison between AE4DNN and AAE in terms of generalization. Target label is 7. Better values are marked in bold. The
-total time to perform 10k-attack, 20k-attack, and 40k-attack are approximate to 1.6 seconds, 3.1 seconds, and 6.3
-second, respectively.These attacks do not need to train the autoencoder.
+[comment]: <> (pixel. Adversarial example in this experiment is called adversarial image for simplicity.)
 
-| Config |      (β, φ)      |
-|:------:|:--------------:|
-|    A   | (0.0005, 0.03) |
-|    B   |  (0.0005, 0.04 |
-|    C   |  (0.002, 0.05) |
+[comment]: <> (### 3.1. Quality of adversaries in terms of <img src="https://render.githubusercontent.com/render/math?math=||L||_2"> distance.)
 
-| Config |    Average L2    |  | Average Adversarial rate (%) |      |
-|:------:|--------|:----------:|------------------------------|------|
-|        | AE4DNN | AAE        | AE4DNN                       | AAE  |
-|    A   | **6.49**   |    6.57    | 82.8                         | **82.9** |
-|    B   | **6.49**   |     6.6    | 82.8                         | **84.4** |
-|    C   | **6.7**    |    6.76    | 88.7                         | **89.1** |
+[comment]: <> (In practice, machine learning testers have no idea about the best value of configurations. Therefore, the testers)
 
-The transferable rate between AE4DNN and AAE with different DNN models. Better values are marked in bold
+[comment]: <> (usually use the strategy try-and-check until they find out the optimal configuration. The experiment in this section)
 
-| Config | VGG-13 (%) |      | VGG-16 (%) |      | LeNet-5 (%) |      | AlextNet (%) |     |
-|:------:|------------|:----:|------------|------|-------------|------|--------------|-----|
-|        | AE4DNN     | AAE  | AE4DNN     | AAE  | AE4DNN      | AAE  | AE4DNN       | AAE |
-|    A   | 18         | 13.8 | 21.2       | 11   | 11.8        | 0.8  | 0.2          | 2.8 |
-|    B   | 18         | 36.4 | 21.2       | 43.5 | 11.8        | 11.7 | 0.2          | 2.6 |
-|    C   | 27         | 51.6 | 30.4       | 36.4 | 2.9         | 4.9  | 3.9          | 0.9 |
+[comment]: <> (follows this strategy. For FGSM, the value of 𝜖 changed from 0.1 to 0.3 with a step of 0.05. For least likely class,)
 
-#### 3.2.2 Autoencoder 2
+[comment]: <> (the value of 𝜖 changed from 0.1 to 0.3 with a step of 0.03 and the number of iterations is 4. Concerning)
 
-The architecture is described as follow:
+[comment]: <> (box-constrained L-BFGS, the value of 𝜖 changed from 0.001 to 0.0035 with a step of 0.0005 and the number of iterations)
 
-The average||L||2 distance and the corresponding number of adversaries with different values of β in AE4DNN. Good values
-of β are marked in bold
+[comment]: <> (is 20.)
 
-|     β   | 0.0005 | 0.001 | 0.002 | 0.003 | 0.004 | 0.005 |
-|:------:|:------:|:-----:|:-----:|:-----:|:-----:|:-----:|
-| AVG L2 |  4.87  |  6.82 |  6.77 |  7.74 |  7.57 |  7.49 |
-|  # adv |   553  |  870  |  872  |  883  |  883  |  880  |
+[comment]: <> (![box plots]&#40;./images/box_plotsv3.png&#41;)
 
-The average||L||2 distance and the corresponding number of adversaries with different values of φ (AAE).
+[comment]: <> (### 3.2 Experiment with other autoencoder architectures)
 
-|    φ    | 0.01 | 0.02 | 0.03 | 0.04 | 0.05 |
-|:------:|:----:|:----:|:----:|:----:|:----:|
-| AVG L2 | 4.25 | 4.92 | 6.16 | 7.55 | 8.12 |
-|  # adv |  39  |  159 |  607 |  782 |  883 |
+[comment]: <> (#### 3.2.1 Autoencoder 1)
 
-The comparison between AE4DNN and AAE in terms of generalization. Target label is 7. Better values are marked in bold. The
-total time to perform 10k-attack, 20k-attack, and 40k-attack are approximate to 1.6 seconds, 3.1 seconds, and 6.3
-second, respectively.These attacks do not need to train the autoencoder.
+[comment]: <> (The architecture is described as follow:)
 
-| Config |      (β, φ)      |
-|:------:|:--------------:|
-|    A   | (0.0005, 0.02) |
-|    B   |  (0.003, 0.04 |
-|    C   |  (0.004, 0.04) |
+[comment]: <> (The average||L||2 distance and the corresponding number of adversaries with different values of β in AE4DNN. Good values)
+
+[comment]: <> (of β are marked in bold)
+
+[comment]: <> (|     β   | 0.0005 | 0.001 | 0.002 | 0.003 | 0.004 | 0.005 |)
+
+[comment]: <> (|:------:|:------:|:-----:|:-----:|:-----:|:-----:|:-----:|)
+
+[comment]: <> (| AVG L2 |   6.4  |  6.4  |  6.62 |  6.71 |  6.6  |  6.73 |)
+
+[comment]: <> (|  # adv |   825  |  856  |  876  |  883  |  883  |  882  |)
+
+[comment]: <> (The average||L||2 distance and the corresponding number of adversaries with different values of φ &#40;AAE&#41;.)
+
+[comment]: <> (|     φ   | 0.01 | 0.02 | 0.03 | 0.04 | 0.05 |)
+
+[comment]: <> (|:------:|:----:|:----:|:----:|:----:|:----:|)
+
+[comment]: <> (| AVG L2 | 6.11 | 6.32 | 6.47 | 6.49 | 6.65 |)
+
+[comment]: <> (|  # adv |  99  |  652 |  827 |  843 |  879 |)
+
+[comment]: <> (The comparison between AE4DNN and AAE in terms of generalization. Target label is 7. Better values are marked in bold. The)
+
+[comment]: <> (total time to perform 10k-attack, 20k-attack, and 40k-attack are approximate to 1.6 seconds, 3.1 seconds, and 6.3)
+
+[comment]: <> (second, respectively.These attacks do not need to train the autoencoder.)
+
+[comment]: <> (| Config |      &#40;β, φ&#41;      |)
+
+[comment]: <> (|:------:|:--------------:|)
+
+[comment]: <> (|    A   | &#40;0.0005, 0.03&#41; |)
+
+[comment]: <> (|    B   |  &#40;0.0005, 0.04 |)
+
+[comment]: <> (|    C   |  &#40;0.002, 0.05&#41; |)
+
+[comment]: <> (| Config |    Average L2    |  | Average Adversarial rate &#40;%&#41; |      |)
+
+[comment]: <> (|:------:|--------|:----------:|------------------------------|------|)
+
+[comment]: <> (|        | AE4DNN | AAE        | AE4DNN                       | AAE  |)
+
+[comment]: <> (|    A   | **6.49**   |    6.57    | 82.8                         | **82.9** |)
+
+[comment]: <> (|    B   | **6.49**   |     6.6    | 82.8                         | **84.4** |)
+
+[comment]: <> (|    C   | **6.7**    |    6.76    | 88.7                         | **89.1** |)
+
+[comment]: <> (The transferable rate between AE4DNN and AAE with different DNN models. Better values are marked in bold)
+
+[comment]: <> (| Config | VGG-13 &#40;%&#41; |      | VGG-16 &#40;%&#41; |      | LeNet-5 &#40;%&#41; |      | AlextNet &#40;%&#41; |     |)
+
+[comment]: <> (|:------:|------------|:----:|------------|------|-------------|------|--------------|-----|)
+
+[comment]: <> (|        | AE4DNN     | AAE  | AE4DNN     | AAE  | AE4DNN      | AAE  | AE4DNN       | AAE |)
+
+[comment]: <> (|    A   | 18         | 13.8 | 21.2       | 11   | 11.8        | 0.8  | 0.2          | 2.8 |)
+
+[comment]: <> (|    B   | 18         | 36.4 | 21.2       | 43.5 | 11.8        | 11.7 | 0.2          | 2.6 |)
+
+[comment]: <> (|    C   | 27         | 51.6 | 30.4       | 36.4 | 2.9         | 4.9  | 3.9          | 0.9 |)
+
+[comment]: <> (#### 3.2.2 Autoencoder 2)
+
+[comment]: <> (The architecture is described as follow:)
+
+[comment]: <> (The average||L||2 distance and the corresponding number of adversaries with different values of β in AE4DNN. Good values)
+
+[comment]: <> (of β are marked in bold)
+
+[comment]: <> (|     β   | 0.0005 | 0.001 | 0.002 | 0.003 | 0.004 | 0.005 |)
+
+[comment]: <> (|:------:|:------:|:-----:|:-----:|:-----:|:-----:|:-----:|)
+
+[comment]: <> (| AVG L2 |  4.87  |  6.82 |  6.77 |  7.74 |  7.57 |  7.49 |)
+
+[comment]: <> (|  # adv |   553  |  870  |  872  |  883  |  883  |  880  |)
+
+[comment]: <> (The average||L||2 distance and the corresponding number of adversaries with different values of φ &#40;AAE&#41;.)
+
+[comment]: <> (|    φ    | 0.01 | 0.02 | 0.03 | 0.04 | 0.05 |)
+
+[comment]: <> (|:------:|:----:|:----:|:----:|:----:|:----:|)
+
+[comment]: <> (| AVG L2 | 4.25 | 4.92 | 6.16 | 7.55 | 8.12 |)
+
+[comment]: <> (|  # adv |  39  |  159 |  607 |  782 |  883 |)
+
+[comment]: <> (The comparison between AE4DNN and AAE in terms of generalization. Target label is 7. Better values are marked in bold. The)
+
+[comment]: <> (total time to perform 10k-attack, 20k-attack, and 40k-attack are approximate to 1.6 seconds, 3.1 seconds, and 6.3)
+
+[comment]: <> (second, respectively.These attacks do not need to train the autoencoder.)
+
+[comment]: <> (| Config |      &#40;β, φ&#41;      |)
+
+[comment]: <> (|:------:|:--------------:|)
+
+[comment]: <> (|    A   | &#40;0.0005, 0.02&#41; |)
+
+[comment]: <> (|    B   |  &#40;0.003, 0.04 |)
+
+[comment]: <> (|    C   |  &#40;0.004, 0.04&#41; |)
 
 
-| Config | Average L2|            |   Average Adversarial rate (%)     |  |
-|:------:|:------:|:----------:|:------:|:----------------------------:|
-|        | AE4DNN |     AAE    | AE4DNN |              AAE             |
-|    A   |  **4.99**  |    5.14    |  **55.35** |             16.37            |
-|    B   |  7.85  |    **7.62**    |  **89.47** |             78.32            |
-|    C   |  7.67  |    **7.62**    |  **89.09** |             78.32            |
+[comment]: <> (| Config | Average L2|            |   Average Adversarial rate &#40;%&#41;     |  |)
 
-The transferable rate between AE4DNN and AAE with different DNN models. Better values are marked in bold
+[comment]: <> (|:------:|:------:|:----------:|:------:|:----------------------------:|)
 
-| Config | VGG-13 (%) |      | VGG-16 (%) |      | LeNet-5 (%) |      | AlextNet (%) |     |
-|:------:|------------|:----:|------------|------|-------------|------|--------------|-----|
-|        | AE4DNN     | AAE  | AE4DNN     | AAE  | AE4DNN      | AAE  | AE4DNN       | AAE |
-|    A   | **18.5**   | 12.3 | **43.8**   | 16   | **4.3**        | 3.3  | **18.1**          | 12.2 |
-|    B   | **67.3**   | 44.1 | **77.5**   | 54.1 | **10.8**        | 5.7 | **59.5**          | 44.6 |
-|    C   | 40.8       | **44.1** | **81.8**| 54.1 | 4.5         | **5.7**  | **55.25**          | 44.6 |
+[comment]: <> (|        | AE4DNN |     AAE    | AE4DNN |              AAE             |)
 
-### 3.3. Examples
+[comment]: <> (|    A   |  **4.99**  |    5.14    |  **55.35** |             16.37            |)
+
+[comment]: <> (|    B   |  7.85  |    **7.62**    |  **89.47** |             78.32            |)
+
+[comment]: <> (|    C   |  7.67  |    **7.62**    |  **89.09** |             78.32            |)
+
+[comment]: <> (The transferable rate between AE4DNN and AAE with different DNN models. Better values are marked in bold)
+
+[comment]: <> (| Config | VGG-13 &#40;%&#41; |      | VGG-16 &#40;%&#41; |      | LeNet-5 &#40;%&#41; |      | AlextNet &#40;%&#41; |     |)
+
+[comment]: <> (|:------:|------------|:----:|------------|------|-------------|------|--------------|-----|)
+
+[comment]: <> (|        | AE4DNN     | AAE  | AE4DNN     | AAE  | AE4DNN      | AAE  | AE4DNN       | AAE |)
+
+[comment]: <> (|    A   | **18.5**   | 12.3 | **43.8**   | 16   | **4.3**        | 3.3  | **18.1**          | 12.2 |)
+
+[comment]: <> (|    B   | **67.3**   | 44.1 | **77.5**   | 54.1 | **10.8**        | 5.7 | **59.5**          | 44.6 |)
+
+[comment]: <> (|    C   | 40.8       | **44.1** | **81.8**| 54.1 | 4.5         | **5.7**  | **55.25**          | 44.6 |)
+
+## 4. Examples
 
 The figure below shows some adversaries generated by the proposed method and comparable methods.
 
 ![image results](./images/best_adv.png)
 
-# Useful command
+[comment]: <> (# Useful command)
 
-### download file 0_to_1.png from server
+[comment]: <> (### download file 0_to_1.png from server)
 
-scp -P 22033 anhnd@uet-hpc.remote.hpc.farm:/home/anhnd/AdvGeneration/data/mnist/model/0_to_1.png
-/Users/ducanhnguyen/Documents
+[comment]: <> (scp -P 22033 anhnd@uet-hpc.remote.hpc.farm:/home/anhnd/AdvGeneration/data/mnist/model/0_to_1.png)
 
-### download folder model from server
+[comment]: <> (/Users/ducanhnguyen/Documents)
 
-scp -P 22033 -r anhnd@uet-hpc.remote.hpc.farm:/home/anhnd/AdvGeneration/data/mnist/model /Users/ducanhnguyen/Documents
+[comment]: <> (### download folder model from server)
 
-### upload local folder src to server
+[comment]: <> (scp -P 22033 -r anhnd@uet-hpc.remote.hpc.farm:/home/anhnd/AdvGeneration/data/mnist/model /Users/ducanhnguyen/Documents)
 
-scp -P 22033 -r /Users/ducanhnguyen/Documents/PycharmProjects/AdvGeneration/src anhnd@uet-hpc.remote.hpc.farm:
-/home/anhnd/AdvGeneration
+[comment]: <> (### upload local folder src to server)
+
+[comment]: <> (scp -P 22033 -r /Users/ducanhnguyen/Documents/PycharmProjects/AdvGeneration/src anhnd@uet-hpc.remote.hpc.farm:)
+
+[comment]: <> (/home/anhnd/AdvGeneration)
 
