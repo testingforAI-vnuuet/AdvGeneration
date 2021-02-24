@@ -5,7 +5,7 @@ from tensorflow.keras.datasets import mnist
 
 from attacker.constants import *
 from attacker.losses import *
-from data_preprocessing.mnist import mnist_preprocessing
+from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
 
 logger = MyLogger.getLog()
@@ -62,7 +62,7 @@ class Auto_encoder_rerank:
         """
         if not self.is_compiled:
             raise ValueError("Compile the autoencoder first")
-        self.auto_encoder.fit(self.get_seed_images(), self.get_seed_images(), epochs=epochs, batch_size=batch_size)
+        self.auto_encoder.train(self.get_seed_images(), self.get_seed_images(), epochs=epochs, batch_size=batch_size)
         self.plot(self.auto_encoder.history)
 
     def plot(self, history):
@@ -84,9 +84,9 @@ if __name__ == '__main__':
 
     # load dataset
     (trainX, trainY), (testX, testY) = mnist.load_data()
-    pre_mnist = mnist_preprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
-    trainX, trainY, testX, testY = pre_mnist.get_preprocess_data()
-    countSamples(probabilityVector=trainY, nClasses=MNIST_NUM_CLASSES)
+    pre_mnist = MnistPreprocessing(trainX, trainY, testX, testY, START_SEED, END_SEED, TARGET)
+    trainX, trainY, testX, testY = pre_mnist.preprocess_data()
+    countSamples(probability_vector=trainY, n_class=MNIST_NUM_CLASSES)
 
     # train an autoencoder
     classifier = keras.models.load_model(ATTACKED_CNN_MODEL)
