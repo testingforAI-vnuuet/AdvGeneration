@@ -1,14 +1,15 @@
 from __future__ import absolute_import
 
+import matplotlib.pyplot as plt
 from numpy.core.multiarray import ndarray
 from tensorflow.keras.datasets import mnist
 from tensorflow.python.keras import Model, Sequential
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint, History
+
 from attacker.constants import *
 from attacker.losses import *
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
-import matplotlib.pyplot as plt
 
 logger = MyLogger.getLog()
 
@@ -23,10 +24,11 @@ class MnistAutoEncoder:
               loss,
               epochs: int,
               batch_size: int,
-              epsilon: int,
+              epsilon: float,
               target_label: int,
               training_set: np.ndarray,
-              output_model_path: str):
+              output_model_path: str,
+              is_fit=True):
         # save the best model during training
         adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
         earlyStopping = EarlyStopping(monitor='loss', patience=30, verbose=0, mode='min')
@@ -38,11 +40,12 @@ class MnistAutoEncoder:
                                  epsilon=epsilon,
                                  target_label=target_label_one_hot)
                              )
-        auto_encoder.fit(x=training_set,
-                         y=training_set,
-                         epochs=epochs,
-                         batch_size=batch_size,
-                         callbacks=[earlyStopping, mcp_save])
+        if is_fit:
+            auto_encoder.fit(x=training_set,
+                             y=training_set,
+                             epochs=epochs,
+                             batch_size=batch_size,
+                             callbacks=[earlyStopping, mcp_save])
         return auto_encoder
 
     def get_architecture(self):
@@ -56,7 +59,7 @@ class MnistAutoEncoder:
         x = keras.layers.UpSampling2D((2, 2))(x)
         x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
         x = keras.layers.UpSampling2D((2, 2))(x)
-        decoded = keras.layers.Conv2D(1, (3, 3), activation='relu', padding='same')(x)
+        decoded = keras.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
         return keras.models.Model(input_img, decoded)
 
     def compute_balanced_point(self,
@@ -130,7 +133,6 @@ if __name__ == '__main__':
         training_set=train_X,
         epsilon=0.01,
         output_model_path=AE_MODEL,
-        output_loss_fig_path=FIG_PATH,
         target_label=TARGET)
 
     # compute the balance point
