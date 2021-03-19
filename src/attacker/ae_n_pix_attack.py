@@ -96,8 +96,8 @@ class AutoencoderNPix:
             phase_name=AE_PHASE_NAME,
             shape=self.trainY.shape))
 
-        self.Sx_for_training_ae = np.array(self.trainX[:self.num_seed_data])  # todo
-        self.Sy_for_training_ae = np.array(self.trainY[:self.num_seed_data])  # todo
+        self.Sx_for_training_ae = np.array(self.trainX[:-1])  # todo
+        self.Sy_for_training_ae = np.array(self.trainY[:-1])  # todo
 
         logger.debug('{phase_name}: shape of data set for autoencoder attack: {shape}'.format(phase_name=AE_PHASE_NAME,
                                                                                               shape=self.Sx_for_training_ae.shape))
