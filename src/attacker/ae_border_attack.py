@@ -117,7 +117,7 @@ class AutoencoderBorder:
                                                save_best_only=True, monitor='loss',
                                                mode='min')
 
-            self.autoencoder.fit(self.origin_images, self.combined_labels, epochs=300, batch_size=256,
+            self.autoencoder.fit(self.origin_images[:1000], self.combined_labels[:1000], epochs=200, batch_size=512,
                                  callbacks=[early_stopping, model_checkpoint], verbose=1)
             logger.debug('training autoencoder DONE!')
 
@@ -236,12 +236,12 @@ if __name__ == '__main__':
     #         logger.debug("=======================++++============================")
 
     logger.debug('starting multi-thread')
-    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    # thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[0], trainX, trainY)
 
-    thread1.start()
+    # thread1.start()
     thread2.start()
-    thread1.join()
+    # thread1.join()
     thread2.join()
     logger.debug('Exiting Main Thread')
     logger.debug('robustness testing DONE !')

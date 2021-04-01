@@ -37,19 +37,15 @@ def filter_by_label(label: int, data_set: np.ndarray, label_set: np.ndarray) -> 
     :rtype:
     """
     logger.debug("Filtering for label: {label}".format(label=label))
-    result_data = None
-    result_label = None
+    result_data = []
+    result_label = []
 
     for data_i, label_i in zip(data_set, label_set):
         if np.argmax(label_i) == label:
-            if result_data is None or result_label is None:
-                result_data = np.array([data_i])
-                result_label = np.array([label_i])
-            else:
-                result_data = np.append(result_data, [data_i], axis=0)
-                result_label = np.append(result_label, [label_i], axis=0)
+            result_data.append(data_i)
+            result_label.append(label_i)
     logger.debug("Filtering for label end!")
-    return result_data, result_label
+    return np.array(result_data), np.array(result_label)
 
 
 def label_ranking(data_set: np.ndarray, classifier: keras.models.Model) -> np.ndarray:
