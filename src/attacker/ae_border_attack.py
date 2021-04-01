@@ -178,7 +178,7 @@ def run_thread(classifier_name, trainX, trainY):
             res_txt, exe_time = attacker.export_result()
             result_txt += res_txt
             exe_time_sum += exe_time
-        f = open('./result/' + classifier_name + '.txt', 'w')
+        f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
         result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
         f.write(result_txt)
         f.close()
