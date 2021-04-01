@@ -83,7 +83,7 @@ class AutoencoderBorder:
         self.origin_adv_result = None
         logger.debug('init attacking DONE!')
 
-    def autoencoder_attack(self, loss, epsilon=0.042):
+    def autoencoder_attack(self, loss, epsilon=0.5):
         ae_trainee = MnistAutoEncoder()
 
         if os.path.isfile(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name):
@@ -117,7 +117,7 @@ class AutoencoderBorder:
                                                save_best_only=True, monitor='loss',
                                                mode='min')
 
-            self.autoencoder.fit(self.origin_images[:1000], self.combined_labels[:1000], epochs=200, batch_size=512,
+            self.autoencoder.fit(self.origin_images, self.combined_labels, epochs=200, batch_size=512,
                                  callbacks=[early_stopping, model_checkpoint], verbose=1)
             logger.debug('training autoencoder DONE!')
 
@@ -167,12 +167,13 @@ def run_thread(classifier_name, trainX, trainY):
     logger.debug('processing model: ' + classifier_name)
     cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
     result_txt = classifier_name + '\n'
+    # AE_LOSS = AE_LOSSES.border_loss
     for origin_label in range(0, 1):
         exe_time_sum = 0
         for target_position in range(2, 3):
             attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                          target_position=target_position, classifier_name=classifier_name)
-            attacker.autoencoder_attack(loss=AE_LOSS)
+            attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
             attacker.get_border_and_adv()
             res_txt, exe_time = attacker.export_result()
             result_txt += res_txt
@@ -212,7 +213,7 @@ if __name__ == '__main__':
 
     logger.debug('robustness testing start')
 
-    AE_LOSS = AE_LOSSES.border_loss
+    # AE_LOSS = AE_LOSSES.border_loss
     # for classifier_name in pretrained_model_name:
     #     logger.debug("\n=======================================================")
     #     logger.debug('processing model: ' + classifier_name)
@@ -237,7 +238,7 @@ if __name__ == '__main__':
 
     logger.debug('starting multi-thread')
     # thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    thread2 = MyThread(pretrained_model_name[0], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
 
     # thread1.start()
     thread2.start()
