@@ -48,6 +48,9 @@ class AutoencoderBorder:
 
         self.origin_images, self.origin_labels = filter_by_label(self.origin_label, self.trainX, self.trainY)
 
+        self.origin_images = np.array(self.origin_images[:2000])
+        self.origin_labels = np.array(self.origin_labels[:2000])
+
         logger.debug('shape of origin_images: {shape}'.format(shape=self.origin_images.shape))
         logger.debug('shape of origin_labels: {shape}'.format(shape=self.origin_labels.shape))
 
