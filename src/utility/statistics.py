@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 from tensorflow import keras
 
@@ -71,7 +72,8 @@ def label_ranking(data_set: np.ndarray, classifier: keras.models.Model) -> np.nd
     return ranked_array
 
 
-def filter_candidate_adv(origin_data: np.ndarray, candidate_adv: np.ndarray, target_label: int, cnn_model: keras.models.Model):
+def filter_candidate_adv(origin_data: np.ndarray, candidate_adv: np.ndarray, target_label: int,
+                         cnn_model: keras.models.Model):
     origin_confident = cnn_model.predict(origin_data)
     candidate_confident = cnn_model.predict(candidate_adv)
 
@@ -89,10 +91,45 @@ def filter_candidate_adv(origin_data: np.ndarray, candidate_adv: np.ndarray, tar
             result_origin_data.append(origin_data[i])
             result_origin_labels_vector.append(origin_confident[i])
 
-    return list(map(np.array, [result_adv_data, result_adv_labels_vector, result_origin_data, result_origin_labels_vector]))
+    return list(
+        map(np.array, [result_adv_data, result_adv_labels_vector, result_origin_data, result_origin_labels_vector]))
 
 
 def compute_difference_two_set(set_1: np.ndarray, set_2: np.ndarray):
     result = np.sum([set_1_i - set_2_i for set_1_i, set_2_i in zip(set_1, set_2)], axis=0)
-    return result/float(set_1.shape[0])
+    return result / float(set_1.shape[0])
 
+
+def get_border(images: np.ndarray) -> np.ndarray:
+    border_results = []
+    for image in images:
+        border_img = (image * 255).astype(np.uint8)
+        border_img = np.array(cv2.Canny(border_img, 100, 200)).reshape((28, 28, 1))
+        border_results.append(border_img)
+    return np.array(border_results, dtype=np.float32)/255.
+
+
+def get_internal_images(images: np.ndarray, border_images=None) -> np.ndarray:
+    internal_results = []
+    if border_images is None:
+        border_images = get_border(images)
+
+    for border_image, image in zip(border_images, images):
+        border_image_flat = border_image.flatten()
+        image_flat = image.flatten()
+        border_position = np.where(border_image_flat == 1.)
+        internal_result = np.array(image_flat)
+        internal_result[border_position] = 0
+        internal_result = internal_result.reshape((28, 28, 1))
+
+        internal_results.append(internal_result)
+
+    return np.array(internal_results)
+
+
+def ranking_sample(images,labels, origin_label, target_label, cnn_model: keras.models.Model):
+    predictions = cnn_model.predict(images)
+    priorities = np.array([abs(prediction[origin_label] - prediction[target_label]) for prediction in predictions])
+    priority_indexes = np.argsort(priorities)
+
+    return np.array(images[priority_indexes]), np.array(labels[priority_indexes])

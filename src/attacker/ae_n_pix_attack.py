@@ -205,7 +205,7 @@ class AutoencoderNPix:
         curr = 0
         lamda_tensor = tf.convert_to_tensor([self.lamda])
 
-        logger.debug('{phase_name}: fining optimized lamda'.format(phase_name=NPIX_PHASE_NAME))
+        logger.debug('{phase_name}: finishing optimized lamda'.format(phase_name=NPIX_PHASE_NAME))
         for iteration in range(iterations):
             logger.debug('{phase_name}: iteration number: {index}'.format(phase_name=NPIX_PHASE_NAME, index=iteration))
             lamda_tensor = tf.convert_to_tensor(lamda_tensor)

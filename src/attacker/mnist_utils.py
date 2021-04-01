@@ -1,7 +1,8 @@
 import json
 import os
-from matplotlib import pyplot as plt
 
+import numpy as np
+from matplotlib import pyplot as plt
 from numpy.core.multiarray import ndarray
 
 run_on_hpc = True
@@ -55,6 +56,31 @@ def load_history_of_attack():
 def generate_identity_for_model(source_label: str,
                                 target_label: str):
     return str(source_label) + '_to_' + str(target_label)
+
+
+def reject_outliers(data):
+    if data.shape[0] == 0:
+        return np.array([])
+    u = np.mean(data)
+    s = np.std(data)
+    filtered = [e for e in data if (u - 2 * s < e < u + 2 * s)]
+    return np.array(filtered)
+
+
+def L0(gen, test):
+    threshold = 10e-4
+    gen_new = np.array(gen)
+    test_new = np.array(test)
+
+    return sum(0 if abs(g - t) < threshold else 1 for g, t in zip(gen_new.flatten(), test_new.flatten()))
+
+
+def L2(gen, test):
+    gen = gen.flatten()
+    test = test.flatten()
+    dist = (gen - test) ** 2
+    dist = np.sum(dist)
+    return np.sqrt(dist)
 
 
 def plot(losses: ndarray, path: str):

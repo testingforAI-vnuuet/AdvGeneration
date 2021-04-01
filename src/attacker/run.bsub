@@ -3,4 +3,4 @@
 #BSUB -o std.output
 #BSUB -q gpu
 export PYTHONPATH=/home/khamd/AdvGeneration/src:$PYTHONPATH
-python3 ae_n_pix_attack.py
+python3 ae_border_attack.py

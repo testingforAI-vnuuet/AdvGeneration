@@ -1,6 +1,6 @@
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-import numpy as np
 
 
 class AE_LOSSES:
@@ -46,4 +46,22 @@ class AE_LOSSES:
             return (1 - weight) * tf.keras.losses.mean_squared_error(origin_image, generated_image) + \
                    weight * tf.keras.losses.mean_squared_error(classifier(generated_image)[0], re_rank)
 
+        return loss
+
+    @staticmethod
+    def border_loss(model, target_vector, origin_images, epsilon, shape=(28, 28, 1)):
+        def loss(combined_labels, generated_borders):
+            borders = combined_labels[:, 0]
+            borders = tf.reshape(borders, (borders.shape[0], 28, 28, 1))
+            internal_images = combined_labels[:, 1]
+            internal_images = tf.reshape(internal_images, (internal_images.shape[0], 28, 28, 1))
+            a = borders.shape[0]
+            target_vectors = np.repeat(np.array([target_vector]), borders.shape[0], axis=0)
+
+            generated_borders = generated_borders * borders
+
+            return (1 - epsilon) * keras.losses.binary_crossentropy(tf.reshape(borders, (a, 784)),
+                                                                    tf.reshape(generated_borders, (a, 784))) + \
+                   epsilon * keras.losses.categorical_crossentropy(target_vectors,
+                                                                   model(internal_images + generated_borders))
         return loss
