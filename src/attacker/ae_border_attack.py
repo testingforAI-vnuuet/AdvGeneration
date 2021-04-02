@@ -240,8 +240,8 @@ if __name__ == '__main__':
     #         logger.debug("=======================++++============================")
 
     logger.debug('starting multi-thread')
-    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    thread1 = MyThread(pretrained_model_name[2], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
     thread2.start()
