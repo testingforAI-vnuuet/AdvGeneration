@@ -60,8 +60,12 @@ class AE_LOSSES:
 
             generated_borders = generated_borders * borders
 
-            return (1 - epsilon) * keras.losses.binary_crossentropy(tf.reshape(borders, (a, 784)),
-                                                                    tf.reshape(generated_borders, (a, 784))) + \
+            border_pixels = combined_labels[:, 2]
+            border_pixels = tf.reshape(border_pixels, (border_pixels.shape[0], 28, 28, 1)) * borders
+
+            return (1 - epsilon) * keras.losses.mean_squared_error(tf.reshape(border_pixels, (a, 784)),
+                                                                   tf.reshape(generated_borders, (a, 784))) + \
                    epsilon * keras.losses.categorical_crossentropy(target_vectors,
                                                                    model(internal_images + generated_borders))
+
         return loss
