@@ -17,8 +17,8 @@ logger = MyLogger.getLog()
 pretrained_model_name = ['Alexnet', 'Lenet', 'vgg13', 'vgg16']
 
 
-def combined_function(set1, set2):
-    return np.array([list(combined) for combined in zip(set1, set2)])
+def combined_function(set1, set2, set3):
+    return np.array([list(combined) for combined in zip(set1, set2, set3)])
 
 
 class AutoencoderBorder:
@@ -78,7 +78,7 @@ class AutoencoderBorder:
 
         logger.debug('combining target_labels for autoencoder training')
 
-        self.combined_labels = combined_function(self.border_origin_images, self.internal_origin_images)
+        self.combined_labels = combined_function(self.border_origin_images, self.internal_origin_images, self.origin_images)
         self.autoencoder = None
         self.generated_borders = None
         self.generated_candidates = None
