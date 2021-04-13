@@ -87,3 +87,4 @@ pyvenv.cfg
 pip-selfcheck.json
 src/classifier/pretrained_models/*.h5
 src/attacker/saved_models/
+src/utility/requests/*.json
