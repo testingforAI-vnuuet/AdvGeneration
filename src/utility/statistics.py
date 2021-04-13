@@ -1,4 +1,7 @@
 import cv2
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow import keras
 
@@ -102,7 +105,7 @@ def get_border(images: np.ndarray) -> np.ndarray:
         border_img = (image * 255).astype(np.uint8)
         border_img = np.array(cv2.Canny(border_img, 100, 200)).reshape((28, 28, 1))
         border_results.append(border_img)
-    return np.array(border_results, dtype=np.float32)/255.
+    return np.array(border_results, dtype=np.float32) / 255.
 
 
 def get_internal_images(images: np.ndarray, border_images=None) -> np.ndarray:
@@ -123,9 +126,63 @@ def get_internal_images(images: np.ndarray, border_images=None) -> np.ndarray:
     return np.array(internal_results)
 
 
-def ranking_sample(images,labels, origin_label, target_label, cnn_model: keras.models.Model):
+def ranking_sample(images, labels, origin_label, target_label, cnn_model: keras.models.Model):
     predictions = cnn_model.predict(images)
     priorities = np.array([abs(prediction[origin_label] - prediction[target_label]) for prediction in predictions])
     priority_indexes = np.argsort(priorities)
 
     return np.array(images[priority_indexes]), np.array(labels[priority_indexes])
+
+
+def plot_images(origin_image_worst, origin_image_best, gen_image_worst, gen_image_best, l2_worst, l2_best,
+                l0_worst, l0_best, save_path,
+                classifier, worst_index, best_index):
+    fig = plt.figure(figsize=(15, 10))
+
+    ax = plt.subplot(2, 2, 1)
+    plt.imshow(origin_image_worst.reshape(28, 28))
+    origin_label = classifier.predict(np.array([origin_image_worst]))[0]
+    origin_image_title = 'origin: {origin: d}, {probability: .0f}, index: {index: d}'.format(origin=np.argmax(origin_label),
+                                                                          probability=np.max(origin_label) * 100, index=worst_index)
+    ax.set_title(origin_image_title)
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+
+    ax = plt.subplot(2, 2, 2)
+    plt.imshow(gen_image_worst.reshape(28, 28))
+    adv_label = classifier.predict(np.array([gen_image_worst]))[0]
+    adv_image_title = 'target: {target: d}, {probability: .0f}, l2: {l2: .2f}, l0: {l0: .2f}'.format(
+        target=np.argmax(adv_label),
+        probability=np.max(adv_label) * 100, l2=l2_worst, l0=l0_worst)
+    ax.set_title(adv_image_title)
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+
+    ax = plt.subplot(2, 2, 3)
+    plt.imshow(origin_image_best.reshape(28, 28))
+    origin_label = classifier.predict(np.array([origin_image_best]))[0]
+    origin_image_title = 'origin: {origin: d}, {probability: .0f}, index: {index: d}'.format(origin=np.argmax(origin_label),
+                                                                          probability=np.max(origin_label) * 100, index = best_index)
+    ax.set_title(origin_image_title)
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+
+    ax = plt.subplot(2, 2, 4)
+    plt.imshow(gen_image_best.reshape(28, 28))
+    adv_label = classifier.predict(np.array([gen_image_best]))[0]
+    adv_image_title = 'target: {target: d}, {probability: .0f}%, l2: {l2: .2f}, l0: {l0: .2f}'.format(
+        target=np.argmax(adv_label),
+        probability=np.max(adv_label) * 100, l2=l2_best, l0=l0_best)
+    ax.set_title(adv_image_title)
+    plt.gray()
+    ax.get_xaxis().set_visible(False)
+    ax.get_yaxis().set_visible(False)
+
+    plt.savefig(save_path)
+    # plt.show()
+    logger.debug('ok')
+    plt.close()
+    return

@@ -14,6 +14,15 @@ class google_drive:
     def upload_files(self, folder_path=None, file_paths=None):
         gauth = GoogleAuth()
         drive = GoogleDrive(gauth)
+        # if gauth.credentials is None:
+        #     # Authenticate if they're not there
+        #     gauth.LocalWebserverAuth()
+        # elif gauth.access_token_expired:
+        #     # Refresh them if expired
+        #     gauth.Refresh()
+        # else:
+        #     # Initialize the saved creds
+        #     gauth.Authorize()
         self.folder_path = folder_path
         self.file_paths = file_paths
 

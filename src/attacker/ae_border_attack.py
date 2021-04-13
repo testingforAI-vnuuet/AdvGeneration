@@ -78,7 +78,8 @@ class AutoencoderBorder:
 
         logger.debug('combining target_labels for autoencoder training')
 
-        self.combined_labels = combined_function(self.border_origin_images, self.internal_origin_images, self.origin_images)
+        self.combined_labels = combined_function(self.border_origin_images, self.internal_origin_images,
+                                                 self.origin_images)
         self.autoencoder = None
         self.generated_borders = None
         self.generated_candidates = None
@@ -164,6 +165,57 @@ class AutoencoderBorder:
         result += '\n==========>\n'
         return result, self.end_time - self.start_time
 
+    def save_images(self):
+        l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
+        l2 = reject_outliers(l2)
+        l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
+        l0 = reject_outliers(l0)
+        if l2.shape[0] == 0:
+            return
+
+        l2_argsort = np.argsort(l2)
+        worst_l2_index = l2_argsort[-1]
+        best_l2_index = l2_argsort[0]
+
+        l0_argsort = np.argsort(l0)
+        worst_l0_index = l0_argsort[-1]
+        best_l0_index = l0_argsort[0]
+
+        path_l2 = SAVED_IMAGE_SAMPLE_PATH + '/l2/' + 'figure_' + self.file_shared_name + '.png'
+        path_l0 = SAVED_IMAGE_SAMPLE_PATH + '/l0/' + 'figure_' + self.file_shared_name + '.png'
+
+        # show for l2
+        origin_image_worst_l2 = self.origin_adv_result[worst_l2_index]
+        origin_image_best_l2 = self.origin_adv_result[best_l2_index]
+
+        gen_image_worst_l2 = self.adv_result[worst_l2_index]
+        gen_image_best_l2 = self.adv_result[best_l2_index]
+
+        l2_worst = l2[worst_l2_index]
+        l2_best = l2[best_l2_index]
+
+        l0_l2_worst = l0[worst_l2_index]
+        l0_l2_best = l0[best_l2_index]
+
+        plot_images(origin_image_worst_l2, origin_image_best_l2, gen_image_worst_l2, gen_image_best_l2, l2_worst,
+                    l2_best, l0_l2_worst, l0_l2_best, path_l2, self.classifier, worst_l2_index, worst_l0_index)
+
+        # show for l0
+        origin_image_worst_l0 = self.origin_adv_result[worst_l0_index]
+        origin_image_best_l0 = self.origin_adv_result[best_l0_index]
+
+        gen_image_worst_l0 = self.adv_result[worst_l0_index]
+        gen_image_best_l0 = self.adv_result[best_l0_index]
+
+        l0_worst = l0[worst_l0_index]
+        l0_best = l0[best_l0_index]
+
+        l2_l0_worst = l0[worst_l0_index]
+        l2_l0_best = l0[best_l0_index]
+
+        plot_images(origin_image_worst_l0, origin_image_best_l0, gen_image_worst_l0, gen_image_best_l0, l2_l0_worst,
+                    l2_l0_best, l0_worst, l0_best, path_l0, self.classifier, worst_l0_index, best_l0_index)
+
 
 def run_thread(classifier_name, trainX, trainY):
     logger.debug("\n=======================================================")
@@ -178,13 +230,14 @@ def run_thread(classifier_name, trainX, trainY):
                                          target_position=target_position, classifier_name=classifier_name)
             attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
             attacker.get_border_and_adv()
+            attacker.save_images()
             res_txt, exe_time = attacker.export_result()
             result_txt += res_txt
             exe_time_sum += exe_time
-        f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
-        result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
-        f.write(result_txt)
-        f.close()
+        # f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
+        # result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
+        # f.write(result_txt)
+        # f.close()
         logger.debug('processing model: ' + classifier_name + ' DONE!')
         logger.debug("=======================++++============================")
 
@@ -195,7 +248,6 @@ class MyThread(threading.Thread):
         self.classifier_name = classifier_name
         self.trainX = trainX
         self.trainY = trainY
-
 
     def run(self):
         run_thread(self.classifier_name, self.trainX, self.trainY)
@@ -217,36 +269,20 @@ if __name__ == '__main__':
 
     logger.debug('robustness testing start')
 
-    # AE_LOSS = AE_LOSSES.border_loss
-    # for classifier_name in pretrained_model_name:
-    #     logger.debug("\n=======================================================")
-    #     logger.debug('processing model: ' + classifier_name)
-    #     cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
-    #     result_txt = classifier_name + '\n'
-    #     for origin_label in range(0, 2):
-    #         exe_time_sum = 0
-    #         for target_position in range(2, 4):
-    #             attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-    #                                          target_position=target_position, classifier_name=classifier_name)
-    #             attacker.autoencoder_attack(loss=AE_LOSS)
-    #             attacker.get_border_and_adv()
-    #             res_txt, exe_time = attacker.export_result()
-    #             result_txt += res_txt
-    #             exe_time_sum += exe_time
-    #         f = open('./result/' + classifier_name + '.txt', 'w')
-    #         result_txt += '\n average_time = ' + str(exe_time_sum / 9. + '\n')
-    #         f.write(result_txt)
-    #         f.close()
-    #         logger.debug('processing model: ' + classifier_name + ' DONE!')
-    #         logger.debug("=======================++++============================")
-
     logger.debug('starting multi-thread')
-    thread1 = MyThread(pretrained_model_name[2], trainX, trainY)
-    thread2 = MyThread(pretrained_model_name[3], trainX, trainY)
+    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
+    thread4 = MyThread(pretrained_model_name[2], trainX, trainY)
 
     thread1.start()
     thread2.start()
+    thread3.start()
+    thread4.start()
     thread1.join()
     thread2.join()
+    thread3.join()
+    thread4.join()
+
     logger.debug('Exiting Main Thread')
     logger.debug('robustness testing DONE !')
