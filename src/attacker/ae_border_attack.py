@@ -223,9 +223,9 @@ def run_thread(classifier_name, trainX, trainY):
     cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
-    for origin_label in range(0, 1):
+    for origin_label in range(0, 10):
         exe_time_sum = 0
-        for target_position in range(5, 6):
+        for target_position in range(2, 11):
             attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                          target_position=target_position, classifier_name=classifier_name)
             attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
@@ -277,13 +277,13 @@ if __name__ == '__main__':
 
     thread1.start()
     thread2.start()
-    thread3.start()
-    thread4.start()
+    # thread3.start()
+    # thread4.start()
 
     thread1.join()
     thread2.join()
-    thread3.join()
-    thread4.join()
+    # thread3.join()
+    # thread4.join()
 
     logger.debug('Exiting Main Thread')
     logger.debug('robustness testing DONE !')
