@@ -32,12 +32,13 @@ class google_drive:
         elif self.file_paths is None:
             return
         for file_path in self.file_paths:
-            gfile = drive.CreateFile({'parents': [{'id': '1VO1ELKNlBGD9gNL6WQv7YDaLcIn9LLkX'}], 'title': os.path.basename(file_path)})
+            gfile = drive.CreateFile({'parents': [{'id': '1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q'}], 'title': os.path.basename(file_path)})
             gfile.SetContentFile(file_path)
             gfile.Upload()  # Upload the file.
 
 
 if __name__ == '__main__':
-    folder_name = '../../attacker/saved_models'
+    folder_name = '../../attacker/saved_images/l2'
     drive = google_drive()
     drive.upload_files(folder_name)
+    drive.upload_files("../../attacker/saved_images/l0")
