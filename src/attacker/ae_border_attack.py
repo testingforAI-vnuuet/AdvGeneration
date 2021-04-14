@@ -271,17 +271,17 @@ if __name__ == '__main__':
 
     logger.debug('starting multi-thread')
     thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
-    thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
-    thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
+    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
+    # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
     thread1.join()
-    thread2.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
