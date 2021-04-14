@@ -11,7 +11,7 @@ class google_drive:
         self.folder_path = None
         self.file_paths = None
 
-    def upload_files(self, folder_path=None, file_paths=None):
+    def upload_files(self, target_parent_id, folder_path=None, file_paths=None):
         gauth = GoogleAuth()
         drive = GoogleDrive(gauth)
         # if gauth.credentials is None:
@@ -32,7 +32,7 @@ class google_drive:
         elif self.file_paths is None:
             return
         for file_path in self.file_paths:
-            gfile = drive.CreateFile({'parents': [{'id': '1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q'}], 'title': os.path.basename(file_path)})
+            gfile = drive.CreateFile({'parents': [{'id': target_parent_id}], 'title': os.path.basename(file_path)})
             gfile.SetContentFile(file_path)
             gfile.Upload()  # Upload the file.
 
@@ -40,5 +40,5 @@ class google_drive:
 if __name__ == '__main__':
     folder_name = '../../attacker/saved_images/l2'
     drive = google_drive()
-    drive.upload_files(folder_name)
-    drive.upload_files("../../attacker/saved_images/l0")
+    drive.upload_files(folder_name, '1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q')
+    drive.upload_files("../../attacker/saved_images/l0", '1z3RFnOdUH8OA8xyqQfaUnqY7qnY68TeY')
