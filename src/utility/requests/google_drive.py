@@ -40,5 +40,5 @@ class google_drive:
 if __name__ == '__main__':
     folder_name = '../../attacker/saved_images/l2'
     drive = google_drive()
-    drive.upload_files(folder_name, '1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q')
-    drive.upload_files("../../attacker/saved_images/l0", '1z3RFnOdUH8OA8xyqQfaUnqY7qnY68TeY')
+    drive.upload_files(target_parent_id='1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q', folder_path=folder_name)
+    drive.upload_files(target_parent_id='1z3RFnOdUH8OA8xyqQfaUnqY7qnY68TeY', folder_path="../../attacker/saved_images/l0")
