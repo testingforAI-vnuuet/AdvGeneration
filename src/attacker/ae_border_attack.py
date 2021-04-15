@@ -87,7 +87,7 @@ class AutoencoderBorder:
         self.origin_adv_result = None
         logger.debug('init attacking DONE!')
 
-    def autoencoder_attack(self, loss, epsilon=0.5):
+    def autoencoder_attack(self, loss, epsilon=0.005):
         ae_trainee = MnistAutoEncoder()
 
         if os.path.isfile(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name):
