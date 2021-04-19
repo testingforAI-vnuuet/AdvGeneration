@@ -47,7 +47,7 @@ if __name__ == '__main__':
         drive.upload_files(target_parent_id='1z3RFnOdUH8OA8xyqQfaUnqY7qnY68TeY',
                            folder_path="../../attacker/saved_images/l0")
 
-    elif args[2] == 'l2':
+    elif args[1] == 'l2':
         drive.upload_files(target_parent_id='1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q', folder_path=folder_name)
     else:
         print('cannot upload !')
