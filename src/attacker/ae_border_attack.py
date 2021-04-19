@@ -166,6 +166,7 @@ class AutoencoderBorder:
         return result, self.end_time - self.start_time
 
     def save_images(self):
+
         l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
         # l2 = reject_outliers(l2)
         l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
@@ -173,11 +174,17 @@ class AutoencoderBorder:
         if l2.shape[0] == 0:
             return
 
+        origin_adv_result_borders = get_border(self.origin_adv_result)
+
+        sum_adv_borders = [np.sum(origin_adv_result_border.flatten()) for origin_adv_result_border in
+                           origin_adv_result_borders]
+
         l2_argsort = np.argsort(l2)
         worst_l2_index = l2_argsort[-1]
         best_l2_index = l2_argsort[0]
 
-        l0_argsort = np.argsort(l0)
+        l0_avg = l0 / sum_adv_borders
+        l0_argsort = np.argsort(l0_avg)
         worst_l0_index = l0_argsort[-1]
         best_l0_index = l0_argsort[0]
 
@@ -197,8 +204,8 @@ class AutoencoderBorder:
         l0_l2_worst = l0[worst_l2_index]
         l0_l2_best = l0[best_l2_index]
 
-        plot_images(origin_image_worst_l2, origin_image_best_l2, gen_image_worst_l2, gen_image_best_l2, l2_worst,
-                    l2_best, l0_l2_worst, l0_l2_best, path_l2, self.classifier, worst_l2_index, worst_l0_index)
+        # plot_images(origin_image_worst_l2, origin_image_best_l2, gen_image_worst_l2, gen_image_best_l2, l2_worst,
+                    # l2_best, l0_l2_worst, l0_l2_best, path_l2, self.classifier, worst_l2_index, worst_l0_index)
 
         # show for l0
         origin_image_worst_l0 = self.origin_adv_result[worst_l0_index]
@@ -210,7 +217,7 @@ class AutoencoderBorder:
         l0_worst = l0[worst_l0_index]
         l0_best = l0[best_l0_index]
 
-        l2_l0_worst = l0[worst_l0_index]
+        l2_l0_worst = l2[worst_l0_index]
         l2_l0_best = l0[best_l0_index]
 
         plot_images(origin_image_worst_l0, origin_image_best_l0, gen_image_worst_l0, gen_image_best_l0, l2_l0_worst,
