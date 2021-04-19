@@ -1,4 +1,5 @@
 import os
+import sys
 
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
@@ -39,6 +40,14 @@ class google_drive:
 
 if __name__ == '__main__':
     folder_name = '../../attacker/saved_images/l2'
+    args = sys.argv
     drive = google_drive()
-    drive.upload_files(target_parent_id='1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q', folder_path=folder_name)
-    drive.upload_files(target_parent_id='1z3RFnOdUH8OA8xyqQfaUnqY7qnY68TeY', folder_path="../../attacker/saved_images/l0")
+
+    if args[1] == 'l0':
+        drive.upload_files(target_parent_id='1z3RFnOdUH8OA8xyqQfaUnqY7qnY68TeY',
+                           folder_path="../../attacker/saved_images/l0")
+
+    elif args[2] == 'l2':
+        drive.upload_files(target_parent_id='1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q', folder_path=folder_name)
+    else:
+        print('cannot upload !')
