@@ -87,7 +87,7 @@ class AutoencoderBorder:
         self.origin_adv_result = None
         logger.debug('init attacking DONE!')
 
-    def autoencoder_attack(self, loss, epsilon=0.005):
+    def autoencoder_attack(self, loss, epsilon=0.001):
         ae_trainee = MnistAutoEncoder()
 
         if os.path.isfile(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name):
@@ -277,18 +277,18 @@ if __name__ == '__main__':
     logger.debug('robustness testing start')
 
     logger.debug('starting multi-thread')
-    # thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    # thread2.start()
+    thread1.start()
+    thread2.start()
     thread3.start()
     thread4.start()
 
-    # thread1.join()
-    # thread2.join()
+    thread1.join()
+    thread2.join()
     thread3.join()
     thread4.join()
 
