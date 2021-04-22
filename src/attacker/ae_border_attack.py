@@ -87,15 +87,15 @@ class AutoencoderBorder:
         self.origin_adv_result = None
         logger.debug('init attacking DONE!')
 
-    def autoencoder_attack(self, loss, epsilon=0.001):
+    def autoencoder_attack(self, loss, epsilon=1.0):
         ae_trainee = MnistAutoEncoder()
 
-        if os.path.isfile(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name):
+        if os.path.isfile(SAVED_ATTACKER_PATH + '/epsilon1/' + self.autoencoder_file_name):
             logger.debug(
                 'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
                     origin_label=self.origin_label, target_label=self.target_label))
 
-            self.autoencoder = tf.keras.models.load_model(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name,
+            self.autoencoder = tf.keras.models.load_model(SAVED_ATTACKER_PATH + '/epsilon1/' + self.autoencoder_file_name,
                                                           compile=False)
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
@@ -188,8 +188,8 @@ class AutoencoderBorder:
         worst_l0_index = l0_argsort[-1]
         best_l0_index = l0_argsort[0]
 
-        path_l2 = SAVED_IMAGE_SAMPLE_PATH + '/l2/' + 'figure_' + self.file_shared_name + '.png'
-        path_l0 = SAVED_IMAGE_SAMPLE_PATH + '/l0/' + 'figure_' + self.file_shared_name + '.png'
+        path_l2 = SAVED_IMAGE_SAMPLE_PATH + '/epsilon1/l2/' + 'figure_' + self.file_shared_name + '.png'
+        path_l0 = SAVED_IMAGE_SAMPLE_PATH + '/epsilon1/l0/' + 'figure_' + self.file_shared_name + '.png'
 
         # show for l2
         origin_image_worst_l2 = self.origin_adv_result[worst_l2_index]
@@ -241,7 +241,7 @@ def run_thread(classifier_name, trainX, trainY):
             res_txt, exe_time = attacker.export_result()
             result_txt += res_txt
             exe_time_sum += exe_time
-        f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
+        f = open('./result/epsilon1/' + classifier_name + str(origin_label) + '.txt', 'w')
         result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
         f.write(result_txt)
         f.close()
