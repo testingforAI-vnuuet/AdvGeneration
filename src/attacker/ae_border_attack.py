@@ -117,7 +117,7 @@ class AutoencoderBorder:
                                      loss=loss(self.classifier, self.target_vector, self.origin_images, epsilon))
             # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
             early_stopping = EarlyStopping(monitor='loss', patience=30, verbose=0, mode='min')
-            model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name,
+            model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/epsilon1/' + self.autoencoder_file_name,
                                                save_best_only=True, monitor='loss',
                                                mode='min')
 
