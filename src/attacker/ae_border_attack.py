@@ -125,7 +125,7 @@ class AutoencoderBorder:
                                                save_best_only=True, monitor='loss',
                                                mode='min')
 
-            history = self.autoencoder.fit(self.origin_images, self.combined_labels, epochs=200, batch_size=512,
+            history = self.autoencoder.fit(self.origin_images, self.combined_labels, epochs=500, batch_size=512,
                                            callbacks=[early_stopping, model_checkpoint], verbose=1)
             self.optimal_epoch = len(history.history['loss'])
             logger.debug('training autoencoder DONE!')
