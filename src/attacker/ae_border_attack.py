@@ -22,7 +22,7 @@ def combined_function(set1, set2, set3):
 
 
 class AutoencoderBorder:
-    def __init__(self, origin_label, trainX, trainY, classifier, target_position=2, classifier_name='noname'):
+    def __init__(self, origin_label, trainX, trainY, classifier, epsilon, target_position=2, classifier_name='noname'):
         """
 
         :param origin_label:
@@ -44,6 +44,7 @@ class AutoencoderBorder:
         self.classifier = classifier
         self.target_position = target_position
         self.optimal_epoch = 0
+        self.epsilon = epsilon
 
         logger.debug('init attacking: origin_label = {origin_label}'.format(origin_label=self.origin_label))
 
@@ -69,9 +70,10 @@ class AutoencoderBorder:
         logger.debug('border_origin_image shape: {shape}'.format(shape=self.border_origin_images.shape))
         self.internal_origin_images = get_internal_images(self.origin_images, border_images=self.border_origin_images)
         logger.debug('internal_origin_image shape: {shape}'.format(shape=self.internal_origin_images.shape))
-        self.file_shared_name = classifier_name + 'border_{origin_label}_{target_label}'.format(
+        self.file_shared_name = classifier_name + 'border_{origin_label}_{target_label}_epsilon{epsilon}'.format(
             origin_label=self.origin_label,
-            target_label=self.target_label)
+            target_label=self.target_label,
+            epsilon=str(self.epsilon).replace('.', ','))
         self.autoencoder_file_name = 'autoencoder_' + self.file_shared_name + '.h5'
         self.result_file_name = 'result_' + self.file_shared_name + '.txt'
 
@@ -88,7 +90,7 @@ class AutoencoderBorder:
         self.origin_adv_result = None
         logger.debug('init attacking DONE!')
 
-    def autoencoder_attack(self, loss, epsilon):
+    def autoencoder_attack(self, loss):
         ae_trainee = MnistAutoEncoder()
 
         if os.path.isfile(SAVED_ATTACKER_PATH + '/epoch/' + self.autoencoder_file_name):
@@ -101,7 +103,7 @@ class AutoencoderBorder:
                 compile=False)
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
-                                     loss=loss(self.classifier, self.target_vector, self.origin_images, epsilon))
+                                     loss=loss(self.classifier, self.target_vector, self.origin_images, self.epsilon))
             self.end_time = time.time()
 
             return
@@ -116,7 +118,7 @@ class AutoencoderBorder:
             self.autoencoder = ae_trainee.get_architecture()
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
-                                     loss=loss(self.classifier, self.target_vector, self.origin_images, epsilon))
+                                     loss=loss(self.classifier, self.target_vector, self.origin_images, self.epsilon))
             # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
             early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
             model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/epoch/' + self.autoencoder_file_name,
@@ -240,8 +242,8 @@ def run_thread(classifier_name, trainX, trainY):
             for epsilon_index in range(0, 11):
                 epsilon_ = epsilon_index * 0.1
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                             target_position=target_position, classifier_name=classifier_name)
-                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss, epsilon=epsilon_)
+                                             target_position=target_position, classifier_name=classifier_name, epsilon=epsilon_)
+                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
                 attacker.get_border_and_adv()
                 # attacker.save_images()
                 res_txt, exe_time = attacker.export_result()
