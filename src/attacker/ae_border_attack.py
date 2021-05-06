@@ -43,6 +43,7 @@ class AutoencoderBorder:
         self.trainY = trainY
         self.classifier = classifier
         self.target_position = target_position
+        self.optimal_epoch = 0
 
         logger.debug('init attacking: origin_label = {origin_label}'.format(origin_label=self.origin_label))
 
@@ -87,16 +88,17 @@ class AutoencoderBorder:
         self.origin_adv_result = None
         logger.debug('init attacking DONE!')
 
-    def autoencoder_attack(self, loss, epsilon=1.0):
+    def autoencoder_attack(self, loss, epsilon):
         ae_trainee = MnistAutoEncoder()
 
-        if os.path.isfile(SAVED_ATTACKER_PATH + '/epsilon1/' + self.autoencoder_file_name):
+        if os.path.isfile(SAVED_ATTACKER_PATH + '/epoch/' + self.autoencoder_file_name):
             logger.debug(
                 'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
                     origin_label=self.origin_label, target_label=self.target_label))
 
-            self.autoencoder = tf.keras.models.load_model(SAVED_ATTACKER_PATH + '/epsilon1/' + self.autoencoder_file_name,
-                                                          compile=False)
+            self.autoencoder = tf.keras.models.load_model(
+                SAVED_ATTACKER_PATH + '/epsilon1/' + self.autoencoder_file_name,
+                compile=False)
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
                                      loss=loss(self.classifier, self.target_vector, self.origin_images, epsilon))
@@ -116,13 +118,14 @@ class AutoencoderBorder:
             self.autoencoder.compile(optimizer=adam,
                                      loss=loss(self.classifier, self.target_vector, self.origin_images, epsilon))
             # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
-            early_stopping = EarlyStopping(monitor='loss', patience=30, verbose=0, mode='min')
-            model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/epsilon1/' + self.autoencoder_file_name,
+            early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
+            model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/epoch/' + self.autoencoder_file_name,
                                                save_best_only=True, monitor='loss',
                                                mode='min')
 
-            self.autoencoder.fit(self.origin_images, self.combined_labels, epochs=200, batch_size=512,
-                                 callbacks=[early_stopping, model_checkpoint], verbose=1)
+            history = self.autoencoder.fit(self.origin_images, self.combined_labels, epochs=200, batch_size=512,
+                                           callbacks=[early_stopping, model_checkpoint], verbose=1)
+            self.optimal_epoch = len(history.history['loss'])
             logger.debug('training autoencoder DONE!')
 
     def get_border_and_adv(self):
@@ -145,6 +148,7 @@ class AutoencoderBorder:
         result = '<=========='
         result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
         result += '\n\t#adv=' + str(self.adv_result.shape[0])
+        result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
         l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
         l0 = reject_outliers(l0)
 
@@ -205,7 +209,7 @@ class AutoencoderBorder:
         l0_l2_best = l0[best_l2_index]
 
         # plot_images(origin_image_worst_l2, origin_image_best_l2, gen_image_worst_l2, gen_image_best_l2, l2_worst,
-                    # l2_best, l0_l2_worst, l0_l2_best, path_l2, self.classifier, worst_l2_index, worst_l0_index)
+        # l2_best, l0_l2_worst, l0_l2_best, path_l2, self.classifier, worst_l2_index, worst_l0_index)
 
         # show for l0
         origin_image_worst_l0 = self.origin_adv_result[worst_l0_index]
@@ -230,18 +234,20 @@ def run_thread(classifier_name, trainX, trainY):
     cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
-    for origin_label in range(0, 10):
+    for origin_label in range(9, 10):
         exe_time_sum = 0
-        for target_position in range(2, 11):
-            attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                         target_position=target_position, classifier_name=classifier_name)
-            attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
-            attacker.get_border_and_adv()
-            attacker.save_images()
-            res_txt, exe_time = attacker.export_result()
-            result_txt += res_txt
-            exe_time_sum += exe_time
-        f = open('./result/epsilon1/' + classifier_name + str(origin_label) + '.txt', 'w')
+        for target_position in range(2, 3):
+            for epsilon_index in range(0, 11):
+                epsilon_ = epsilon_index * 0.1
+                attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
+                                             target_position=target_position, classifier_name=classifier_name)
+                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss, epsilon=epsilon_)
+                attacker.get_border_and_adv()
+                # attacker.save_images()
+                res_txt, exe_time = attacker.export_result()
+                result_txt += res_txt
+                exe_time_sum += exe_time
+        f = open('./result/epoch/' + classifier_name + str(origin_label) + '.txt', 'w')
         result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
         f.write(result_txt)
         f.close()
