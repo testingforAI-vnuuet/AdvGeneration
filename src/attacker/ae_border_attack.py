@@ -93,7 +93,7 @@ class AutoencoderBorder:
     def autoencoder_attack(self, loss):
         ae_trainee = MnistAutoEncoder()
 
-        if os.path.isfile(SAVED_ATTACKER_PATH + '/epoch/' + self.autoencoder_file_name):
+        if os.path.isfile(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name):
             logger.debug(
                 'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
                     origin_label=self.origin_label, target_label=self.target_label))
@@ -121,7 +121,7 @@ class AutoencoderBorder:
                                      loss=loss(self.classifier, self.target_vector, self.origin_images, self.epsilon))
             # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
             early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
-            model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/epoch/' + self.autoencoder_file_name,
+            model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name,
                                                save_best_only=True, monitor='loss',
                                                mode='min')
 
@@ -236,11 +236,11 @@ def run_thread(classifier_name, trainX, trainY):
     cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
-    for origin_label in range(9, 10):
+    for origin_label in range(0, 10):
         exe_time_sum = 0
-        for target_position in range(2, 3):
-            for epsilon_index in range(0, 11):
-                epsilon_ = epsilon_index * 0.1
+        for target_position in range(2, 11):
+            for epsilon_index in range(0, 1):
+                epsilon_ = 1.0
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                              target_position=target_position, classifier_name=classifier_name, epsilon=epsilon_)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
@@ -249,7 +249,7 @@ def run_thread(classifier_name, trainX, trainY):
                 res_txt, exe_time = attacker.export_result()
                 result_txt += res_txt
                 exe_time_sum += exe_time
-        f = open('./result/epoch/' + classifier_name + str(origin_label) + '.txt', 'w')
+        f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
         result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
         f.write(result_txt)
         f.close()
