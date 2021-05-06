@@ -40,6 +40,7 @@ class google_drive:
 
 if __name__ == '__main__':
     folder_name = '../../attacker/saved_images/l2'
+    autoencoder_path = '../../attacker/saved_models/upload'
     args = sys.argv
     drive = google_drive()
 
@@ -49,5 +50,7 @@ if __name__ == '__main__':
 
     elif args[1] == 'l2':
         drive.upload_files(target_parent_id='1uB-HX80YMQIpj1NMUmEdwWwA0hJUYW7q', folder_path=folder_name)
+    elif args[1] == 'autoencoder':
+        drive.upload_files(target_parent_id='1eaUzzHvSH5qO6hYuzOisM1i2ShCQQlRI', folder_path=autoencoder_path)
     else:
         print('cannot upload !')

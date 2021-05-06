@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-import matplotlib.pyplot as plt
 from numpy.core.multiarray import ndarray
 from tensorflow.keras.datasets import mnist
 from tensorflow.python.keras import Model, Sequential
