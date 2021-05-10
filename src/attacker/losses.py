@@ -27,7 +27,7 @@ class AE_LOSSES:
         return loss
 
     @staticmethod
-    def re_rank_loss(classifier, target_label, weight, alpha):
+    def re_rank_loss(classifier, target_label, weight, alpha = 1.5):
         """
 
         :param classifier: classification model
@@ -38,13 +38,22 @@ class AE_LOSSES:
         """
         target_class = tf.argmax(target_label)
 
-        def loss(origin_image, generated_image):
-            re_rank = classifier(origin_image)[0].numpy()
-            predicted_class = np.argmax(re_rank)
-            re_rank[target_class] = alpha * re_rank[predicted_class]
-            re_rank = (re_rank - np.mean(re_rank)) / np.std(re_rank)
-            return (1 - weight) * tf.keras.losses.mean_squared_error(origin_image, generated_image) + \
-                   weight * tf.keras.losses.mean_squared_error(classifier(generated_image)[0], re_rank)
+        def loss(true_image, generated_image):
+            re_rank = classifier(true_image).numpy()
+            predicted_class = [np.argmax(re_rank_i) for re_rank_i in re_rank]
+
+            for index, predicted_class_i in enumerate(predicted_class):
+                re_rank[index, target_class] = alpha * re_rank[index, predicted_class_i]
+
+            re_rank = np.array([(re_rank_i - np.mean(re_rank_i)) / np.std(re_rank_i) for re_rank_i in re_rank])
+
+            a = true_image.shape[0]
+            true_image1 = tf.reshape(true_image, (a, 784))
+            generated_image1 = tf.reshape(generated_image, (a, 784))
+
+            # print(a)
+            return (1 - weight) * tf.keras.losses.mean_squared_error(true_image1, generated_image1) + \
+                   weight * tf.keras.losses.mean_squared_error(classifier(generated_image), re_rank)
 
         return loss
 
