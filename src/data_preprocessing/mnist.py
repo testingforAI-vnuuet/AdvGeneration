@@ -1,6 +1,7 @@
 import numpy as np
+import tensorflow as tf
 
-from .constants import *
+from constants import *
 
 
 class MnistPreprocessing:
@@ -80,3 +81,10 @@ class MnistPreprocessing:
         self.trainY = self.convert_to_onehot_vector(self.trainY)
 
         return self.trainX, self.trainY, self.testX, self.testY
+
+    @staticmethod
+    def quick_preprocess_data(images, label, num_classes, rows, cols, chl):
+
+        images = images.astype('float32') / 255.
+        return images.reshape((len(images), rows, cols, chl)), \
+               tf.keras.utils.to_categorical(label, num_classes)
