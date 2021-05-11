@@ -48,7 +48,7 @@ class Auto_encoder_rerank:
         self.optimal_epoch = 0
         self.generated_candidates = None
         self.adv_result = None
-        self.oin_adv_result = None
+        self.origin_adv_result = None
         self.end_time = None
 
         # self.target = target
@@ -78,6 +78,7 @@ class Auto_encoder_rerank:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
+        self.end_time = time.time()
 
     def export_result(self):
         result = '<=========='
