@@ -29,7 +29,7 @@ class AE_LOSSES:
             target_vectors = np.repeat(np.array([target_vector]), batch_size, axis=0)
             return (1 - epsilon) * keras.losses.mean_squared_error(
                 tf.reshape(origin_image, (batch_size, MNIST_IMG_ROWS * MNIST_IMG_COLS * MNIST_IMG_CHL)),
-                generated_image) + \
+                tf.reshape(generated_image, (batch_size, MNIST_IMG_ROWS * MNIST_IMG_COLS * MNIST_IMG_CHL))) + \
                    epsilon * keras.losses.categorical_crossentropy(classifier(generated_image)[0], target_vectors)
 
         return loss
