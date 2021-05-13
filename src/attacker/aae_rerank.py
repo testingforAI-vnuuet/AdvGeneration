@@ -27,6 +27,7 @@ class Auto_encoder_rerank:
 
         :param target: target class in attack
         """
+        self.method_name = 'atn'
         self.start_time = time.time()
         self.origin_label = origin_label
         self.classifier = classifier
@@ -44,17 +45,19 @@ class Auto_encoder_rerank:
         self.target_vector = tf.keras.utils.to_categorical(self.target_label, MNIST_NUM_CLASSES, dtype='float32')
 
         self.autoencoder = None
-        self.file_shared_name = classifier_name + f'_{origin_label}_{self.target_label}' + 'weight' + str(
+
+        self.file_shared_name = self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight' + str(
             self.weight).replace('.', ',')
-        self.autoencoder_file_name = 'atn_' + self.file_shared_name + '.h5'
+
+        self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
         self.optimal_epoch = 0
         self.generated_candidates = None
         self.adv_result = None
         self.origin_adv_result = None
         self.end_time = None
-        self.adv_result_file_path = 'atn_adv_result' + self.file_shared_name + '.npy'
-        self.origin_adv_result_file_path = 'atn_origin_adv_result' + self.file_shared_name + '.npy'
-        self.method_name = 'atn'
+        self.adv_result_file_path = self.file_shared_name + '_adv_result' + '.npy'
+        self.origin_adv_result_file_path = self.file_shared_name + '_origin_adv_result' + '.npy'
+
         # self.target = target
 
     # self.target_label_onehot = keras.utils.to_categorical(target, nClasses, dtype='float32')
