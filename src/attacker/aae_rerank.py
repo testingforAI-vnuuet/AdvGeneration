@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import os
 import threading
 import time
 
@@ -43,14 +44,17 @@ class Auto_encoder_rerank:
         self.target_vector = tf.keras.utils.to_categorical(self.target_label, MNIST_NUM_CLASSES, dtype='float32')
 
         self.autoencoder = None
-        self.file_shared_name = classifier_name + f'_{origin_label}_{self.target_label}'
+        self.file_shared_name = classifier_name + f'_{origin_label}_{self.target_label}' + 'weight' + str(
+            self.weight).replace('.', ',')
         self.autoencoder_file_name = 'atn_' + self.file_shared_name + '.h5'
         self.optimal_epoch = 0
         self.generated_candidates = None
         self.adv_result = None
         self.origin_adv_result = None
         self.end_time = None
-
+        self.adv_result_file_path = 'atn_adv_result' + self.file_shared_name + '.npy'
+        self.origin_adv_result_file_path = 'atn_origin_adv_result' + self.file_shared_name + '.npy'
+        self.method_name = 'atn'
         # self.target = target
 
     # self.target_label_onehot = keras.utils.to_categorical(target, nClasses, dtype='float32')
@@ -65,7 +69,7 @@ class Auto_encoder_rerank:
                                  loss=loss(self.classifier, self.target_vector, self.weight))
         # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
         early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
-        model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/atn/' + self.autoencoder_file_name,
+        model_checkpoint = ModelCheckpoint(os.path.join(SAVED_ATTACKER_PATH, self.method_name ,self.autoencoder_file_name),
                                            save_best_only=True, monitor='loss',
                                            mode='min')
 
@@ -78,6 +82,8 @@ class Auto_encoder_rerank:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
+        np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.adv_result_file_path), self.adv_result)
+        np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.origin_adv_result_file_path), self.origin_adv_result)
         self.end_time = time.time()
 
     def export_result(self):
