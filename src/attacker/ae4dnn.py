@@ -7,10 +7,10 @@ import time
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 from attacker.autoencoder import MnistAutoEncoder
-from attacker.constants import *
 from attacker.losses import *
 from attacker.mnist_utils import reject_outliers, L0, L2
 from data_preprocessing.mnist import MnistPreprocessing
+from utility.filters.filter_advs import *
 from utility.statistics import *
 
 logger = MyLogger.getLog()
@@ -65,26 +65,42 @@ class AE4DNN:
 
     def autoencoder_attack(self, loss):
         ae_trainee = MnistAutoEncoder()
-        self.autoencoder = ae_trainee.get_architecture()
-        adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
-        self.autoencoder.compile(optimizer=adam,
-                                 loss=loss(self.classifier, self.target_vector, self.weight))
-        # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
-        early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
-        model_checkpoint = ModelCheckpoint(
-            os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name),
-            save_best_only=True, monitor='loss',
-            mode='min')
+        autoencoder_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name)
+        if os.path.isfile(autoencoder_path):
+            logger.debug(
+                'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
+                    origin_label=self.origin_label, target_label=self.target_label))
 
-        history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
-                                       callbacks=[early_stopping, model_checkpoint], verbose=1)
-        self.optimal_epoch = len(history.history['loss'])
+            self.autoencoder = tf.keras.models.load_model(
+                autoencoder_path,
+                compile=False)
+            adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+            self.autoencoder.compile(optimizer=adam,
+                                     loss=loss(self.classifier, self.target_vector, self.weight))
+            self.end_time = time.time()
+        else:
+            self.autoencoder = ae_trainee.get_architecture()
+            adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+            self.autoencoder.compile(optimizer=adam,
+                                     loss=loss(self.classifier, self.target_vector, self.weight))
+            # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
+            early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
+            model_checkpoint = ModelCheckpoint(
+                autoencoder_path,
+                save_best_only=True, monitor='loss',
+                mode='min')
+
+            history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
+                                           callbacks=[early_stopping, model_checkpoint], verbose=1)
+            self.optimal_epoch = len(history.history['loss'])
 
         self.generated_candidates = self.autoencoder.predict(self.origin_images)
         self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images,
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
+        self.adv_result = restore_redundant_mnist_pixels(self.classifier, self.adv_result, self.origin_adv_result,
+                                                         self.target_label)
         np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.adv_result_file_path), self.adv_result)
         np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.origin_adv_result_file_path),
                 self.origin_adv_result)
@@ -115,6 +131,67 @@ class AE4DNN:
         result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
         result += '\n==========>\n'
         return result, self.end_time - self.start_time
+
+    def save_images(self):
+
+        l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
+        # l2 = reject_outliers(l2)
+        l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
+        # l0 = reject_outliers(l0)
+        if l2.shape[0] == 0:
+            return
+
+        origin_adv_result_borders = get_border(self.origin_adv_result)
+
+        sum_adv_borders = [np.sum(origin_adv_result_border.flatten()) for origin_adv_result_border in
+                           origin_adv_result_borders]
+
+        l2_argsort = np.argsort(l2)
+        worst_l2_index = l2_argsort[-1]
+        best_l2_index = l2_argsort[0]
+
+        l0_avg = l0 / sum_adv_borders
+        l0_argsort = np.argsort(l0_avg)
+        worst_l0_index = l0_argsort[-1]
+        best_l0_index = l0_argsort[0]
+
+        l2_image_file_name = self.file_shared_name + '_l2' + '.png'
+        l0_image_file_name = self.file_shared_name + '_l0' + '.png'
+
+        path_l2 = os.path.join(SAVED_IMAGE_SAMPLE_PATH, l2_image_file_name)
+        path_l0 = os.path.join(SAVED_IMAGE_SAMPLE_PATH, l0_image_file_name)
+
+        # show for l2
+        origin_image_worst_l2 = self.origin_adv_result[worst_l2_index]
+        origin_image_best_l2 = self.origin_adv_result[best_l2_index]
+
+        gen_image_worst_l2 = self.adv_result[worst_l2_index]
+        gen_image_best_l2 = self.adv_result[best_l2_index]
+
+        l2_worst = l2[worst_l2_index]
+        l2_best = l2[best_l2_index]
+
+        l0_l2_worst = l0[worst_l2_index]
+        l0_l2_best = l0[best_l2_index]
+
+        plot_images(origin_image_worst_l2, origin_image_best_l2, gen_image_worst_l2, gen_image_best_l2, l2_worst,
+                    l2_best, l0_l2_worst, l0_l2_best, path_l2, self.classifier, worst_l2_index, worst_l0_index)
+
+        # show for l0
+        origin_image_worst_l0 = self.origin_adv_result[worst_l0_index]
+        origin_image_best_l0 = self.origin_adv_result[best_l0_index]
+
+        gen_image_worst_l0 = self.adv_result[worst_l0_index]
+        gen_image_best_l0 = self.adv_result[best_l0_index]
+
+        l0_worst = l0[worst_l0_index]
+        l0_best = l0[best_l0_index]
+
+        l2_l0_worst = l2[worst_l0_index]
+        l2_l0_best = l0[best_l0_index]
+
+        plot_images(origin_image_worst_l0, origin_image_best_l0, gen_image_worst_l0, gen_image_best_l0, l2_l0_worst,
+                    l2_l0_best, l0_worst, l0_best, path_l0, self.classifier, worst_l0_index, best_l0_index)
 
     # def get_architecture(self, input_shape=(MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL)):
     #     input_img = keras.layers.Input(shape=input_shape)
@@ -174,7 +251,7 @@ def run_thread(classifier_name, trainX, trainY):
                           classifier_name=classifier_name, weight=weight_value)
         attacker.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
         res_txt, _ = attacker.export_result()
-
+        attacker.save_images()
         result_txt += res_txt
 
     f = open('./result/ae4dnn/' + classifier_name + str(origin_label) + '.txt', 'w')
