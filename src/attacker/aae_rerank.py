@@ -11,6 +11,7 @@ from attacker.constants import *
 from attacker.losses import *
 from attacker.mnist_utils import reject_outliers, L0, L2
 from data_preprocessing.mnist import MnistPreprocessing
+from utility.filters.filter_advs import *
 from utility.statistics import *
 
 logger = MyLogger.getLog()
