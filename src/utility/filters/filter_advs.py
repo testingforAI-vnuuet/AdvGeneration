@@ -22,7 +22,7 @@ def filter_advs(classifier, origin_images, generated_imgs, target):
 
 def restore_redundant_mnist_pixels(classifier, generated_advs, origin_images, target_label):
     result = []
-
+    avg_redundant_pixels = 0
     for generated_adv, origin_image in zip(generated_advs, origin_images):
         tmp_adv = np.array([generated_adv])
         for index in generated_adv.reshape(np.prod(generated_adv.shape), ):
@@ -32,7 +32,9 @@ def restore_redundant_mnist_pixels(classifier, generated_advs, origin_images, ta
             predicted_label = np.argmax(classifier.predict(tmp_adv))
             if predicted_label != target_label:
                 tmp_adv[0][row, col] = tmp_value
+            else:
+                avg_redundant_pixels += 1
 
-        result.append(tmp_adv)
+        result.append(tmp_adv[0])
 
-    return np.array(result)
+    return np.array(result), avg_redundant_pixels / float(generated_advs.shape[0])

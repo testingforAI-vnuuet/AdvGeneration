@@ -56,7 +56,7 @@ class AE4DNN:
         self.end_time = None
         self.adv_result_file_path = self.file_shared_name + '_adv_result' + '.npy'
         self.origin_adv_result_file_path = self.file_shared_name + '_origin_adv_result' + '.npy'
-
+        self.num_avg_redundant_pixels = 0
         # self.target = target
 
     # self.target_label_onehot = keras.utils.to_categorical(target, nClasses, dtype='float32')
@@ -99,7 +99,7 @@ class AE4DNN:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
-        self.adv_result = restore_redundant_mnist_pixels(self.classifier, self.adv_result, self.origin_adv_result,
+        self.adv_result, self.num_avg_redundant_pixels = restore_redundant_mnist_pixels(self.classifier, self.adv_result, self.origin_adv_result,
                                                          self.target_label)
         np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.adv_result_file_path), self.adv_result)
         np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.origin_adv_result_file_path),
@@ -112,6 +112,7 @@ class AE4DNN:
         result += '\n\tweihjt=' + str(self.weight)
         result += '\n\t#adv=' + str(self.adv_result.shape[0])
         result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
+        result += '\n\t#avg_redundant_pixels=' + str(self.num_avg_redundant_pixels)
         l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
         l0 = reject_outliers(l0)
 
