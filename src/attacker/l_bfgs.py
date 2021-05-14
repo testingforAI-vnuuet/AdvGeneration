@@ -1,10 +1,11 @@
 from __future__ import absolute_import
 
 import tensorflow as tf
+from tensorflow import keras
 
 from attacker.constants import *
 from data_preprocessing.mnist import MnistPreprocessing
-from utility.filter_advs import *
+from utility.filters.filter_advs import *
 from utility.statistics import *
 
 logger = MyLogger.getLog()
