@@ -191,7 +191,7 @@ class Auto_encoder_rerank:
         l0_best = l0[best_l0_index]
 
         l2_l0_worst = l2[worst_l0_index]
-        l2_l0_best = l0[best_l0_index]
+        l2_l0_best = l2[best_l0_index]
 
         plot_images(origin_image_worst_l0, origin_image_best_l0, gen_image_worst_l0, gen_image_best_l0, l2_l0_worst,
                     l2_l0_best, l0_worst, l0_best, path_l0, self.classifier, worst_l0_index, best_l0_index)
