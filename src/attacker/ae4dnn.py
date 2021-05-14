@@ -158,8 +158,8 @@ class AE4DNN:
         l2_image_file_name = self.file_shared_name + '_l2' + '.png'
         l0_image_file_name = self.file_shared_name + '_l0' + '.png'
 
-        path_l2 = os.path.join(SAVED_IMAGE_SAMPLE_PATH, l2_image_file_name)
-        path_l0 = os.path.join(SAVED_IMAGE_SAMPLE_PATH, l0_image_file_name)
+        path_l2 = os.path.join(SAVED_IMAGE_SAMPLE_PATH, self.method_name, l2_image_file_name)
+        path_l0 = os.path.join(SAVED_IMAGE_SAMPLE_PATH, self.method_name, l0_image_file_name)
 
         # show for l2
         origin_image_worst_l2 = self.origin_adv_result[worst_l2_index]
