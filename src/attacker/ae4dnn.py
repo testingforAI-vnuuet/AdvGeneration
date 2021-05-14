@@ -275,8 +275,6 @@ if __name__ == '__main__':
     END_SEED = 1000
     TARGET = 7
     ATTACKED_CNN_MODEL = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
-    AE_MODEL = CLASSIFIER_PATH + '/autoencoder_rerank_mnist.h5'
-    AE_LOSS = AE_LOSSES.re_rank_loss
 
     # load dataset
     # (trainX, trainY), (testX, testY) = mnist.load_data()

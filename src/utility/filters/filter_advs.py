@@ -1,6 +1,6 @@
 import numpy as np
 
-from constants.constants import *
+from constants.data_constants import *
 
 
 def filter_advs(classifier, origin_images, generated_imgs, target):
