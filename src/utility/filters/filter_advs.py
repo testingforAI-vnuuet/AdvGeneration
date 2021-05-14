@@ -1,6 +1,5 @@
 import numpy as np
 
-from constants.constants import *
 
 
 def filter_advs(classifier, origin_images, generated_imgs, target):
@@ -27,7 +26,7 @@ def restore_redundant_mnist_pixels(classifier, generated_advs, origin_images, ta
     for generated_adv, origin_image in zip(generated_advs, origin_images):
         tmp_adv = np.array([generated_adv])
         for index in generated_adv.reshape(np.prod(generated_adv.shape), ):
-            row, col = index // MNIST_IMG_ROWS, index % MNIST_IMG_COLS
+            row, col = index // 28, index % 28
             tmp_value = tmp_adv[0][row, col]
             tmp_adv[0][row, col] = origin_image[row, col]
             predicted_label = np.argmax(classifier.predict(tmp_adv))
