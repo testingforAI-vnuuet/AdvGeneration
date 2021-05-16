@@ -7,7 +7,6 @@ import time
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 from attacker.autoencoder import MnistAutoEncoder
-from attacker.constants import *
 from attacker.losses import *
 from attacker.mnist_utils import reject_outliers, L0, L2
 from data_preprocessing.mnist import MnistPreprocessing
@@ -100,8 +99,10 @@ class Auto_encoder_rerank:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
-        self.adv_result, self.num_avg_redundant_pixels = restore_redundant_mnist_pixels(self.classifier, self.adv_result, self.origin_adv_result,
-                                                         self.target_label)
+        self.adv_result, self.num_avg_redundant_pixels = restore_redundant_mnist_pixels(self.classifier,
+                                                                                        self.adv_result,
+                                                                                        self.origin_adv_result,
+                                                                                        self.target_label)
         np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.adv_result_file_path), self.adv_result)
         np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.origin_adv_result_file_path),
                 self.origin_adv_result)
@@ -133,6 +134,10 @@ class Auto_encoder_rerank:
             result += '\n\tl2=None'
         result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
         result += '\n==========>\n'
+        f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
+        f.write(result)
+        f.close()
+
         return result, self.end_time - self.start_time
 
     def save_images(self):
@@ -255,11 +260,11 @@ def run_thread(classifier_name, trainX, trainY):
         attacker.autoencoder_attack(loss=AE_LOSSES.re_rank_loss)
         res_txt, _ = attacker.export_result()
         attacker.save_images()
-        result_txt += res_txt
+        # result_txt += res_txt
 
-    f = open('./result/atn/' + classifier_name + str(origin_label) + '.txt', 'w')
-    f.write(result_txt)
-    f.close()
+    # f = open('./result/atn/' + classifier_name + str(origin_label) + '.txt', 'w')
+    # f.write(result_txt)
+    # f.close()
 
 
 class MyThread(threading.Thread):
