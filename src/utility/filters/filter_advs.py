@@ -28,6 +28,7 @@ def restore_redundant_mnist_pixels(classifier, generated_advs, origin_images, ta
         for index in range(np.prod(generated_adv.shape)):
             row, col = int(index // 28), int(index % 28)
             tmp_value = tmp_adv[0][row, col]
+            print(index)
             tmp_adv[0][row, col] = origin_image[row, col]
             predicted_label = np.argmax(classifier.predict(tmp_adv))
             if predicted_label != target_label:
