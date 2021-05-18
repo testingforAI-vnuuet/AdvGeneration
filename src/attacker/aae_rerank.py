@@ -252,7 +252,7 @@ def run_thread(classifier_name, trainX, trainY):
     origin_label = 9
     target_position = 2
 
-    for weight_index in range(0, 11):
+    for weight_index in range(10, 11):
         weight_value = weight_index * 0.1
         attacker = Auto_encoder_rerank(trainX=trainX, trainY=trainY, origin_label=origin_label,
                                        target_position=target_position, classifier=cnn_model,
