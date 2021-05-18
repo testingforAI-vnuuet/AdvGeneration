@@ -53,8 +53,8 @@ class AutoencoderBorder:
 
         self.origin_images, self.origin_labels = filter_by_label(self.origin_label, self.trainX, self.trainY)
 
-        self.origin_images = np.array(self.origin_images[:2000])
-        self.origin_labels = np.array(self.origin_labels[:2000])
+        self.origin_images = np.array(self.origin_images[:self.num_images])
+        self.origin_labels = np.array(self.origin_labels[:self.num_images])
 
         logger.debug('shape of origin_images: {shape}'.format(shape=self.origin_images.shape))
         logger.debug('shape of origin_labels: {shape}'.format(shape=self.origin_labels.shape))
@@ -104,7 +104,7 @@ class AutoencoderBorder:
                 compile=False)
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
-                                     loss=loss(self.classifier, self.target_vector, self.origin_images, self.epsilon))
+                                     loss=loss(self.classifier, self.target_vector, self.origin_images, self.weight))
             self.end_time = time.time()
 
             return
@@ -119,7 +119,7 @@ class AutoencoderBorder:
             self.autoencoder = ae_trainee.get_architecture()
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
-                                     loss=loss(self.classifier, self.target_vector, self.origin_images, self.epsilon))
+                                     loss=loss(self.classifier, self.target_vector, self.origin_images, self.weight))
             # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
             early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
             model_checkpoint = ModelCheckpoint(autoencoder_path,
@@ -239,7 +239,7 @@ def run_thread(classifier_name, trainX, trainY):
     # AE_LOSS = AE_LOSSES.border_loss
     for origin_label in range(9, 10):
         # exe_time_sum = 0
-        for target_position in range(2, 11):
+        for target_position in range(2, 3):
             for weight_index in range(0, 11):
                 weight_value = weight_index * 0.1
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
