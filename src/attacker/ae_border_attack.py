@@ -22,7 +22,8 @@ def combined_function(set1, set2, set3):
 
 
 class AutoencoderBorder:
-    def __init__(self, origin_label, trainX, trainY, classifier, epsilon, target_position=2, classifier_name='noname'):
+    def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
+                 num_images=1000):
         """
 
         :param origin_label:
@@ -44,7 +45,9 @@ class AutoencoderBorder:
         self.classifier = classifier
         self.target_position = target_position
         self.optimal_epoch = 0
-        self.epsilon = epsilon
+        self.weight = weight
+        self.num_images = num_images
+        self.method_name = 'ae_border'
 
         logger.debug('init attacking: origin_label = {origin_label}'.format(origin_label=self.origin_label))
 
@@ -70,14 +73,11 @@ class AutoencoderBorder:
         logger.debug('border_origin_image shape: {shape}'.format(shape=self.border_origin_images.shape))
         self.internal_origin_images = get_internal_images(self.origin_images, border_images=self.border_origin_images)
         logger.debug('internal_origin_image shape: {shape}'.format(shape=self.internal_origin_images.shape))
-        self.file_shared_name = classifier_name + 'border_{origin_label}_{target_label}_epsilon{epsilon}'.format(
-            origin_label=self.origin_label,
-            target_label=self.target_label,
-            epsilon=str(self.epsilon).replace('.', ','))
-        self.autoencoder_file_name = 'autoencoder_' + self.file_shared_name + '.h5'
-        self.result_file_name = 'result_' + self.file_shared_name + '.txt'
+        self.file_shared_name = self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
+            self.weight).replace('.', ',') + '_' + str(self.num_images)
 
-        self.result_folder = './result'
+        self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
+        self.result_file_name = self.file_shared_name + 'result' + '.txt'
 
         logger.debug('combining target_labels for autoencoder training')
 
@@ -92,8 +92,9 @@ class AutoencoderBorder:
 
     def autoencoder_attack(self, loss):
         ae_trainee = MnistAutoEncoder()
+        autoencoder_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name)
 
-        if os.path.isfile(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name):
+        if os.path.isfile(autoencoder_path):
             logger.debug(
                 'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
                     origin_label=self.origin_label, target_label=self.target_label))
@@ -121,7 +122,7 @@ class AutoencoderBorder:
                                      loss=loss(self.classifier, self.target_vector, self.origin_images, self.epsilon))
             # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
             early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
-            model_checkpoint = ModelCheckpoint(SAVED_ATTACKER_PATH + '/' + self.autoencoder_file_name,
+            model_checkpoint = ModelCheckpoint(autoencoder_path,
                                                save_best_only=True, monitor='loss',
                                                mode='min')
 
@@ -236,23 +237,25 @@ def run_thread(classifier_name, trainX, trainY):
     cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
-    for origin_label in range(0, 10):
-        exe_time_sum = 0
+    for origin_label in range(9, 10):
+        # exe_time_sum = 0
         for target_position in range(2, 11):
-            for epsilon_index in range(0, 1):
-                epsilon_ = 1.0
+            for weight_index in range(0, 11):
+                weight_value = weight_index * 0.1
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                             target_position=target_position, classifier_name=classifier_name, epsilon=epsilon_)
+                                             target_position=target_position, classifier_name=classifier_name,
+                                             weight=weight_value)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
                 attacker.get_border_and_adv()
+                del attacker
                 # attacker.save_images()
-                res_txt, exe_time = attacker.export_result()
-                result_txt += res_txt
-                exe_time_sum += exe_time
-        f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
-        result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
-        f.write(result_txt)
-        f.close()
+                # res_txt, exe_time = attacker.export_result()
+        #         result_txt += res_txt
+        #         exe_time_sum += exe_time
+        # f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
+        # result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
+        # f.write(result_txt)
+        # f.close()
         logger.debug('processing model: ' + classifier_name + ' DONE!')
         logger.debug("=======================++++============================")
 
@@ -286,19 +289,19 @@ if __name__ == '__main__':
 
     logger.debug('starting multi-thread')
     thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
-    thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
-    thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
+    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
+    # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
-    thread3.start()
-    thread4.start()
+    # thread2.start()
+    # thread3.start()
+    # thread4.start()
 
     thread1.join()
-    thread2.join()
-    thread3.join()
-    thread4.join()
+    # thread2.join()
+    # thread3.join()
+    # thread4.join()
 
     logger.debug('Exiting Main Thread')
     logger.debug('robustness testing DONE !')

@@ -259,6 +259,7 @@ def run_thread(classifier_name, trainX, trainY):
                                        target_position=target_position, classifier=cnn_model,
                                        classifier_name=classifier_name, weight=weight_value)
         attacker.autoencoder_attack(loss=AE_LOSSES.re_rank_loss)
+        del attacker
         # res_txt, _ = attacker.export_result()
         # attacker.save_images()
         # result_txt += res_txt
