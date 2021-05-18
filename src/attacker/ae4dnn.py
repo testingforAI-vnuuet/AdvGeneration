@@ -10,7 +10,6 @@ from attacker.autoencoder import MnistAutoEncoder
 from attacker.losses import *
 from attacker.mnist_utils import reject_outliers, L0, L2
 from data_preprocessing.mnist import MnistPreprocessing
-from utility.filters.filter_advs import *
 from utility.statistics import *
 
 logger = MyLogger.getLog()
@@ -22,7 +21,8 @@ pretrained_model_name = ['Alexnet', 'Lenet', 'vgg13', 'vgg16']
 
 class AE4DNN:
 
-    def __init__(self, trainX, trainY, origin_label, target_position, classifier, weight, classifier_name='noname'):
+    def __init__(self, trainX, trainY, origin_label, target_position, classifier, weight, classifier_name='noname',
+                 num_images=1000):
         """
 
         :param target: target class in attack
@@ -35,18 +35,19 @@ class AE4DNN:
         self.trainY = trainY
         self.target_position = target_position
         self.weight = weight
+        self.num_images = num_images
 
         self.origin_images, self.origin_labels = filter_by_label(self.origin_label, self.trainX, self.trainY)
 
-        self.origin_images = np.array(self.origin_images[:2000])
-        self.origin_labels = np.array(self.origin_labels[:2000])
+        self.origin_images = np.array(self.origin_images[:self.num_images])
+        self.origin_labels = np.array(self.origin_labels[:self.num_images])
 
         self.target_label = label_ranking(self.origin_images, self.classifier)[-1 * self.target_position]
         self.target_vector = tf.keras.utils.to_categorical(self.target_label, MNIST_NUM_CLASSES, dtype='float32')
 
         self.autoencoder = None
         self.file_shared_name = self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
-            self.weight).replace('.', ',')
+            self.weight).replace('.', ',') + '_' + str(self.num_images)
 
         self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
         self.optimal_epoch = 0
@@ -99,19 +100,19 @@ class AE4DNN:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
-        self.adv_result, self.num_avg_redundant_pixels = restore_redundant_mnist_pixels(self.classifier,
-                                                                                        self.adv_result,
-                                                                                        self.origin_adv_result,
-                                                                                        self.target_label)
-        np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.adv_result_file_path), self.adv_result)
-        np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.origin_adv_result_file_path),
-                self.origin_adv_result)
+        # self.adv_result, self.num_avg_redundant_pixels = restore_redundant_mnist_pixels(self.classifier,
+        #                                                                                 self.adv_result,
+        #                                                                                 self.origin_adv_result,
+        #                                                                                 self.target_label)
+        # np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.adv_result_file_path), self.adv_result)
+        # np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.origin_adv_result_file_path),
+        #         self.origin_adv_result)
         self.end_time = time.time()
 
     def export_result(self):
         result = '<=========='
         result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
-        result += '\n\tweihjt=' + str(self.weight)
+        result += '\n\tweight=' + str(self.weight)
         result += '\n\t#adv=' + str(self.adv_result.shape[0])
         result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
         result += '\n\t#avg_redundant_pixels=' + str(self.num_avg_redundant_pixels)
@@ -252,14 +253,14 @@ def run_thread(classifier_name, trainX, trainY):
     origin_label = 9
     target_position = 2
 
-    for weight_index in range(10, 11):
+    for weight_index in range(0, 11):
         weight_value = weight_index * 0.1
         attacker = AE4DNN(trainX=trainX, trainY=trainY, origin_label=origin_label,
                           target_position=target_position, classifier=cnn_model,
                           classifier_name=classifier_name, weight=weight_value)
         attacker.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
-        res_txt, _ = attacker.export_result()
-        attacker.save_images()
+        # res_txt, _ = attacker.export_result()
+        # attacker.save_images()
         # result_txt += res_txt
 
     # f = open('./result/ae4dnn/' + classifier_name + str(origin_label) + '.txt', 'w')
