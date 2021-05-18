@@ -100,7 +100,7 @@ class AutoencoderBorder:
                     origin_label=self.origin_label, target_label=self.target_label))
 
             self.autoencoder = tf.keras.models.load_model(
-                SAVED_ATTACKER_PATH + '/epsilon1/' + self.autoencoder_file_name,
+                autoencoder_path,
                 compile=False)
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
