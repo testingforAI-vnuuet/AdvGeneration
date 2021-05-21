@@ -1,13 +1,15 @@
+import enum
+
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
 from tensorflow import keras
-from tensorflow.python.keras import Sequential
-from attacker.constants import MNIST_IMG_ROWS, MNIST_IMG_COLS, CLASSIFIER_PATH, MNIST_IMG_CHL
 from tensorflow.keras.datasets import mnist
+from tensorflow.python.keras import Sequential
+
+from attacker.constants import MNIST_IMG_ROWS, MNIST_IMG_COLS, CLASSIFIER_PATH, MNIST_IMG_CHL
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.mylogger import MyLogger
-import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
-import enum
 
 logger = MyLogger.getLog()
 
@@ -172,6 +174,32 @@ class feature_ranker:
         plt.imshow(input_image, cmap='gray')
         plt.title("Most important features are highlighted")
         plt.show()
+
+    @staticmethod
+    def jsma_ranking(origin_image, target_label, classifier, num_expected_features=1, num_classes=10):
+        dF_t = None
+        dF_rest = []
+        for i in range(num_classes):
+            dF_i = feature_ranker.compute_gradient_wrt_features(input=tf.convert_to_tensor([origin_image]),
+                                                                target_neuron=i, classifier=classifier)
+            if i != target_label:
+                dF_rest.append(dF_i)
+            else:
+                dF_t = dF_i
+
+        SX = np.zeros_like(origin_image)
+        for index in range(np.prod(origin_image.shape)):
+            row, col = int(index // 28), int(index % 28)
+            SX_i = None
+            dF_t_i = dF_t[row, col]
+            sum_dF_rest_i = sum([dF_rest_i[row, col] for dF_rest_i in dF_rest])
+            if dF_t_i > 0 or sum_dF_rest_i < 0:
+                SX_i = 0
+            else:
+                SX_i = abs(dF_t_i) * sum_dF_rest_i
+            SX[row, col] = SX_i
+
+        return np.argsort(SX.flatten())
 
 
 if __name__ == '__main__':

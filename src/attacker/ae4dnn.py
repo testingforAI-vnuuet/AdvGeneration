@@ -11,6 +11,7 @@ from attacker.losses import *
 from attacker.mnist_utils import reject_outliers, L0, L2
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.statistics import *
+from utility.filters.filter_advs import *
 
 logger = MyLogger.getLog()
 
@@ -22,7 +23,7 @@ pretrained_model_name = ['Alexnet', 'Lenet', 'vgg13', 'vgg16']
 class AE4DNN:
 
     def __init__(self, trainX, trainY, origin_label, target_position, classifier, weight, classifier_name='noname',
-                 num_images=1000):
+                 num_images=10):
         """
 
         :param target: target class in attack
@@ -58,6 +59,7 @@ class AE4DNN:
         self.adv_result_file_path = self.file_shared_name + '_adv_result' + '.npy'
         self.origin_adv_result_file_path = self.file_shared_name + '_origin_adv_result' + '.npy'
         self.num_avg_redundant_pixels = 0
+        self.smooth_adv = None
         # self.target = target
 
     # self.target_label_onehot = keras.utils.to_categorical(target, nClasses, dtype='float32')
@@ -107,33 +109,36 @@ class AE4DNN:
         # np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.adv_result_file_path), self.adv_result)
         # np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.origin_adv_result_file_path),
         #         self.origin_adv_result)
+        self.smooth_adv = smooth_adv_V2(self.classifier, self.adv_result, self.origin_adv_result, self.target_label)
         self.end_time = time.time()
 
     def export_result(self):
         result = '<=========='
-        result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
-        result += '\n\tweight=' + str(self.weight)
-        result += '\n\t#adv=' + str(self.adv_result.shape[0])
-        result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
-        result += '\n\t#avg_redundant_pixels=' + str(self.num_avg_redundant_pixels)
-        l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
-        l0 = reject_outliers(l0)
-
-        if l0.shape[0] != 0:
-            result += '\n\tl0=' + str(min(l0)) + '/' + str(max(l0)) + '/' + str(np.average(l0))
-        else:
-            result += '\n\tl0=None'
-
-        l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
-        l2 = reject_outliers(l2)
-
-        if l2.shape[0] != 0:
-            result += '\n\tl2=' + str(round(min(l2), 2)) + '/' + str(round(max(l2), 2)) + '/' + str(
-                round(np.average(l2), 2))
-        else:
-            result += '\n\tl2=None'
-        result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
-        result += '\n==========>\n'
+        str_smooth_adv = list(map(str, self.smooth_adv))
+        result += '\n' + '\n'.join(str_smooth_adv)
+        # result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
+        # result += '\n\tweight=' + str(self.weight)
+        # result += '\n\t#adv=' + str(self.adv_result.shape[0])
+        # result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
+        # result += '\n\t#avg_redundant_pixels=' + str(self.num_avg_redundant_pixels)
+        # l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
+        # l0 = reject_outliers(l0)
+        #
+        # if l0.shape[0] != 0:
+        #     result += '\n\tl0=' + str(min(l0)) + '/' + str(max(l0)) + '/' + str(np.average(l0))
+        # else:
+        #     result += '\n\tl0=None'
+        #
+        # l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
+        # l2 = reject_outliers(l2)
+        #
+        # if l2.shape[0] != 0:
+        #     result += '\n\tl2=' + str(round(min(l2), 2)) + '/' + str(round(max(l2), 2)) + '/' + str(
+        #         round(np.average(l2), 2))
+        # else:
+        #     result += '\n\tl2=None'
+        # result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
+        # result += '\n==========>\n'
 
         f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
         f.write(result)

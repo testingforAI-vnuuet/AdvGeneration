@@ -1,5 +1,5 @@
-import numpy as np
-
+from attacker.mnist_utils import L0
+from utility.feature_ranker import *
 
 
 def filter_advs(classifier, origin_images, generated_imgs, target):
@@ -38,3 +38,31 @@ def restore_redundant_mnist_pixels(classifier, generated_advs, origin_images, ta
         result.append(tmp_adv[0])
 
     return np.array(result), avg_redundant_pixels / float(generated_advs.shape[0])
+
+
+def smooth_adv_V2(classifier, generated_advs, origin_images, target_label, step=1, K=784):
+    sum_changed_pixels = 0
+    restored_pixels_list = []
+
+    for index, (generated_adv, origin_image) in enumerate(zip(generated_advs, origin_images)):
+        tmp_adv = np.array([generated_adv])
+        ranked_index = feature_ranker.jsma_ranking(origin_image, target_label, classifier)
+        l0 = L0(generated_adv, origin_image)
+        sum_changed_pixels += l0
+        sum_restored_pixels_i = 0
+        sum_restored_pixels_i_list = []
+        for i in range(1, K):
+            chosen_index = ranked_index[-1 * i * step]
+            row, col = int(chosen_index // 28), int(chosen_index % 28)
+            tmp_value = tmp_adv[0][row, col]
+            tmp_adv[0][row, col] = origin_image[row, col]
+            predicted_label = np.argmax(classifier.predict(tmp_adv))
+            if predicted_label != target_label:
+                tmp_adv[0][row, col] = tmp_value
+            else:
+                sum_restored_pixels_i += 1
+
+            sum_restored_pixels_i_list.append(sum_restored_pixels_i)
+        restored_pixels_list.append(sum_restored_pixels_i_list)
+    restored_pixels_list = np.array(restored_pixels_list)
+    return np.sum(restored_pixels_list, axis=0) / float(sum_changed_pixels)
