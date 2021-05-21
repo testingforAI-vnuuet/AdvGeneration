@@ -69,4 +69,4 @@ def smooth_adv_border_V2(classifier, generated_advs, origin_images, border_index
         restored_pixels_list.append(v_adv_j)
     restored_pixels_list = np.array(restored_pixels_list)
 
-    return np.average(restored_pixels_list, axis=0) / float(sum_changed_pixels)
+    return np.average(restored_pixels_list, axis=0)
