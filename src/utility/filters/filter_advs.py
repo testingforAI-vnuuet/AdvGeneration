@@ -65,4 +65,5 @@ def smooth_adv_V2(classifier, generated_advs, origin_images, target_label, step=
             sum_restored_pixels_i_list.append(sum_restored_pixels_i)
         restored_pixels_list.append(sum_restored_pixels_i_list)
     restored_pixels_list = np.array(restored_pixels_list)
+    print(restored_pixels_list)
     return np.sum(restored_pixels_list, axis=0) / float(sum_changed_pixels)
