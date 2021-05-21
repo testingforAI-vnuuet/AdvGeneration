@@ -258,6 +258,7 @@ def run_thread(classifier_name, trainX, trainY):
                                              weight=weight_value)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
                 attacker.get_border_and_adv()
+                attacker.export_result()
                 del attacker
                 # attacker.save_images()
                 # res_txt, exe_time = attacker.export_result()
