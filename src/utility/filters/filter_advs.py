@@ -1,4 +1,4 @@
-from attacker.mnist_utils import L0
+from attacker.mnist_utils import compute_l0_V2
 from utility.feature_ranker import *
 
 
@@ -47,7 +47,7 @@ def smooth_adv_V2(classifier, generated_advs, origin_images, target_label, step=
     for index, (generated_adv, origin_image) in enumerate(zip(generated_advs, origin_images)):
         tmp_adv = np.array([generated_adv])
         ranked_index = feature_ranker.jsma_ranking(origin_image, target_label, classifier)
-        l0 = L0(generated_adv, origin_image)
+        l0 = compute_l0_V2(generated_adv, origin_image)
         sum_changed_pixels += l0
         sum_restored_pixels_i = 0
         sum_restored_pixels_i_list = []
