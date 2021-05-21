@@ -47,22 +47,27 @@ def smooth_adv_border_V2(classifier, generated_advs, origin_images, border_index
     for index, (generated_adv, origin_image, border_index) in enumerate(
             zip(generated_advs, origin_images, border_indexs)):
         tmp_adv = np.array([generated_adv])
-        ranked_index = feature_ranker.jsma_ranking_border(origin_image, border_index, target_label, classifier)
+        SX_flat = feature_ranker.jsma_ranking_border(origin_image, border_index, target_label, classifier)
+        ranked_index = np.argsort(SX_flat)
+
         l0 = compute_l0_V2(generated_adv, origin_image)
         sum_changed_pixels += l0
         sum_restored_pixels_i = 0
         v_adv_j = []
-        for i in range(1, K + 1):
+        for i in range(1, K + 1, step):
             chosen_index = ranked_index[-1 * i * step]
-            if chosen_index == float('-inf'):
+            if SX_flat[chosen_index] == float('-inf'):
                 break
             row, col = int(chosen_index // 28), int(chosen_index % 28)
             tmp_value = tmp_adv[0][row, col]
             tmp_adv[0][row, col] = origin_image[row, col]
             predicted_label = np.argmax(classifier.predict(tmp_adv))
+            print(f'{predicted_label} {target_label}')
             if predicted_label != target_label:
                 tmp_adv[0][row, col] = tmp_value
-            v_adv_j.append((l0 - compute_l0_V2(tmp_adv, origin_image))/l0)
+            else:
+                sum_restored_pixels_i += 1
+            v_adv_j.append(sum_restored_pixels_i/l0)
 
             # sum_restored_pixels_i_list.append(sum_restored_pixels_i)
         v_adv_j += [v_adv_j[-1]] * (K - len(v_adv_j))

@@ -201,7 +201,7 @@ class feature_ranker:
             SX[row, col] = SX_i
         SX_flat = SX.flatten()
         SX_flat[border_index.flatten() == 0] = float('-inf')
-        return np.argsort(SX_flat)
+        return SX_flat
 
 
 if __name__ == '__main__':
