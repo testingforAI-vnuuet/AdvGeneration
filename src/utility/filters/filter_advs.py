@@ -62,7 +62,7 @@ def smooth_adv_border_V2(classifier, generated_advs, origin_images, border_index
             predicted_label = np.argmax(classifier.predict(tmp_adv))
             if predicted_label != target_label:
                 tmp_adv[0][row, col] = tmp_value
-            v_adv_j.append(compute_l0_V2(tmp_adv, origin_image)/l0)
+            v_adv_j.append((l0 - compute_l0_V2(tmp_adv, origin_image))/l0)
 
             # sum_restored_pixels_i_list.append(sum_restored_pixels_i)
         v_adv_j += [v_adv_j[-1]] * (K - len(v_adv_j))
@@ -70,3 +70,4 @@ def smooth_adv_border_V2(classifier, generated_advs, origin_images, border_index
     restored_pixels_list = np.array(restored_pixels_list)
 
     return np.average(restored_pixels_list, axis=0)
+
