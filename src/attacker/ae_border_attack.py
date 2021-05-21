@@ -8,6 +8,7 @@ import time
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
+from utility.filters.filter_advs import smooth_adv_border_V2
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -88,6 +89,7 @@ class AutoencoderBorder:
         self.generated_candidates = None
         self.adv_result = None
         self.origin_adv_result = None
+        self.smooth_adv = None
         logger.debug('init attacking DONE!')
 
     def autoencoder_attack(self, loss):
@@ -144,32 +146,41 @@ class AutoencoderBorder:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
+
+        self.smooth_adv = smooth_adv_border_V2(self.classifier, self.adv_result[:5], self.origin_adv_result[:5], get_border(self.origin_adv_result[:5]), self.target_label)
         self.end_time = time.time()
         logger.debug('get advs DONE!')
 
     def export_result(self):
         result = '<=========='
-        result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
-        result += '\n\t#adv=' + str(self.adv_result.shape[0])
-        result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
-        l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
-        l0 = reject_outliers(l0)
+        str_smooth_adv = list(map(str, self.smooth_adv))
+        result += '\n' + '\n'.join(str_smooth_adv)
+        # result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
+        # result += '\n\t#adv=' + str(self.adv_result.shape[0])
+        # result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
+        # l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
+        # l0 = reject_outliers(l0)
+        #
+        # if l0.shape[0] != 0:
+        #     result += '\n\tl0=' + str(min(l0)) + '/' + str(max(l0)) + '/' + str(np.average(l0))
+        # else:
+        #     result += '\n\tl0=None'
+        #
+        # l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
+        # l2 = reject_outliers(l2)
+        #
+        # if l2.shape[0] != 0:
+        #     result += '\n\tl2=' + str(round(min(l2), 2)) + '/' + str(round(max(l2), 2)) + '/' + str(
+        #         round(np.average(l2), 2))
+        # else:
+        #     result += '\n\tl2=None'
+        # result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
+        # result += '\n==========>\n'
+        # return result, self.end_time - self.start_time
+        f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
+        f.write(result)
+        f.close()
 
-        if l0.shape[0] != 0:
-            result += '\n\tl0=' + str(min(l0)) + '/' + str(max(l0)) + '/' + str(np.average(l0))
-        else:
-            result += '\n\tl0=None'
-
-        l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
-        l2 = reject_outliers(l2)
-
-        if l2.shape[0] != 0:
-            result += '\n\tl2=' + str(round(min(l2), 2)) + '/' + str(round(max(l2), 2)) + '/' + str(
-                round(np.average(l2), 2))
-        else:
-            result += '\n\tl2=None'
-        result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
-        result += '\n==========>\n'
         return result, self.end_time - self.start_time
 
     def save_images(self):

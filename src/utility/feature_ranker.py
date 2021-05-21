@@ -176,7 +176,8 @@ class feature_ranker:
         plt.show()
 
     @staticmethod
-    def jsma_ranking(origin_image, target_label, classifier, num_expected_features=1, num_classes=10):
+    def jsma_ranking_border(origin_image, border_index, target_label, classifier, num_expected_features=1,
+                            num_classes=10):
         dF_t = None
         dF_rest = []
         for i in range(num_classes):
@@ -198,8 +199,9 @@ class feature_ranker:
             else:
                 SX_i = abs(dF_t_i) * sum_dF_rest_i
             SX[row, col] = SX_i
-
-        return np.argsort(SX.flatten())
+        SX_flat = SX.flatten()
+        SX_flat[border_index == 0] = float('-inf')
+        return np.argsort(SX_flat)
 
 
 if __name__ == '__main__':
