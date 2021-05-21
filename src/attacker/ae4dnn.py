@@ -23,7 +23,7 @@ pretrained_model_name = ['Alexnet', 'Lenet', 'vgg13', 'vgg16']
 class AE4DNN:
 
     def __init__(self, trainX, trainY, origin_label, target_position, classifier, weight, classifier_name='noname',
-                 num_images=10):
+                 num_images=1000):
         """
 
         :param target: target class in attack
@@ -109,7 +109,7 @@ class AE4DNN:
         # np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.adv_result_file_path), self.adv_result)
         # np.save(os.path.join(SAVED_NPY_PATH, self.method_name, self.origin_adv_result_file_path),
         #         self.origin_adv_result)
-        self.smooth_adv = smooth_adv_V2(self.classifier, self.adv_result, self.origin_adv_result, self.target_label)
+        self.smooth_adv = smooth_adv_V2(self.classifier, self.adv_result[:5], self.origin_adv_result[:5], self.target_label)
         self.end_time = time.time()
 
     def export_result(self):
