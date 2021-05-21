@@ -200,7 +200,7 @@ class feature_ranker:
                 SX_i = abs(dF_t_i) * sum_dF_rest_i
             SX[row, col] = SX_i
         SX_flat = SX.flatten()
-        SX_flat[border_index == 0] = float('-inf')
+        SX_flat[border_index.flatten() == 0] = float('-inf')
         return np.argsort(SX_flat)
 
 
