@@ -87,7 +87,7 @@ class AutoencoderBorder:
         self.autoencoder = None
         self.generated_borders = None
         self.generated_candidates = None
-        self.adv_result = None
+        self.adv_result = np.array([])
         self.origin_adv_result = None
         self.smooth_adv = None
         logger.debug('init attacking DONE!')
@@ -147,14 +147,16 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv = smooth_adv_border_V2(self.classifier, self.adv_result, self.origin_adv_result, get_border(self.origin_adv_result), self.target_label)
+        self.smooth_adv = smooth_adv_border_V2(self.classifier, self.adv_result, self.origin_adv_result,
+                                               get_border(self.origin_adv_result), self.target_label)
         self.end_time = time.time()
         logger.debug('get advs DONE!')
 
     def export_result(self):
         result = '<=========='
-        str_smooth_adv = list(map(str, self.smooth_adv))
-        result += '\n' + '\n'.join(str_smooth_adv)
+        # str_smooth_adv = list(map(str, self.smooth_adv))
+        # result += '\n' + '\n'.join(str_smooth_adv)
+
         # result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
         # result += '\n\t#adv=' + str(self.adv_result.shape[0])
         # result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
@@ -177,11 +179,12 @@ class AutoencoderBorder:
         # result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
         # result += '\n==========>\n'
         # return result, self.end_time - self.start_time
-        f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
-        f.write(result)
-        f.close()
-
-        return result, self.end_time - self.start_time
+        # f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
+        # f.write(result)
+        # f.close()
+        #
+        # return result, self.end_time - self.start_time
+        return self.adv_result.shape[0] / float(self.num_images)
 
     def save_images(self):
 
@@ -272,6 +275,37 @@ def run_thread(classifier_name, trainX, trainY):
         logger.debug("=======================++++============================")
 
 
+def run_thread_V2(classifier_name, trainX, trainY):
+    logger.debug("\n=======================================================")
+    logger.debug('processing model: ' + classifier_name)
+    cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
+    result_txt = classifier_name + '\n'
+    # AE_LOSS = AE_LOSSES.border_loss
+    weight_result = []
+    for weight_index in range(0, 11):
+        weight_value = weight_index * 0.1
+        weight_result_i = []
+        for origin_label in range(0, 10):
+            weight_result_i_j = []
+            for target_position in range(2, 11):
+                attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
+                                             target_position=target_position, classifier_name=classifier_name,
+                                             weight=weight_value)
+                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
+                attacker.get_border_and_adv()
+                weight_result_i_j.append(attacker.export_result())
+                del attacker
+            weight_result_i.append(weight_result_i_j)
+        weight_result_i = np.average(weight_result_i, axis=0)
+        weight_result.append(weight_result_i)
+    s = np.array2string(weight_result, separator=' ')
+    s = s.replace('[', ' ')
+    s = s.replace(']', ' ')
+    f = open('./result/primary_ae_border/' + classifier_name + '.txt', 'w')
+    f.write(s)
+    f.close()
+
+
 class MyThread(threading.Thread):
     def __init__(self, classifier_name, trainX, trainY):
         super(MyThread, self).__init__()
@@ -301,19 +335,19 @@ if __name__ == '__main__':
 
     logger.debug('starting multi-thread')
     thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
-    # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
-    # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
+    thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    # thread2.start()
-    # thread3.start()
-    # thread4.start()
+    thread2.start()
+    thread3.start()
+    thread4.start()
 
     thread1.join()
-    # thread2.join()
-    # thread3.join()
-    # thread4.join()
+    thread2.join()
+    thread3.join()
+    thread4.join()
 
     logger.debug('Exiting Main Thread')
     logger.debug('robustness testing DONE !')
