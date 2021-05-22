@@ -313,7 +313,7 @@ class MyThread(threading.Thread):
         self.trainY = trainY
 
     def run(self):
-        run_thread(self.classifier_name, self.trainX, self.trainY)
+        run_thread_V2(self.classifier_name, self.trainX, self.trainY)
 
 
 if __name__ == '__main__':
