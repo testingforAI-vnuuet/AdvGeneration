@@ -8,7 +8,6 @@ import time
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
-from utility.filters.filter_advs import smooth_adv_border_V2
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -147,8 +146,8 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv = smooth_adv_border_V2(self.classifier, self.adv_result, self.origin_adv_result,
-                                               get_border(self.origin_adv_result), self.target_label)
+        # self.smooth_adv = smooth_adv_border_V2(self.classifier, self.adv_result, self.origin_adv_result,
+        #                                        get_border(self.origin_adv_result), self.target_label)
         self.end_time = time.time()
         logger.debug('get advs DONE!')
 
