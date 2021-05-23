@@ -78,7 +78,7 @@ class AutoencoderBorder:
         self.internal_origin_images = get_internal_images(self.origin_images, border_images=self.border_origin_images)
         logger.debug('internal_origin_image shape: {shape}'.format(shape=self.internal_origin_images.shape))
         self.file_shared_name = self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
-            self.weight).replace('.', ',') + '_' + str(self.num_images) + 'step=' + str(self.step)
+            self.weight).replace('.', ',') + '_' + str(self.num_images)
 
         self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
         self.result_file_name = self.file_shared_name + 'result' + '.txt'
@@ -184,7 +184,7 @@ class AutoencoderBorder:
         # result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
         # result += '\n==========>\n'
         # return result, self.end_time - self.start_time
-        f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
+        f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ), 'w')
         f.write(result)
         f.close()
         #
