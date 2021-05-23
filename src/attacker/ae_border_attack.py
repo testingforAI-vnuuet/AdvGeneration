@@ -8,9 +8,8 @@ import time
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
-from utility.filters.filter_advs import smooth_adv_border_V2, smooth_adv_border_V3
+from utility.filters.filter_advs import smooth_adv_border_V3
 from utility.statistics import *
-
 
 tf.config.experimental_run_functions_eagerly(True)
 
@@ -24,7 +23,8 @@ def combined_function(set1, set2, set3):
 
 
 class AutoencoderBorder:
-    def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname', step = 1,
+    def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
+                 step=6,
                  num_images=1000):
         """
 
@@ -183,7 +183,8 @@ class AutoencoderBorder:
         # result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
         # result += '\n==========>\n'
         # return result, self.end_time - self.start_time
-        f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ), 'w')
+        f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
+                 'w')
         f.write(result)
         f.close()
         #

@@ -197,7 +197,6 @@ def smooth_adv_border_V3(classifier, generated_advs, origin_images, border_index
                 ranking_strategy)
         per_pixel_by_prediction = restored_pixel_by_prediction / L0_before
         per_pixel_by_prediction = padding_to_array(per_pixel_by_prediction, K)
-        print(per_pixel_by_prediction.shape)
         result.append(per_pixel_by_prediction)
     return np.average(result, axis=0)
 
