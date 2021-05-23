@@ -88,6 +88,13 @@ def compute_l0_V2(adv: np.ndarray,
             l0_dist += 1
     return l0_dist
 
+def compute_l2_V2(adv: np.ndarray,
+               ori: np.ndarray):
+    if not (np.min(adv) >= 0 and np.max(adv) <= 1):
+        adv = adv / 255
+    if not (np.min(ori) >= 0 and np.max(ori) <= 1):
+        ori = ori / 255
+    return np.linalg.norm(adv.reshape(-1) - ori.reshape(-1))
 
 def L2(gen, test):
     gen = gen.flatten()
