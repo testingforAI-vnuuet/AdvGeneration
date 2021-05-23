@@ -11,7 +11,6 @@ from attacker.mnist_utils import *
 from utility.filters.filter_advs import smooth_adv_border_V2, smooth_adv_border_V3
 from utility.statistics import *
 
-matplotlib.use('TkAgg')
 
 tf.config.experimental_run_functions_eagerly(True)
 
