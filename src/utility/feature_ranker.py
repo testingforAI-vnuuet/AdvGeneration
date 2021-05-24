@@ -213,16 +213,19 @@ class feature_ranker:
     def jsma_ranking_borderV2(generated_adv, origin_image, border_index, target_label, classifier, diff_pixels,
                               num_expected_features=1,
                               num_classes=10):
-        dF_t = None
-        dF_rest = []
+        # compute gradient respect to generated_adv for each label
+        dF_t = None     # gradient for target_label
+        dF_rest = []    # array of gradient for the rest
         for i in range(num_classes):
-            dF_i = feature_ranker.compute_gradient_wrt_features(input=tf.convert_to_tensor([generated_adv.reshape(28, 28, 1)]),
-                                                                target_neuron=i, classifier=classifier)
+            dF_i = feature_ranker.compute_gradient_wrt_features(
+                input=tf.convert_to_tensor([generated_adv.reshape(28, 28, 1)]),
+                target_neuron=i, classifier=classifier)
             if i != target_label:
                 dF_rest.append(dF_i)
             else:
                 dF_t = dF_i
 
+        # compute the importance of each pixel
         SX = np.zeros_like(origin_image)
         for index in range(np.prod(origin_image.shape)):
             row, col = int(index // 28), int(index % 28)
@@ -234,6 +237,7 @@ class feature_ranker:
             else:
                 SX_i = dF_t_i * abs(sum_dF_rest_i)
             SX[row, col] = SX_i
+        # get the rank of diff_pixels
         SX_flat = SX.flatten()
         a = SX_flat[diff_pixels]
         a = np.argsort(a)
