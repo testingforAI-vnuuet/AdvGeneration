@@ -67,7 +67,7 @@ class AE_LOSSES:
         return loss
 
     @staticmethod
-    def border_loss(model, target_vector, origin_images, epsilon, shape=(28, 28, 1)):
+    def border_loss(model, target_vector, epsilon, shape=(28, 28, 1)):
         def loss(combined_labels, generated_borders):
             borders = combined_labels[:, 0]
             borders = tf.reshape(borders, (borders.shape[0], MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL))
