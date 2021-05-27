@@ -127,7 +127,6 @@ class AE4DNN:
                                                  cnn_model=hidden_model)
             transfer_rate_results[hidden_model_name] = advs.shape[0] / float(self.adv_result.shape[0])
         self.transfer_rate_results = transfer_rate_results
-        print(f'transfer_rate_results: {self.transfer_rate_results}')
 
     def export_result(self):
         result = '<=========='
@@ -157,11 +156,10 @@ class AE4DNN:
         result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
 
         transfer_txt = ''
-        print(f'hidden_models_name: {self.hidden_models_name}')
         if self.hidden_models_name is not None:
             transfer_txt = '\ntransferable rate: '
             for item in self.transfer_rate_results:
-                transfer_txt += f'{item} ({self.transfer_rate_results[item]} '
+                transfer_txt += f'{item} ({self.transfer_rate_results[item]}) '
         result += transfer_txt
         result += '\n==========>\n'
 
