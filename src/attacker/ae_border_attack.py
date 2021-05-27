@@ -123,7 +123,7 @@ class AutoencoderBorder:
             self.autoencoder = ae_trainee.get_architecture()
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
-                                     loss=loss(self.classifier, self.target_vector, self.origin_images, self.weight))
+                                     loss=loss(self.classifier, self.target_vector, self.weight))
             # self.autoencoder.compile(optimizer=adam, loss=tf.keras.losses.binary_crossentropy)
             early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
             model_checkpoint = ModelCheckpoint(autoencoder_path,

@@ -253,6 +253,6 @@ if __name__ == '__main__':
     ae4dnn_attack = AE4DNN(trainX=trainX, trainY=trainY, origin_label=None, target_position=None, classifier=classifier,
                            weight=DEFAULT_EPSILON, classifier_name='targetmodel', num_images=1000)
 
-    ae4dnn_attack.autoencoder_attack(loss=AE_LOSSES.border_loss)
+    ae4dnn_attack.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
     ae4dnn_attack.black_box_attack(pretrained_model_name)
     ae4dnn_attack.export_result()
