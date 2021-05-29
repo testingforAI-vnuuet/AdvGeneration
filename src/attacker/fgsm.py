@@ -1,17 +1,15 @@
 from __future__ import absolute_import
 
-import tensorflow as tf
-from tensorflow import keras
+import time
 
 from attacker.constants import *
-from data_preprocessing.mnist import MnistPreprocessing
-from utility.statistics import *
 from utility.filters.filter_advs import *
+
 logger = MyLogger.getLog()
 
 
 class FGSM:
-    def __init__(self, classifier, epsilon=0.1, target=7):
+    def __init__(self, trainX, trainY, origin_label, target_label, classifier, weight, num_images, classifier_name='noname'):
         """
 
         :param classifier: target cnn model
@@ -19,13 +17,38 @@ class FGSM:
         :param target: target class
         """
 
-        self.epsilon = epsilon
-        self.target = target
+        self.weight = weight
         self.classifier = classifier
-        self.target_label = keras.utils.to_categorical(target, num_classes=MNIST_NUM_CLASSES).reshape((1, MNIST_NUM_CLASSES))
+        self.origin_label = origin_label
+        self.target_label = target_label
+        self.num_images = num_images
+
+        self.origin_images = trainX[:self.num_images]
+
+
+
+        if self.origin_label is None:
+            self.origin_label = 'all'
+
+        self.target_vector = keras.utils.to_categorical(self.target_label, num_classes=MNIST_NUM_CLASSES).reshape(
+            (1, MNIST_NUM_CLASSES))
+
+        self.file_shared_name = self.method_name + '_' + classifier_name + f'_{self.origin_label}_{self.target_label}' + 'weight=' + str(
+            self.weight).replace('.', ',') + '_' + str(self.num_images)
+
+        self.method_name = 'fgsm'
+        self.adv_result = None
+        self.origin_adv_result = None
+        self.end_time = None
+        self.adv_result_file_path = self.file_shared_name + '_adv_result' + '.npy'
+        self.origin_adv_result_file_path = self.file_shared_name + '_origin_adv_result' + '.npy'
+        self.start_time = time.time()
+        self.end_time = None
+
+
 
     @staticmethod
-    def create_adversarial_pattern(input_image, target_label, pretrained_model, get_sign = True):
+    def create_adversarial_pattern(input_image, target_label, pretrained_model, get_sign=True):
         """
         compute gradient of pretrained model output respect to input_image
         :param input_image: a input image
@@ -44,8 +67,10 @@ class FGSM:
         return sign
 
     def create_adversaries(self, images):
-        result = [img - self.epsilon * self.create_adversarial_pattern(img, self.target_label, self.classifier)[0] for img in images]
+        result = [img - self.weight * self.create_adversarial_pattern(img, self.target_label, self.classifier)[0] for
+                  img in images]
         return np.array(result)
+
 
 
 if __name__ == '__main__':
@@ -65,9 +90,11 @@ if __name__ == '__main__':
     classifier.evaluate(trainX, trainY)
 
     logger.debug('Creating adversarial examples: ')
-    fgsm = FGSM(classifier= classifier, target=TARGET)
+    fgsm = FGSM(classifier=classifier)
     result_imgs = fgsm.create_adversaries(trainX)
-    result_origin_imgs, result_origin_confidients, result_gen_imgs, result_gen_confidents = filter_advs(classifier, trainX, result_imgs, TARGET)
+    result_origin_imgs, result_origin_confidients, result_gen_imgs, result_gen_confidents = filter_advs(classifier,
+                                                                                                        trainX,
+                                                                                                        result_imgs,
+                                                                                                        TARGET)
 
-    logger.debug('Fgsm done')
-
+    logger.debug('FGSM done')

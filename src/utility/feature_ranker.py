@@ -240,8 +240,8 @@ class feature_ranker:
         # get the rank of diff_pixels
         SX_flat = SX.flatten()
         a = SX_flat[diff_pixels]
-        a = np.argsort(a)
-        return np.array(diff_pixels)[a]
+        a_argsort = np.argsort(a)
+        return np.array(diff_pixels)[a_argsort], a[a_argsort]
 
 
 if __name__ == '__main__':

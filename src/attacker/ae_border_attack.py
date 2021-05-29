@@ -24,7 +24,7 @@ def combined_function(set1, set2, set3):
 
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=12,
+                 step=1,
                  num_images=1000):
         """
 
@@ -161,35 +161,12 @@ class AutoencoderBorder:
         str_smooth_adv = list(map(str, self.smooth_adv))
         result += '\n' + '\n'.join(str_smooth_adv)
 
-        # result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
-        # result += '\n\t#adv=' + str(self.adv_result.shape[0])
-        # result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
-        # l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
-        # l0 = reject_outliers(l0)
-        #
-        # if l0.shape[0] != 0:
-        #     result += '\n\tl0=' + str(min(l0)) + '/' + str(max(l0)) + '/' + str(np.average(l0))
-        # else:
-        #     result += '\n\tl0=None'
-        #
-        # l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
-        # l2 = reject_outliers(l2)
-        #
-        # if l2.shape[0] != 0:
-        #     result += '\n\tl2=' + str(round(min(l2), 2)) + '/' + str(round(max(l2), 2)) + '/' + str(
-        #         round(np.average(l2), 2))
-        # else:
-        #     result += '\n\tl2=None'
-        # result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
-        # result += '\n==========>\n'
-        # return result, self.end_time - self.start_time
         f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
                  'w')
         f.write(result)
         f.close()
         #
         return result, self.end_time - self.start_time
-        # return self.adv_result.shape[0] / float(self.num_images)
 
     def save_images(self):
 
@@ -268,14 +245,6 @@ def run_thread(classifier_name, trainX, trainY):
                 attacker.get_border_and_adv()
                 attacker.export_result()
                 del attacker
-                # attacker.save_images()
-                # res_txt, exe_time = attacker.export_result()
-        #         result_txt += res_txt
-        #         exe_time_sum += exe_time
-        # f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
-        # result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
-        # f.write(result_txt)
-        # f.close()
         logger.debug('processing model: ' + classifier_name + ' DONE!')
         logger.debug("=======================++++============================")
 
