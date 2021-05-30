@@ -74,6 +74,27 @@ def L0(gen, test):
 
     return sum(0 if abs(g - t) < threshold else 1 for g, t in zip(gen_new.flatten(), test_new.flatten()))
 
+def compute_l0_V2(adv: np.ndarray,
+               ori: np.ndarray,
+               normalized=False):  # 1d array, value in range of [0 .. 1]
+    if not normalized:
+        adv = np.round(adv * 255)
+        ori = np.round(ori * 255)
+    adv = adv.reshape(-1)
+    ori = ori.reshape(-1)
+    l0_dist = 0
+    for idx in range(len(adv)):
+        if adv[idx] != ori[idx]:
+            l0_dist += 1
+    return l0_dist
+
+def compute_l2_V2(adv: np.ndarray,
+               ori: np.ndarray):
+    if not (np.min(adv) >= 0 and np.max(adv) <= 1):
+        adv = adv / 255
+    if not (np.min(ori) >= 0 and np.max(ori) <= 1):
+        ori = ori / 255
+    return np.linalg.norm(adv.reshape(-1) - ori.reshape(-1))
 
 def L2(gen, test):
     gen = gen.flatten()

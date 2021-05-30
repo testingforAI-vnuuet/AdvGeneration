@@ -1,13 +1,15 @@
+import enum
+
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
 from tensorflow import keras
-from tensorflow.python.keras import Sequential
-from attacker.constants import MNIST_IMG_ROWS, MNIST_IMG_COLS, CLASSIFIER_PATH, MNIST_IMG_CHL
 from tensorflow.keras.datasets import mnist
+from tensorflow.python.keras import Sequential
+
+from attacker.constants import MNIST_IMG_ROWS, MNIST_IMG_COLS, CLASSIFIER_PATH, MNIST_IMG_CHL
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.mylogger import MyLogger
-import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
-import enum
 
 logger = MyLogger.getLog()
 
@@ -172,6 +174,74 @@ class feature_ranker:
         plt.imshow(input_image, cmap='gray')
         plt.title("Most important features are highlighted")
         plt.show()
+
+    @staticmethod
+    def jsma_ranking_border(generated_adv, origin_image, border_index, target_label, classifier,
+                            num_expected_features=1,
+                            num_classes=10):
+        dF_t = None
+        dF_rest = []
+        for i in range(num_classes):
+            dF_i = feature_ranker.compute_gradient_wrt_features(input=tf.convert_to_tensor([generated_adv]),
+                                                                target_neuron=i, classifier=classifier)
+            if i != target_label:
+                dF_rest.append(dF_i)
+            else:
+                dF_t = dF_i
+
+        SX = np.zeros_like(origin_image)
+        for index in range(np.prod(origin_image.shape)):
+            row, col = int(index // 28), int(index % 28)
+            SX_i = None
+            dF_t_i = dF_t[row, col]
+            sum_dF_rest_i = sum([dF_rest_i[row, col] for dF_rest_i in dF_rest])
+            if dF_t_i < 0 or sum_dF_rest_i > 0:
+                SX_i = 0
+            else:
+                SX_i = dF_t_i * abs(sum_dF_rest_i)
+            SX[row, col] = SX_i
+        SX_flat = SX.flatten()
+        SX_flat[border_index.flatten() == 0] = float('inf')
+        return SX_flat
+
+    @staticmethod
+    def sequence_ranking(generated_adv, origin_image, border_index, target_label, classifier, num_expected_features=1,
+                         num_classes=10):
+        return np.array([*range(np.prod(generated_adv.shape, dtype=np.int64))])
+
+    @staticmethod
+    def jsma_ranking_borderV2(generated_adv, origin_image, border_index, target_label, classifier, diff_pixels,
+                              num_expected_features=1,
+                              num_classes=10):
+        # compute gradient respect to generated_adv for each label
+        dF_t = None     # gradient for target_label
+        dF_rest = []    # array of gradient for the rest
+        for i in range(num_classes):
+            dF_i = feature_ranker.compute_gradient_wrt_features(
+                input=tf.convert_to_tensor([generated_adv.reshape(28, 28, 1)]),
+                target_neuron=i, classifier=classifier)
+            if i != target_label:
+                dF_rest.append(dF_i)
+            else:
+                dF_t = dF_i
+
+        # compute the importance of each pixel
+        SX = np.zeros_like(origin_image)
+        for index in range(np.prod(origin_image.shape)):
+            row, col = int(index // 28), int(index % 28)
+            SX_i = None
+            dF_t_i = dF_t[row, col]
+            sum_dF_rest_i = sum([dF_rest_i[row, col] for dF_rest_i in dF_rest])
+            if dF_t_i < 0 or sum_dF_rest_i > 0:
+                SX_i = 0
+            else:
+                SX_i = dF_t_i * abs(sum_dF_rest_i)
+            SX[row, col] = SX_i
+        # get the rank of diff_pixels
+        SX_flat = SX.flatten()
+        a = SX_flat[diff_pixels]
+        a_argsort = np.argsort(a)
+        return np.array(diff_pixels)[a_argsort], a[a_argsort]
 
 
 if __name__ == '__main__':
