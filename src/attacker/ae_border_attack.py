@@ -24,7 +24,7 @@ def combined_function(set1, set2, set3):
 
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=6,
+                 step=12,
                  num_images=1000):
         """
 
@@ -149,8 +149,8 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result, self.origin_adv_result,
-                                               get_border(self.origin_adv_result), self.target_label)
+        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:10], self.origin_adv_result[:10],
+                                               get_border(self.origin_adv_result[:10]), self.target_label)
 
         self.end_time = time.time()
         logger.debug('get advs DONE!')

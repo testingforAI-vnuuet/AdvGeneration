@@ -218,7 +218,7 @@ class feature_ranker:
         dF_rest = []    # array of gradient for the rest
         for i in range(num_classes):
             dF_i = feature_ranker.compute_gradient_wrt_features(
-                input=tf.convert_to_tensor([generated_adv.reshape(28, 28, 1)]),
+                input=tf.convert_to_tensor([origin_image.reshape(28, 28, 1)]),
                 target_neuron=i, classifier=classifier)
             if i != target_label:
                 dF_rest.append(dF_i)
@@ -231,12 +231,12 @@ class feature_ranker:
             row, col = int(index // 28), int(index % 28)
             SX_i = None
             dF_t_i = dF_t[row, col]
-            sum_dF_rest_i = sum([dF_rest_i[row, col] for dF_rest_i in dF_rest])
+            sum_dF_rest_i = sum([abs(dF_rest_i[row, col]) for dF_rest_i in dF_rest])
             # if dF_t_i < 0 or sum_dF_rest_i > 0:
             #     SX_i = 0
             # else:
             #     SX_i = dF_t_i * abs(sum_dF_rest_i)
-            SX_i = abs(dF_t_i) / float(sum_dF_rest_i)
+            SX_i = abs(dF_t_i) / (float(sum_dF_rest_i) + 0.1)
             SX[row, col] = SX_i
         # get the rank of diff_pixels
         SX_flat = SX.flatten()
