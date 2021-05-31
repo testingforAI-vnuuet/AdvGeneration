@@ -149,8 +149,8 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:10], self.origin_adv_result[:10],
-                                               get_border(self.origin_adv_result[:10]), self.target_label)
+        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+                                               get_border(self.origin_adv_result[:-1]), self.target_label)
 
         self.end_time = time.time()
         logger.debug('get advs DONE!')
