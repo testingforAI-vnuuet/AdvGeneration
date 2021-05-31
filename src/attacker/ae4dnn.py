@@ -176,7 +176,7 @@ class AE4DNN:
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.secured_model.compile(optimizer=adam,
                                        loss=tf.keras.losses.categorical_crossentropy)
-            self.secured_model.fit(result_training_data, result_training_label, epochs=500, batch_size=512,
+            self.secured_model.fit(result_training_data, result_training_label, epochs=500, batch_size=1024,
                                    callbacks=[early_stopping, model_checkpoint], verbose=1)
         logger.debug('adversarial training DONE!')
 

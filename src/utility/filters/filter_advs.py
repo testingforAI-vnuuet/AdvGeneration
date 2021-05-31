@@ -191,7 +191,7 @@ def smooth_vet_can_stepV2(ori, adv, dnn, target_label, step, strategy=None):
         count_changes += 0 if curr_pixels is None else len(curr_pixels)
 
         smooth_adv_0_255[curr_pixels] = ori_0_255[curr_pixels]
-        L0_after = compute_l0_V2(smooth_adv_0_255, ori_0_255, normalized=True)
+        # L0_after = compute_l0_V2(smooth_adv_0_255, ori_0_255, normalized=True)
         # print(f'{L0_after} is L0 after')
         # print(len(curr_pixels))
 

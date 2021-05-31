@@ -232,10 +232,11 @@ class feature_ranker:
             SX_i = None
             dF_t_i = dF_t[row, col]
             sum_dF_rest_i = sum([dF_rest_i[row, col] for dF_rest_i in dF_rest])
-            if dF_t_i < 0 or sum_dF_rest_i > 0:
-                SX_i = 0
-            else:
-                SX_i = dF_t_i * abs(sum_dF_rest_i)
+            # if dF_t_i < 0 or sum_dF_rest_i > 0:
+            #     SX_i = 0
+            # else:
+            #     SX_i = dF_t_i * abs(sum_dF_rest_i)
+            SX_i = abs(dF_t_i) / float(sum_dF_rest_i)
             SX[row, col] = SX_i
         # get the rank of diff_pixels
         SX_flat = SX.flatten()

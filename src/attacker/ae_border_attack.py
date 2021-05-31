@@ -24,7 +24,7 @@ def combined_function(set1, set2, set3):
 
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=1,
+                 step=6,
                  num_images=1000):
         """
 
@@ -149,8 +149,8 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result, self.origin_adv_result,
-                                               get_border(self.origin_adv_result), self.target_label)
+        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:5], self.origin_adv_result[:5],
+                                               get_border(self.origin_adv_result[:5]), self.target_label)
 
         self.end_time = time.time()
         logger.debug('get advs DONE!')
@@ -236,7 +236,7 @@ def run_thread(classifier_name, trainX, trainY):
     for origin_label in range(9, 10):
         # exe_time_sum = 0
         for target_position in range(2, 3):
-            for weight_index in range(0, 11):
+            for weight_index in range(1, 2):
                 weight_value = weight_index * 0.1
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                              target_position=target_position, classifier_name=classifier_name,
