@@ -71,11 +71,13 @@ class AE4DNN:
         self.file_shared_name = self.method_name + '_' + classifier_name + f'_{self.origin_label}_{self.target_label}' + 'weight=' + str(
             self.weight).replace('.', ',') + '_' + str(self.num_images)
 
+        # for autoencoder training
         self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
         self.optimal_epoch = 0
         self.generated_candidates = None
         self.adv_result = None
         self.origin_adv_result = None
+        self.origin_adv_result_label = None
         self.end_time = None
         self.adv_result_file_path = self.file_shared_name + '_adv_result' + '.npy'
         self.origin_adv_result_file_path = self.file_shared_name + '_origin_adv_result' + '.npy'
@@ -127,10 +129,11 @@ class AE4DNN:
             self.optimal_epoch = len(history.history['loss'])
 
         self.generated_candidates = self.autoencoder.predict(self.origin_images)
-        self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images,
-                                                                             self.generated_candidates,
-                                                                             self.target_label,
-                                                                             cnn_model=self.classifier)
+        self.adv_result, _, self.origin_adv_result, self.origin_adv_result_label = filter_candidate_adv(
+            self.origin_images,
+            self.generated_candidates,
+            self.target_label,
+            cnn_model=self.classifier)
 
         self.end_time = time.time()
 
@@ -164,7 +167,7 @@ class AE4DNN:
         else:
             logger.debug("not found pre-trained model")
             result_training_data = np.concatenate((self.trainX, self.adv_result), axis=0)
-            result_training_label = np.concatenate((self.trainY, self.origin_labels), axis=0)
+            result_training_label = np.concatenate((self.trainY, self.origin_adv_result_label), axis=0)
             early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
             model_checkpoint = ModelCheckpoint(
                 secured_model_path,
