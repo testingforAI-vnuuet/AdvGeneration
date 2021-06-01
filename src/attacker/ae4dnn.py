@@ -313,7 +313,7 @@ if __name__ == '__main__':
     START_SEED = 0
     END_SEED = 1000
     DEFAULT_TARGET = 7
-    DEFAULT_EPSILON = 0.005
+    DEFAULT_EPSILON = 0.001
     ATTACKED_CNN_MODEL = CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5'
     AE_MODEL = CLASSIFIER_PATH + '/autoencoder_rerank_mnist.h5'
     AE_LOSS = AE_LOSSES.re_rank_loss
