@@ -1,0 +1,12 @@
+<==========
+origin=all,target=7
+
+	weight=0.005
+	#adv=875/1000
+	#optimal_epoch=0
+	l0=575/720/646.4129411764706
+	l2=3.34/6.87/5.22
+	time=1.3733701705932617 s
+	transferable rate: Alexnet (0.68) Lenet (0.08) vgg13 (0.65) vgg16 (0.74) 
+	generalization success: 10000 (0.83) 20000 (0.83) 40000 (0.83) 
+==========>

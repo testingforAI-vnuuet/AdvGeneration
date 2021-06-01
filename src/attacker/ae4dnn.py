@@ -90,12 +90,15 @@ class AE4DNN:
         self.secured_model_name = self.file_shared_name + 'secure_model' + '.h5'
         self.secured_model = tf.keras.models.clone_model(self.classifier)
 
+        # for generalization
+        self.generalization_results = None
+
     def autoencoder_attack(self, loss):
         ae_trainee = MnistAutoEncoder()
         autoencoder_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name)
         if os.path.isfile(autoencoder_path):
             logger.debug(
-                'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
+                '[training] found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
                     origin_label=self.origin_label, target_label=self.target_label))
 
             self.autoencoder = tf.keras.models.load_model(
@@ -107,9 +110,9 @@ class AE4DNN:
             self.end_time = time.time()
         else:
             logger.debug(
-                'not found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
+                '[training] not found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
                     origin_label=self.origin_label, target_label=self.target_label))
-            logger.debug('training autoencoder start')
+            logger.debug('[training] training autoencoder start')
             self.autoencoder = ae_trainee.get_architecture()
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
@@ -123,7 +126,7 @@ class AE4DNN:
 
             history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
                                            callbacks=[early_stopping, model_checkpoint], verbose=1)
-            logger.debug('training autoencoder DONE!')
+            logger.debug('[training] training autoencoder DONE!')
             self.optimal_epoch = len(history.history['loss'])
 
         self.generated_candidates = self.autoencoder.predict(self.origin_images)
@@ -142,10 +145,11 @@ class AE4DNN:
         :return: None
         :rtype:
         """
-        logger.debug(f'black-box attack for {hidden_models_name} start')
+        logger.debug(f'[black-box] black-box attack for {hidden_models_name} start')
         transfer_rate_results = defaultdict()
         self.hidden_models_name = hidden_models_name
         for hidden_model_name in hidden_models_name:
+            logger.debug(f'[black-box] attacking {hidden_model_name}')
             hidden_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + hidden_model_name + '.h5')
             advs, _, _, _ = filter_candidate_adv(self.origin_adv_result,
                                                  self.adv_result,
@@ -154,15 +158,15 @@ class AE4DNN:
             transfer_rate_results[hidden_model_name] = advs.shape[0] / float(
                 self.adv_result.shape[0])  # compute transfer rate
         self.transfer_rate_results = transfer_rate_results
-        logger.debug('black-box attack DONE!')
+        logger.debug('[black-box] black-box attack DONE!')
 
     def adv_training(self):
-        logger.debug("adversarial training start!")
+        logger.debug("[adv training] adversarial training start!")
         secured_model_path = os.path.join(os.path.join(CLASSIFIER_PATH, self.secured_model_name))
         if os.path.isfile(secured_model_path):
-            logger.debug("found pre-trained model")
+            logger.debug("[adv training] found pre-trained model")
         else:
-            logger.debug("not found pre-trained model")
+            logger.debug("[adv training] not found pre-trained model")
             result_training_data = np.concatenate((self.trainX, self.adv_result), axis=0)
             result_training_label = np.concatenate((self.trainY, self.origin_labels), axis=0)
             early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
@@ -175,15 +179,27 @@ class AE4DNN:
                                        loss=tf.keras.losses.categorical_crossentropy)
             self.secured_model.fit(result_training_data, result_training_label, epochs=500, batch_size=512,
                                    callbacks=[early_stopping, model_checkpoint], verbose=1)
-        logger.debug('adversarial training DONE!')
+        logger.debug('[adv training] adversarial training DONE!')
+
+    def generalization(self):
+        logger.debug('[generalization] generalization start')
+        new_sets = [trainX[:10000], trainX[:20000], trainX[:40000]]
+        self.generalization_results = defaultdict()
+        for new_set in new_sets:
+            logger.debug(f'[generalization] generalization {str(new_set.shape[0])}')
+            new_set_adv_candidates = self.autoencoder.predict(new_set)
+            advs, _, _, _ = filter_candidate_adv(new_set, new_set_adv_candidates, self.target_label, self.classifier)
+            self.generalization_results[str(new_set.shape[0])] = advs.shape[0] / float(new_set.shape[0])
+        logger.debug('[generalization] generalization DONE!')
 
     def export_result(self):
+        logger.debug('[result] exporting result start')
         result = '<=========='
         # str_smooth_adv = list(map(str, self.smooth_adv))
         # result += '\n' + '\n'.join(str_smooth_adv)
         result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label) + '\n'
         result += '\n\tweight=' + str(self.weight)
-        result += '\n\t#adv=' + str(self.adv_result.shape[0])
+        result += '\n\t#adv=' + str(self.adv_result.shape[0]) + '/' + str(self.num_images)
         result += '\n\t#optimal_epoch=' + str(self.optimal_epoch)
         # result += '\n\t#avg_redundant_pixels=' + str(self.num_avg_redundant_pixels)
         l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
@@ -206,16 +222,26 @@ class AE4DNN:
 
         transfer_txt = ''
         if self.hidden_models_name is not None:
-            transfer_txt = '\ntransferable rate: '
+            transfer_txt = '\n\ttransferable rate: '
             for item in self.transfer_rate_results:
-                transfer_txt += f'{item} ({self.transfer_rate_results[item]}) '
+                transfer_txt += f'{item} ({round(self.transfer_rate_results[item], 2)}) '
         result += transfer_txt
+
+        generalization_txt = ''
+        if self.generalization_results is not None:
+            generalization_txt = '\n\tgeneralization success: '
+            for item in self.generalization_results:
+                generalization_txt += f'{item} ({round(self.generalization_results[item], 2)}) '
+        result += generalization_txt
         result += '\n==========>\n'
 
         f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
         f.write(result)
         f.close()
-
+        logger.debug('[result] exporting result DONE!')
+        abs_path = os.path.abspath(os.path.join('result', self.method_name, self.file_shared_name + '.txt'))
+        logger.debug(f'[result] view result at {abs_path}')
+        # logger.debug(f'view result at {str()}')
         return result, self.end_time - self.start_time
 
     def save_images(self):
@@ -300,9 +326,12 @@ if __name__ == '__main__':
 
     classifier = keras.models.load_model(ATTACKED_CNN_MODEL)
 
+    logger.debug('[ae4dnn] robustness testing start')
     ae4dnn_attack = AE4DNN(trainX=trainX, trainY=trainY, origin_label=None, target_position=None, classifier=classifier,
                            weight=DEFAULT_EPSILON, classifier_name='targetmodel', num_images=1000)
 
     ae4dnn_attack.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
     ae4dnn_attack.black_box_attack(pretrained_model_name)
+    ae4dnn_attack.generalization()
     ae4dnn_attack.export_result()
+    logger.debug('[ae4dnn] robustness testing DONE!')
