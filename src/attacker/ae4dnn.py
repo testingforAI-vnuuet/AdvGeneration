@@ -206,7 +206,7 @@ class AE4DNN:
         l0 = reject_outliers(l0)
 
         if l0.shape[0] != 0:
-            result += '\n\tl0=' + str(min(l0)) + '/' + str(max(l0)) + '/' + str(np.average(l0))
+            result += '\n\tl0(min/max/avg)=' + str(min(l0)) + '/' + str(max(l0)) + '/' + str(np.average(l0))
         else:
             result += '\n\tl0=None'
 
@@ -214,11 +214,11 @@ class AE4DNN:
         l2 = reject_outliers(l2)
 
         if l2.shape[0] != 0:
-            result += '\n\tl2=' + str(round(min(l2), 2)) + '/' + str(round(max(l2), 2)) + '/' + str(
+            result += '\n\tl2(min/max/avg)=' + str(round(min(l2), 2)) + '/' + str(round(max(l2), 2)) + '/' + str(
                 round(np.average(l2), 2))
         else:
             result += '\n\tl2=None'
-        result += '\n\ttime=' + str(self.end_time - self.start_time) + ' s'
+        result += '\n\tadv_gen_time=' + str(self.end_time - self.start_time) + ' s'
 
         transfer_txt = ''
         if self.hidden_models_name is not None:
