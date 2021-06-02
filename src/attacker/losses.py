@@ -61,8 +61,8 @@ class AE_LOSSES:
                                           (batch_size, MNIST_IMG_ROWS * MNIST_IMG_COLS * MNIST_IMG_CHL))
 
             # print(a)
-            return (1 - weight) * tf.keras.losses.mean_squared_error(true_image1, generated_image1) + \
-                   weight * tf.keras.losses.mean_squared_error(classifier(generated_image), re_rank)
+            return weight * tf.keras.losses.mean_squared_error(true_image1, generated_image1) + \
+                   tf.keras.losses.mean_squared_error(classifier(generated_image), re_rank)
 
         return loss
 
