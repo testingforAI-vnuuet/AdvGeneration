@@ -168,7 +168,7 @@ if __name__ == '__main__':
                                                             chl=MNIST_IMG_CHL)
     logger.debug('Creating adversarial examples: ')
     lbfgs = L_BFGS(trainX=trainX, trainY=trainY, origin_label=None, target_label=TARGET, classifier=classifier,
-                   weight=0.001,
+                   weight=0.0001,
                    num_images=1000, classifier_name='targetmodel', num_iter=20)
     lbfgs.attack()
     lbfgs.export_result()
