@@ -62,8 +62,12 @@ for value in tcp_test:
 
 result_train = np.array(result_train)
 result_test = np.array(result_test)
+
 X_train[:, 2] = result_train
 X_test[:, 2] = result_test
+
+np.save('train.npy', X_train)
+np.save('test.npy', X_test)
 
 
 def RNN():
@@ -88,7 +92,7 @@ start = time.time()
 model.fit(sequences_matrix, Y_train, batch_size=2048, epochs=10,
           validation_split=0.2)
 end = time.time()
-
+model.save('model.h5')
 exe_time = end - start
 print("exe_time: " + str(exe_time))
 
