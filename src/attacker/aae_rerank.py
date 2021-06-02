@@ -160,26 +160,26 @@ class AAE:
         self.transfer_rate_results = transfer_rate_results
         logger.debug('[black-box] black-box attack DONE!')
 
-    def adv_training(self):
-        logger.debug("[adv training] adversarial training start!")
-        secured_model_path = os.path.join(os.path.join(CLASSIFIER_PATH, self.secured_model_name))
-        if os.path.isfile(secured_model_path):
-            logger.debug("[adv training] found pre-trained model")
-        else:
-            logger.debug("[adv training] not found pre-trained model")
-            result_training_data = np.concatenate((self.trainX, self.adv_result), axis=0)
-            result_training_label = np.concatenate((self.trainY, self.origin_labels), axis=0)
-            early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
-            model_checkpoint = ModelCheckpoint(
-                secured_model_path,
-                save_best_only=True, monitor='loss',
-                mode='min')
-            adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
-            self.secured_model.compile(optimizer=adam,
-                                       loss=tf.keras.losses.categorical_crossentropy)
-            self.secured_model.fit(result_training_data, result_training_label, epochs=500, batch_size=512,
-                                   callbacks=[early_stopping, model_checkpoint], verbose=1)
-        logger.debug('[adv training] adversarial training DONE!')
+    # def adv_training(self):
+    #     logger.debug("[adv training] adversarial training start!")
+    #     secured_model_path = os.path.join(os.path.join(CLASSIFIER_PATH, self.secured_model_name))
+    #     if os.path.isfile(secured_model_path):
+    #         logger.debug("[adv training] found pre-trained model")
+    #     else:
+    #         logger.debug("[adv training] not found pre-trained model")
+    #         result_training_data = np.concatenate((self.trainX, self.adv_result), axis=0)
+    #         result_training_label = np.concatenate((self.trainY, self.origin_labels), axis=0)
+    #         early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
+    #         model_checkpoint = ModelCheckpoint(
+    #             secured_model_path,
+    #             save_best_only=True, monitor='loss',
+    #             mode='min')
+    #         adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+    #         self.secured_model.compile(optimizer=adam,
+    #                                    loss=tf.keras.losses.categorical_crossentropy)
+    #         self.secured_model.fit(result_training_data, result_training_label, epochs=500, batch_size=512,
+    #                                callbacks=[early_stopping, model_checkpoint], verbose=1)
+    #     logger.debug('[adv training] adversarial training DONE!')
 
     def generalization(self):
         logger.debug('[generalization] generalization start')
@@ -330,7 +330,7 @@ if __name__ == '__main__':
     aae_attack = AAE(trainX=trainX, trainY=trainY, origin_label=None, target_position=None, classifier=classifier,
                            weight=DEFAULT_EPSILON, classifier_name='targetmodel', num_images=1000)
 
-    aae_attack.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
+    aae_attack.autoencoder_attack(loss=AE_LOSSES.re_rank_loss)
     aae_attack.black_box_attack(pretrained_model_name)
     aae_attack.generalization()
     aae_attack.export_result()

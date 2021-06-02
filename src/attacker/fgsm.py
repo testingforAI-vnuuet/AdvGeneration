@@ -125,11 +125,11 @@ if __name__ == '__main__':
                                                             chl=MNIST_IMG_CHL)
 
     logger.debug('Evaluating classifier on seed_images: ')
-    classifier.evaluate(trainX, trainY)
+    classifier.evaluate(trainX[:1000], trainY[:1000])
 
     logger.debug('Creating adversarial examples: ')
 
-    fgsm = FGSM(trainX=trainX, trainY=trainY, origin_label=None, target_label=TARGET, classifier=classifier, weight=0.1,
+    fgsm = FGSM(trainX=trainX, trainY=trainY, origin_label=None, target_label=TARGET, classifier=classifier, weight=0.2,
                 num_images=1000, classifier_name='targetmodel')
     fgsm.attack()
     fgsm.export_result()
