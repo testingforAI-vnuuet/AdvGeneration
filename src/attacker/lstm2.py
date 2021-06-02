@@ -20,9 +20,10 @@ from tensorflow.keras.optimizers import RMSprop
 
 # Import the dataset
 data_train = pd.read_csv(
-    '/data/train.csv')
+    'data/train.csv')
 data_test = pd.read_csv(
-    '/data/test.csv')
+    'data/test.csv')
+print('ok')
 # ip.id max = 65535
 # tcp.seq_raw max = 4124483354
 X_train = data_train.iloc[:3932803, [1, 2, 3, 4, 5, 6, 7, 8]].values
@@ -101,3 +102,5 @@ model.evaluate(X_test, Y_test)
 end = time.time()
 exe_time = end - start
 print("eval time: " + str(exe_time))
+
+# scp -P 22033 -r /media/dominhkha/D/AdvGeneration/src/attacker/data khamd@uet-hpc.remote.hpc.farm:/home/khamd/AdvGeneration/src/attacker
