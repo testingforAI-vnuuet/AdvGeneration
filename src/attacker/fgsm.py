@@ -80,6 +80,7 @@ class FGSM:
         self.end_time = time.time()
 
     def export_result(self):
+        logger.debug('[result] exporting result start')
         result = '<=========='
         result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label)
         result += '\n\tweight=' + str(self.weight)
@@ -105,6 +106,9 @@ class FGSM:
         f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
         f.write(result)
         f.close()
+        logger.debug('[result] exporting result DONE!')
+        abs_path = os.path.abspath(os.path.join('result', self.method_name, self.file_shared_name + '.txt'))
+        logger.debug(f'[result] view result at {abs_path}')
 
 
 if __name__ == '__main__':
@@ -127,11 +131,11 @@ if __name__ == '__main__':
     logger.debug('Evaluating classifier on seed_images: ')
     classifier.evaluate(trainX[:1000], trainY[:1000])
 
-    logger.debug('Creating adversarial examples: ')
+    logger.debug('[adv] creating adversarial examples start')
 
     fgsm = FGSM(trainX=trainX, trainY=trainY, origin_label=None, target_label=TARGET, classifier=classifier, weight=0.2,
                 num_images=1000, classifier_name='targetmodel')
     fgsm.attack()
     fgsm.export_result()
-
+    logger.debug('[adv] creating adversarial examples DONE ')
     logger.debug('FGSM done')

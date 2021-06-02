@@ -148,6 +148,9 @@ class L_BFGS:
         f = open(os.path.join('result', self.method_name, self.file_shared_name + '.txt', ), 'w')
         f.write(result)
         f.close()
+        logger.debug('[result] exporting result DONE!')
+        abs_path = os.path.abspath(os.path.join('result', self.method_name, self.file_shared_name + '.txt'))
+        logger.debug(f'[result] view result at {abs_path}')
 
 
 if __name__ == '__main__':
@@ -166,11 +169,12 @@ if __name__ == '__main__':
     testX, testY = MnistPreprocessing.quick_preprocess_data(testX, testY, num_classes=MNIST_NUM_CLASSES,
                                                             rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
                                                             chl=MNIST_IMG_CHL)
-    logger.debug('Creating adversarial examples: ')
+    logger.debug('[adv] creating adversarial examples start')
     lbfgs = L_BFGS(trainX=trainX, trainY=trainY, origin_label=None, target_label=TARGET, classifier=classifier,
                    weight=0.0001,
                    num_images=1000, classifier_name='targetmodel', num_iter=20)
     lbfgs.attack()
     lbfgs.export_result()
+    logger.debug('[adv] creating adversarial examples DONE')
 
     logger.debug('L-BFGS done')

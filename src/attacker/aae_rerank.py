@@ -224,14 +224,14 @@ class AAE:
         if self.hidden_models_name is not None:
             transfer_txt = '\n\ttransferable rate: '
             for item in self.transfer_rate_results:
-                transfer_txt += f'{item} ({round(self.transfer_rate_results[item], 2)}) '
+                transfer_txt += f'{item} ({round(self.transfer_rate_results[item], 3)}) '
         result += transfer_txt
 
         generalization_txt = ''
         if self.generalization_results is not None:
             generalization_txt = '\n\tgeneralization success: '
             for item in self.generalization_results:
-                generalization_txt += f'{item} ({round(self.generalization_results[item], 2)}) '
+                generalization_txt += f'{item} ({round(self.generalization_results[item], 3)}) '
         result += generalization_txt
         result += '\n==========>\n'
 
