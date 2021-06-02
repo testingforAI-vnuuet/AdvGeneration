@@ -1,0 +1,6 @@
+
+#BSUB -e std1.error
+#BSUB -o std1.output
+#BSUB -q gpu
+export PYTHONPATH=/home/khamd/AdvGeneration/src:$PYTHONPATH
+python3 lstm2.py
