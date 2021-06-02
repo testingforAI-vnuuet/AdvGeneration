@@ -1,3 +1,5 @@
+import os
+
 from attacker.mnist_utils import compute_l0_V2, compute_l2_V2
 from utility.feature_ranker import *
 
@@ -269,6 +271,21 @@ def smooth_adv_border_V3(classifier, generated_advs, origin_images, border_index
         per_pixel_by_prediction = padding_to_array(per_pixel_by_prediction, K)
         result.append(per_pixel_by_prediction)
     return np.average(result, axis=0)
+
+
+def get_important_pixel_vetcan_all_images(images, classifier, path, shared_file_name):
+    important_pixels_arr = []
+    score_arr = []
+
+    for image in images:
+        important_pixels, score = feature_ranker.get_important_pixel_vetcan(image, classifier)
+        important_pixels_arr.append(important_pixels)
+        score_arr.append(score)
+    important_pixels_arr_path = os.path.join(path, shared_file_name + 'pixels.npy')
+    np.save(important_pixels_arr_path, np.array(important_pixels_arr))
+    score_arr_path = os.path.join(path, shared_file_name + 'score.npy')
+    np.save(score_arr_path, np.array(score_arr))
+    return np.array(important_pixels_arr), np.array(score_arr)
 
 
 def padding_to_array(arr, max_len):

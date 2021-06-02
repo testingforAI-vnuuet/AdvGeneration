@@ -244,6 +244,33 @@ class feature_ranker:
         a_argsort = np.argsort(a)
         return np.array(diff_pixels)[a_argsort], a[a_argsort]
 
+    @staticmethod
+    def get_important_pixel_vetcan(image, classifier):
+
+        important_pixels = []
+        score = []
+        changed_pixel_values = [2., 3.]
+        tmp_image = np.array([image])
+        predict_true = classifier.predict(tmp_image)[0]
+        y_true = np.argmax(predict_true)
+        confident_true = np.max(predict_true)
+
+        for index in range(np.prod(image.shape)):
+            row, col = int(index // 28), int(index % 28)
+            tmp_pixel_value = tmp_image[0][row, col][0]
+            for changed_pixel_value in changed_pixel_values:
+                tmp_image[0][row, col] = changed_pixel_value
+                predict = classifier.predict(tmp_image)[0]
+                y_pred = np.argmax(predict)
+                if y_pred != y_true:
+                    print(f'pred: {y_pred}, true: {y_true}')
+                    important_pixels.append(index)
+                    score.append(abs(np.max(predict) - confident_true))
+                    break
+            tmp_image[0][row, col] = tmp_pixel_value
+
+        return np.array(important_pixels), np.array(score)
+
 
 if __name__ == '__main__':
     classifier = keras.models.load_model(CLASSIFIER_PATH + '/pretrained_mnist_cnn1.h5')

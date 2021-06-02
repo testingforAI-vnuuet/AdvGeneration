@@ -1,14 +1,16 @@
 """
 Created At: 23/03/2021 16:22
 """
-
+import os.path
 import threading
 import time
+
+import numpy as np
 
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
-from utility.filters.filter_advs import smooth_adv_border_V3
+from utility.filters.filter_advs import smooth_adv_border_V3, get_important_pixel_vetcan_all_images
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -149,8 +151,11 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-                                               get_border(self.origin_adv_result[:-1]), self.target_label)
+        # self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+        #                                        get_border(self.origin_adv_result[:-1]), self.target_label)
+
+        tmp_path = os.path.join('result', self.method_name)
+        _, _ = get_important_pixel_vetcan_all_images(self.adv_result, self.classifier, os.path.abspath(tmp_path), self.file_shared_name)
 
         self.end_time = time.time()
         logger.debug('get advs DONE!')
@@ -158,8 +163,9 @@ class AutoencoderBorder:
     def export_result(self):
         result = '<=========='
         result = ''
-        str_smooth_adv = list(map(str, self.smooth_adv))
-        result += '\n' + '\n'.join(str_smooth_adv)
+        if self.smooth_adv is not None:
+            str_smooth_adv = list(map(str, self.smooth_adv))
+            result += '\n' + '\n'.join(str_smooth_adv)
 
         f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
                  'w')
@@ -249,36 +255,6 @@ def run_thread(classifier_name, trainX, trainY):
         logger.debug("=======================++++============================")
 
 
-def run_thread_V2(classifier_name, trainX, trainY):
-    logger.debug("\n=======================================================")
-    logger.debug('processing model: ' + classifier_name)
-    cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
-    result_txt = classifier_name + '\n'
-    # AE_LOSS = AE_LOSSES.border_loss
-    weight_result = []
-    for weight_index in range(0, 11):
-        weight_value = weight_index * 0.1
-        weight_result_i = []
-        for origin_label in range(0, 10):
-            weight_result_i_j = []
-            for target_position in range(2, 11):
-                attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                             target_position=target_position, classifier_name=classifier_name,
-                                             weight=weight_value)
-                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
-                attacker.get_border_and_adv()
-                weight_result_i_j.append(attacker.export_result())
-                del attacker
-            weight_result_i.append(weight_result_i_j)
-        weight_result_i = np.average(weight_result_i, axis=0)
-        weight_result.append(weight_result_i)
-    s = np.array2string(weight_result, separator=' ')
-    s = s.replace('[', ' ')
-    s = s.replace(']', ' ')
-    f = open('./result/primary_ae_border/' + classifier_name + '.txt', 'w')
-    f.write(s)
-    f.close()
-
 
 class MyThread(threading.Thread):
     def __init__(self, classifier_name, trainX, trainY):
@@ -293,6 +269,12 @@ class MyThread(threading.Thread):
 
 if __name__ == '__main__':
     # target_position = 2
+
+    # a = np.load(os.path.join('result', 'ae_border', 'ae_border_Alexnet_9_7weight=0,1_1000pixels.npy'), allow_pickle=True)
+    # b = np.load(os.path.join('result', 'ae_border', 'ae_border_Alexnet_9_7weight=0,1_1000score.npy'), allow_pickle=True)
+    # print(a.shape)
+    # print(b.shape)
+    # print(a[0].shape)
 
     logger.debug('pre-processing data')
     (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
