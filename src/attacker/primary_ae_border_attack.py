@@ -23,7 +23,7 @@ def combined_function(set1, set2, set3):
 
 class PrimaryAutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 num_images=1000):
+                 num_images=2000):
         """
         :param origin_label:
         :type origin_label:
@@ -136,11 +136,11 @@ class PrimaryAutoencoderBorder:
         # self.generated_borders = []
         # self.generated_candidates = []
         logger.debug('getting advs')
-        candidate_generated_borders = self.autoencoder.predict(self.origin_images) * self.border_origin_images
+        candidate_generated_borders = self.autoencoder.predict(self.origin_images[:1000]) * self.border_origin_images[:1000]
 
-        self.generated_candidates = np.clip(candidate_generated_borders + self.internal_origin_images, 0, 1)
+        self.generated_candidates = np.clip(candidate_generated_borders + self.internal_origin_images[:1000], 0, 1)
         self.generated_borders = np.array(candidate_generated_borders)
-        self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images,
+        self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images[:1000],
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
