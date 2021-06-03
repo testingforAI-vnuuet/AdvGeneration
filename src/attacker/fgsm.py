@@ -49,7 +49,7 @@ class FGSM:
         self.end_time = None
 
     @staticmethod
-    def create_adversarial_pattern(input_image, target_vector, pretrained_model, get_sign=True):
+    def create_adversarial_pattern(input_image, target_vector, pretrained_model, index, get_sign=True):
         """
         compute gradient of pretrained model output respect to input_image
         :param input_image: a input image
@@ -57,6 +57,7 @@ class FGSM:
         :param pretrained_model: trained classifier
         :return: gradient sign
         """
+        logger.debug(f"FGSM: getting candidate for an image: {index}")
         loss_object = keras.losses.CategoricalCrossentropy()
         input = [input_image] if tf.is_tensor(input_image) else tf.convert_to_tensor([input_image])
         with tf.GradientTape() as tape:
@@ -69,8 +70,8 @@ class FGSM:
 
     def attack(self):
         generated_candidates = [
-            img - self.weight * self.create_adversarial_pattern(img, self.target_vector, self.classifier)[0] for
-            img in self.origin_images]
+            img - self.weight * self.create_adversarial_pattern(img, self.target_vector, self.classifier, index)[0] for
+            index, img in enumerate(self.origin_images)]
 
         generated_candidates = np.array(generated_candidates)
         self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images,

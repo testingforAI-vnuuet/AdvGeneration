@@ -94,6 +94,7 @@ class AE4DNN:
         self.generalization_results = None
 
     def autoencoder_attack(self, loss):
+        logger.debug('[training] training autoencoder start!')
         ae_trainee = MnistAutoEncoder()
         autoencoder_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name)
         if os.path.isfile(autoencoder_path):
@@ -129,11 +130,15 @@ class AE4DNN:
             logger.debug('[training] training autoencoder DONE!')
             self.optimal_epoch = len(history.history['loss'])
 
+        logger.debug('[training] training autoencoder DONE!')
+        logger.debug('[filter] filtering candidate adv start')
         self.generated_candidates = self.autoencoder.predict(self.origin_images)
         self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images,
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
+        logger.debug('[filter] got valid adv set')
+        logger.debug('[filter] filtering candidate adv DONE')
 
         self.end_time = time.time()
 
@@ -218,7 +223,7 @@ class AE4DNN:
                 round(np.average(l2), 2))
         else:
             result += '\n\tl2=None'
-        result += '\n\tadv_gen_time=' + str(self.end_time - self.start_time) + ' s'
+        result += '\n\tgen_time=' + str(self.end_time - self.start_time) + ' s'
 
         transfer_txt = ''
         if self.hidden_models_name is not None:
@@ -331,7 +336,8 @@ if __name__ == '__main__':
                            weight=DEFAULT_EPSILON, classifier_name='targetmodel', num_images=1000)
 
     ae4dnn_attack.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
-    ae4dnn_attack.black_box_attack(pretrained_model_name)
     ae4dnn_attack.generalization()
+    ae4dnn_attack.black_box_attack(pretrained_model_name)
+    ae4dnn_attack.adv_training()
     ae4dnn_attack.export_result()
     logger.debug('[ae4dnn] robustness testing DONE!')

@@ -6,7 +6,7 @@ origin=all,target=7
 	#optimal_epoch=0
 	l0(min/max/avg)=783/784/783.8550057537399
 	l2(min/max/avg)=11.01/13.49/12.21
-	adv_gen_time=1.4454984664916992 s
-	transferable rate: Alexnet (0.31) Lenet (0.06) vgg13 (0.38) vgg16 (0.32)
-	generalization success: 10000 (0.89) 20000 (0.89) 40000 (0.89) 
+	adv_gen_time=1.5118577480316162 s
+	transferable rate: Alexnet (0.095) Lenet (0.0) vgg13 (0.01) vgg16 (0.32) 
+	generalization success: 10000 (0.891) 20000 (0.893) 40000 (0.894) 
 ==========>

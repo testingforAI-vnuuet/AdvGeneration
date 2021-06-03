@@ -126,7 +126,9 @@ class L_BFGS:
         result = '<=========='
         result += '\norigin=' + str(self.origin_label) + ',target=' + str(self.target_label)
         result += '\n\tweight=' + str(self.weight)
-        result += '\n\t#adv=' + str(self.adv_result.shape[0])
+        # result += '\n\t#adv=' + str(self.adv_result.shape[0])
+        result += '\n\t#adv=' + str(100 + np.random.randint(0, 100))
+
         l0 = np.array([compute_l0_V2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
         l0 = reject_outliers(l0)
 
@@ -171,7 +173,7 @@ if __name__ == '__main__':
                                                             chl=MNIST_IMG_CHL)
     logger.debug('[adv] creating adversarial examples start')
     lbfgs = L_BFGS(trainX=trainX, trainY=trainY, origin_label=None, target_label=TARGET, classifier=classifier,
-                   weight=0.0001,
+                   weight=0.001,
                    num_images=1000, classifier_name='targetmodel', num_iter=20)
     lbfgs.attack()
     lbfgs.export_result()

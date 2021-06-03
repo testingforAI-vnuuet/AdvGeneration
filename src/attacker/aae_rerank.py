@@ -94,6 +94,8 @@ class AAE:
         self.generalization_results = None
 
     def autoencoder_attack(self, loss):
+        logger.debug('[training] training autoencoder start!')
+
         ae_trainee = MnistAutoEncoder()
         autoencoder_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name)
         if os.path.isfile(autoencoder_path):
@@ -129,12 +131,15 @@ class AAE:
             logger.debug('[training] training autoencoder DONE!')
             self.optimal_epoch = len(history.history['loss'])
 
+        logger.debug('[training] training autoencoder DONE!')
+        logger.debug('[filter] filtering candidate adv start')
         self.generated_candidates = self.autoencoder.predict(self.origin_images)
         self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images,
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
-
+        logger.debug('[filter] got valid adv set')
+        logger.debug('[filter] filtering candidate adv DONE')
         self.end_time = time.time()
 
     def black_box_attack(self, hidden_models_name):
@@ -218,7 +223,7 @@ class AAE:
                 round(np.average(l2), 2))
         else:
             result += '\n\tl2=None'
-        result += '\n\tadv_gen_time=' + str(self.end_time - self.start_time) + ' s'
+        result += '\n\tgen_time=' + str(self.end_time - self.start_time) + ' s'
 
         transfer_txt = ''
         if self.hidden_models_name is not None:
@@ -328,7 +333,7 @@ if __name__ == '__main__':
 
     logger.debug('[aae] robustness testing start')
     aae_attack = AAE(trainX=trainX, trainY=trainY, origin_label=None, target_position=None, classifier=classifier,
-                           weight=DEFAULT_EPSILON, classifier_name='targetmodel', num_images=1000)
+                     weight=DEFAULT_EPSILON, classifier_name='targetmodel', num_images=1000)
 
     aae_attack.autoencoder_attack(loss=AE_LOSSES.re_rank_loss)
     aae_attack.black_box_attack(pretrained_model_name)
