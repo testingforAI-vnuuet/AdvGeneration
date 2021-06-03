@@ -297,6 +297,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
+
+    weight_result = np.array(weight_result)
     s = np.array2string(weight_result, separator=' ')
     s = s.replace('[', ' ')
     s = s.replace(']', ' ')
