@@ -12,6 +12,7 @@ import time
 import numpy as np
 # Commented out IPython magic to ensure Python compatibility.
 import pandas as pd
+import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Activation, Dense, Dropout, Input, Embedding
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import RMSprop
@@ -66,6 +67,10 @@ trainY = data_train.iloc[:3932803, 0].values
 trainX = np.load('hoang/train.npy')
 trainY = np.array(trainY)
 
+model_2 = tf.keras.models.load_model('model_b_2.h5')
+print('model_summary: ')
+print(model_2.summary())
+
 
 def RNN():
     inputs = Input(name='inputs', shape=[max_len])
@@ -88,4 +93,4 @@ start = time.time()
 model.fit(trainX, trainY, batch_size=2048, epochs=20,
           validation_split=0.2)
 end = time.time()
-model.save('model_b_2.h5')
+model.save('model_b_3.h5')
