@@ -15,7 +15,7 @@ import pandas as pd
 from tensorflow.keras.layers import LSTM, Activation, Dense, Dropout, Input, Embedding
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import RMSprop
-
+import tensorflow as tf
 # # %matplotlib inline
 # #Import the dataset
 # data_train=pd.read_csv('/content/drive/MyDrive/N12-Kĩ thuật giấu tin/CSV/4 patterns/4m9 records/.TRAIN_4_PATTERN_3.932.803.csv')
@@ -71,17 +71,33 @@ trainY = np.array(trainY)
 # print('model_summary: ')
 # print(model_2.summary())
 
+#
+# def RNN():
+#     inputs = Input(name='inputs', shape=[max_len])
+#     layer = Embedding(max_words, 32, input_length=max_len)(inputs)
+#     layer = LSTM(64)(layer)
+#     layer = Dense(128, name='FC1')(layer)
+#     layer = Activation('relu')(layer)
+#     layer = Dropout(0.5)(layer)
+#     layer = Dense(1, name='out_layer')(layer)
+#     layer = Activation('sigmoid')(layer)
+#     model = Model(inputs=inputs, outputs=layer)
+#     return model
 
 def RNN():
-    inputs = Input(name='inputs', shape=[max_len])
-    layer = Embedding(max_words, 32, input_length=max_len)(inputs)
+    inputs = Input(name='inputs',shape=[max_len])
+    layer = Embedding(max_words,32,input_length=max_len)(inputs)
     layer = LSTM(64)(layer)
-    layer = Dense(128, name='FC1')(layer)
+    layer=tf.expand_dims(layer, axis=-1)
+    layer = LSTM(128)(layer)
+    layer=tf.expand_dims(layer, axis=-1)
+    layer = LSTM(64)(layer)
+    layer = Dense(128,name='FC1')(layer)
     layer = Activation('relu')(layer)
     layer = Dropout(0.5)(layer)
-    layer = Dense(1, name='out_layer')(layer)
+    layer = Dense(1,name='out_layer')(layer)
     layer = Activation('sigmoid')(layer)
-    model = Model(inputs=inputs, outputs=layer)
+    model = Model(inputs=inputs,outputs=layer)
     return model
 
 
@@ -90,7 +106,7 @@ model.summary()
 model.compile(loss='binary_crossentropy', optimizer=RMSprop(), metrics=['accuracy'])
 
 start = time.time()
-model.fit(trainX, trainY, batch_size=2048, epochs=5,
+model.fit(trainX, trainY, batch_size=2048, epochs=10,
           validation_split=0.2)
 end = time.time()
-model.save('model_b_3.h5')
+model.save('model_b_3_1.h5')

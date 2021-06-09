@@ -12,6 +12,7 @@ import time
 import numpy as np
 # Commented out IPython magic to ensure Python compatibility.
 import pandas as pd
+import tensorflow as tf
 from tensorflow.keras.layers import LSTM, Activation, Dense, Dropout, Input, Embedding
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import RMSprop
@@ -88,9 +89,11 @@ trainY = np.array(trainY)
 
 def RNN():
     inputs = Input(name='inputs', shape=[max_len])
-    layer = Embedding(max_words, 50, input_length=max_len)(inputs)
+    layer = Embedding(max_words, 32, input_length=max_len)(inputs)
     layer = LSTM(64)(layer)
-    layer = Dense(256, name='FC1')(layer)
+    layer = tf.expand_dims(layer, axis=-1)
+    layer = LSTM(128)(layer)
+    layer = Dense(128, name='FC1')(layer)
     layer = Activation('relu')(layer)
     layer = Dropout(0.5)(layer)
     layer = Dense(1, name='out_layer')(layer)
@@ -107,7 +110,7 @@ model.summary()
 model.compile(loss='binary_crossentropy', optimizer=RMSprop(), metrics=['accuracy'])
 
 start = time.time()
-model.fit(trainX, trainY, batch_size=2048, epochs=20,
+model.fit(trainX, trainY, batch_size=2048, epochs=10,
           validation_split=0.2)
 end = time.time()
-model.save('model_b_2.h5')
+model.save('model_b_2_1.h5')
