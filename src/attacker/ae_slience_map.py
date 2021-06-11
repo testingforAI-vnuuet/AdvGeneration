@@ -167,12 +167,12 @@ if __name__ == '__main__':
     print(saved_ranking_features_file)
     attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=3, target_position=None, classifier=classifier,
                               weight=0.5, saved_ranking_features_file=saved_ranking_features_file,
-                              classifier_name=classifier_name, target_label=5)
+                              classifier_name=classifier_name, target_label=5, num_images=5000)
     attacker.autoencoder_attack()
 
     # a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Alexnet_3_5weight=0,1_1000adv.npy'))
     #
-    # n = 10
+    # n = 3
     # for i in range(n):
     #     ax = plt.subplot(1, n, i + 1)
     #     plt.imshow(a[i].reshape((28, 28)), cmap='gray')
