@@ -111,7 +111,7 @@ class ae_slience_map:
         decoded = concate_start_to_end(important_pixels=self.important_features)([decoded, input_img])
         self.autoencoder = keras.models.Model(input_img, decoded)
 
-        adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+        adam = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
         self.autoencoder.compile(optimizer=adam,
                                  loss=AE_LOSSES.cross_entropy_loss(self.classifier, self.target_vector, self.weight),
                                  run_eagerly=True)
@@ -120,7 +120,7 @@ class ae_slience_map:
         model_checkpoint = ModelCheckpoint(self.autoencoder_file_path,
                                            save_best_only=True, monitor='loss',
                                            mode='min')
-        history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=100, batch_size=512,
+        history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
                                        callbacks=[early_stopping, model_checkpoint], verbose=1)
         self.optimal_epoch = len(history.history['loss'])
 
@@ -166,17 +166,19 @@ if __name__ == '__main__':
 
     print(saved_ranking_features_file)
     attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=3, target_position=None, classifier=classifier,
-                              weight=0.5, saved_ranking_features_file=saved_ranking_features_file,
-                              classifier_name=classifier_name, target_label=5, num_images=5000)
+                              weight=1., saved_ranking_features_file=saved_ranking_features_file,
+                              classifier_name=classifier_name, target_label=5, num_images=5000, num_features=20)
     attacker.autoencoder_attack()
 
-    # a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Alexnet_3_5weight=0,1_1000adv.npy'))
-    #
-    # n = 3
+    # a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Alexnet_3_5weight=0,5_5000adv.npy'))
+    # print(a.shape)
+    # n = 10
+    # matplotlib.use('TkAgg')
+    # plt.figure(figsize=(16, 4))
     # for i in range(n):
     #     ax = plt.subplot(1, n, i + 1)
     #     plt.imshow(a[i].reshape((28, 28)), cmap='gray')
     #     ax.get_xaxis().set_visible(False)
     #     ax.get_yaxis().set_visible(False)
     # plt.show()
-
+    #
