@@ -5,16 +5,12 @@ Created At: 11/06/2021 09:43
 import os
 import time
 
-from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
-
 from attacker.ae_custom_layer import *
 from attacker.constants import SAVED_ATTACKER_PATH, PRETRAIN_CLASSIFIER_PATH, RESULT_FOLDER_PATH
 from attacker.losses import AE_LOSSES
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
 from utility.statistics import *
-import matplotlib
-
 
 tf.config.experimental_run_functions_eagerly(True)
 
@@ -116,12 +112,15 @@ class ae_slience_map:
                                  loss=AE_LOSSES.cross_entropy_loss(self.classifier, self.target_vector, self.weight),
                                  run_eagerly=True)
 
-        early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
-        model_checkpoint = ModelCheckpoint(self.autoencoder_file_path,
-                                           save_best_only=True, monitor='loss',
-                                           mode='min')
+        # early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
+        # model_checkpoint = ModelCheckpoint(self.autoencoder_file_path,
+        #                                    save_best_only=True, monitor='loss',
+        #                                    mode='min')
+        # history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
+        #                                callbacks=[early_stopping, model_checkpoint], verbose=1)
         history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
-                                       callbacks=[early_stopping, model_checkpoint], verbose=1)
+                                       verbose=1)
+        self.autoencoder.save(self.autoencoder_file_path)
         self.optimal_epoch = len(history.history['loss'])
 
         self.generated_candidates = self.autoencoder.predict(self.origin_images)
