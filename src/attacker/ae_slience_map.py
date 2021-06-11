@@ -14,7 +14,7 @@ from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
 from utility.statistics import *
 import matplotlib
-matplotlib.use('TkAgg')
+
 
 tf.config.experimental_run_functions_eagerly(True)
 
