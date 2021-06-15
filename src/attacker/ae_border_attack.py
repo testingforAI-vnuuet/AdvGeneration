@@ -26,7 +26,7 @@ def combined_function(set1, set2, set3):
 
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=12,
+                 step=1,
                  num_images=1000):
         """
 
@@ -151,11 +151,11 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        # self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-        #                                        get_border(self.origin_adv_result[:-1]), self.target_label)
+        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+                                               get_border(self.origin_adv_result[:-1]), self.target_label)
 
-        tmp_path = os.path.join('result', self.method_name)
-        _, _ = get_important_pixel_vetcan_all_images(self.adv_result, self.classifier, os.path.abspath(tmp_path), self.file_shared_name)
+        # tmp_path = os.path.join('result', self.method_name)
+        # _, _ = get_important_pixel_vetcan_all_images(self.adv_result, self.classifier, os.path.abspath(tmp_path), self.file_shared_name)
 
         self.end_time = time.time()
         logger.debug('get advs DONE!')
@@ -295,13 +295,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    thread1.start()
-    # thread2.start()
+    # thread1.start()
+    thread2.start()
     # thread3.start()
     # thread4.start()
 
-    thread1.join()
-    # thread2.join()
+    # thread1.join()
+    thread2.join()
     # thread3.join()
     # thread4.join()
 
