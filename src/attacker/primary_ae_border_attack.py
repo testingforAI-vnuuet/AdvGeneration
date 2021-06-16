@@ -23,7 +23,7 @@ def combined_function(set1, set2, set3):
 
 class PrimaryAutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 num_images=2000):
+                 num_images=1000):
         """
         :param origin_label:
         :type origin_label:
@@ -280,13 +280,13 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
-    for weight_index in [0.01, 0.05, 0.5, 1.]:
-        # weight_value = weight_index * 0.1
-        weight_value = weight_index
+    for weight_index in range(0, 11):
+        weight_value = weight_index * 0.1
+        # weight_value = weight_index
         weight_result_i = []
-        for origin_label in range(0, 10):
+        for origin_label in range(9, 10):
             weight_result_i_j = []
-            for target_position in range(2, 11):
+            for target_position in range(2, 3):
                 attacker = PrimaryAutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                              target_position=target_position, classifier_name=classifier_name,
                                              weight=weight_value)
