@@ -168,7 +168,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 11):
                 attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=origin_label,
                                           target_position=target_position, classifier=cnn_model, weight=weight_value,
-                                          saved_ranking_features_file='slience_map/label=3,optimizer=adam,lr=0.1,lamda=0.1.npy',
+                                          saved_ranking_features_file=saved_ranking_features_file,
                                           classifier_name=classifier_name, num_features=20)
                 attacker.autoencoder_attack()
                 weight_result_i_j.append(attacker.export_result())
@@ -213,6 +213,8 @@ if __name__ == '__main__':
     logger.debug('robustness testing start')
 
     logger.debug('starting multi-thread')
+    saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
+                                               'slience_map/label=3,optimizer=adam,lr=0.1,lamda=0.1.npy')
     thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
     # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
