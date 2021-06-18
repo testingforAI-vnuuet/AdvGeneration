@@ -3,6 +3,7 @@ Created At: 11/06/2021 09:43
 """
 
 import os
+import threading
 import time
 
 from attacker.ae_custom_layer import *
@@ -118,7 +119,7 @@ class ae_slience_map:
         #                                    mode='min')
         # history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
         #                                callbacks=[early_stopping, model_checkpoint], verbose=1)
-        history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
+        history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=20, batch_size=256,
                                        verbose=1)
         self.autoencoder.save(self.autoencoder_file_path)
         self.optimal_epoch = len(history.history['loss'])
@@ -146,8 +147,59 @@ class ae_slience_map:
         ranking_matrix = ranking_matrix.flatten()
         return np.argsort(ranking_matrix)[::-1][:self.num_features]
 
+    def export_result(self):
+
+        return self.adv_result.shape[0] / float(self.num_images)
+
+
+def run_thread_V2(classifier_name, trainX, trainY):
+    logger.debug("\n=======================================================")
+    logger.debug('processing model: ' + classifier_name)
+    cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
+    result_txt = classifier_name + '\n'
+    # AE_LOSS = AE_LOSSES.border_loss
+    weight_result = []
+    for weight_index in range(0, 11):
+        weight_value = weight_index * 0.1
+        # weight_value = weight_index
+        weight_result_i = []
+        for origin_label in range(3, 4):
+            weight_result_i_j = []
+            for target_position in range(2, 11):
+                attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=origin_label,
+                                          target_position=target_position, classifier=cnn_model, weight=weight_value,
+                                          saved_ranking_features_file='slience_map/label=3,optimizer=adam,lr=0.1,lamda=0.1.npy',
+                                          classifier_name=classifier_name, num_features=20)
+                attacker.autoencoder_attack()
+                weight_result_i_j.append(attacker.export_result())
+                del attacker
+            weight_result_i.append(weight_result_i_j)
+        weight_result_i = np.average(weight_result_i, axis=0)
+        weight_result.append(weight_result_i)
+
+    weight_result = np.array(weight_result)
+    s = np.array2string(weight_result, separator=' ')
+    s = s.replace('[', ' ')
+    s = s.replace(']', ' ')
+    f = open('./result/ae_slience_map/' + classifier_name + '.txt', 'w')
+    f.write(s)
+    f.close()
+
+
+class MyThread(threading.Thread):
+    def __init__(self, classifier_name, trainX, trainY):
+        super(MyThread, self).__init__()
+        self.classifier_name = classifier_name
+        self.trainX = trainX
+        self.trainY = trainY
+
+    def run(self):
+        run_thread_V2(self.classifier_name, self.trainX, self.trainY)
 
 if __name__ == '__main__':
+    # target_position = 2
+
+    logger.debug('pre-processing data')
     (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
 
     trainX, trainY = MnistPreprocessing.quick_preprocess_data(trainX, trainY, num_classes=MNIST_NUM_CLASSES,
@@ -156,28 +208,58 @@ if __name__ == '__main__':
     testX, testY = MnistPreprocessing.quick_preprocess_data(testX, testY, num_classes=MNIST_NUM_CLASSES,
                                                             rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
                                                             chl=MNIST_IMG_CHL)
+    logger.debug('pre-processing data DONE !')
 
-    classifier_name = pretrained_model_name[0]
-    classifier = tf.keras.models.load_model(os.path.join(PRETRAIN_CLASSIFIER_PATH, classifier_name + '.h5'))
+    logger.debug('robustness testing start')
 
-    saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-                                               'slience_map/label=3,optimizer=adam,lr=0.1,lamda=0.1.npy')
+    logger.debug('starting multi-thread')
+    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
+    # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    print(saved_ranking_features_file)
-    attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=3, target_position=None, classifier=classifier,
-                              weight=1., saved_ranking_features_file=saved_ranking_features_file,
-                              classifier_name=classifier_name, target_label=5, num_images=5000, num_features=20)
-    attacker.autoencoder_attack()
+    thread1.start()
+    # thread2.start()
+    # thread3.start()
+    # thread4.start()
 
-    # a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Alexnet_3_5weight=0,5_5000adv.npy'))
-    # print(a.shape)
-    # n = 10
-    # matplotlib.use('TkAgg')
-    # plt.figure(figsize=(16, 4))
-    # for i in range(n):
-    #     ax = plt.subplot(1, n, i + 1)
-    #     plt.imshow(a[i].reshape((28, 28)), cmap='gray')
-    #     ax.get_xaxis().set_visible(False)
-    #     ax.get_yaxis().set_visible(False)
-    # plt.show()
-    #
+    thread1.join()
+    # thread2.join()
+    # thread3.join()
+    # thread4.join()
+
+    logger.debug('Exiting Main Thread')
+    logger.debug('robustness testing DONE !')
+# if __name__ == '__main__':
+#     (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
+#
+#     trainX, trainY = MnistPreprocessing.quick_preprocess_data(trainX, trainY, num_classes=MNIST_NUM_CLASSES,
+#                                                               rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
+#                                                               chl=MNIST_IMG_CHL)
+#     testX, testY = MnistPreprocessing.quick_preprocess_data(testX, testY, num_classes=MNIST_NUM_CLASSES,
+#                                                             rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
+#                                                             chl=MNIST_IMG_CHL)
+#
+#     classifier_name = pretrained_model_name[0]
+#     classifier = tf.keras.models.load_model(os.path.join(PRETRAIN_CLASSIFIER_PATH, classifier_name + '.h5'))
+#
+#     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
+#                                                'slience_map/label=3,optimizer=adam,lr=0.1,lamda=0.1.npy')
+#
+#     print(saved_ranking_features_file)
+#     attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=3, target_position=None, classifier=classifier,
+#                               weight=0.1, saved_ranking_features_file=saved_ranking_features_file,
+#                               classifier_name=classifier_name, target_label=5, num_images=1000, num_features=20)
+#     attacker.autoencoder_attack()
+#
+#     # a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Alexnet_3_5weight=1,0_5000adv.npy'))
+#     # print(a.shape)
+#     # n = 10
+#     # matplotlib.use('TkAgg')
+#     # plt.figure(figsize=(16, 4))
+#     # for i in range(n):
+#     #     ax = plt.subplot(1, n, i + 1)
+#     #     plt.imshow(a[i].reshape((28, 28)), cmap='gray')
+#     #     ax.get_xaxis().set_visible(False)
+#     #     ax.get_yaxis().set_visible(False)
+#     # plt.show()

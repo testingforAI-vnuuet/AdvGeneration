@@ -37,19 +37,22 @@ class concate_start_to_end(tf.keras.layers.Layer):
         origin = tf.reshape(tensor=origin, shape=(self.batch_size, -1))
 
         # create mask
-        important_pixels_array = np.zeros(shape=generated.shape)
+        important_pixels_array = np.zeros(shape=generated.shape, dtype=np.float32)
         # print(important_pixels_array.shape)
-        important_pixels_array[:, self.important_pixels] = 1
+        important_pixels_array[:, self.important_pixels] = 1.0
 
         important_pixels_array = tf.Variable(important_pixels_array, trainable=False, dtype=float32_type)
 
-        not_important_pixel_array = np.zeros(shape=generated.shape)
-        not_important_pixel_array[:, self.not_important_pixels] = 1
+        not_important_pixel_array = np.zeros(shape=generated.shape, dtype=np.float32)
+        not_important_pixel_array[:, self.not_important_pixels] = 1.0
         not_important_pixel_array = tf.Variable(not_important_pixel_array, trainable=False, dtype=float32_type)
 
         # get result
         result = tf.add(tf.math.multiply(generated, important_pixels_array), tf.multiply(origin, not_important_pixel_array))
+        # print(result.shape)
+        # print(result.numpy()[:, self.important_pixels])
         result = tf.reshape(tensor=result, shape=origin_shape)
+
 
         # print(tf.subtract(result, ))
         return result
