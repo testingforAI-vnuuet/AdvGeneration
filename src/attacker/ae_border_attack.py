@@ -26,7 +26,7 @@ def combined_function(set1, set2, set3):
 
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=12,
+                 step=1,
                  num_images=1000):
         """
 
@@ -242,7 +242,7 @@ def run_thread(classifier_name, trainX, trainY):
     for origin_label in range(9, 10):
         # exe_time_sum = 0
         for target_position in range(2, 3):
-            for weight_index in range(1, 2):
+            for weight_index in range(1, 11):
                 weight_value = weight_index * 0.1
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                              target_position=target_position, classifier_name=classifier_name,
