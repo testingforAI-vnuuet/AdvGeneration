@@ -16,7 +16,8 @@ logger = MyLogger.getLog()
 
 
 class slience_ranking:
-    def __init__(self, classifier: tf.keras.models.Model, data_name=MNIST_DATA_NAME, is_clip_above=True):
+    def __init__(self, classifier_name: str, classifier: tf.keras.models.Model, data_name=MNIST_DATA_NAME,
+                 is_clip_above=True):
         """
         This is the implementation of paper: https://arxiv.org/pdf/1312.6034.pdf
         """
@@ -26,6 +27,7 @@ class slience_ranking:
         self.result_image = None
         self.method_name = 'slience_ranking'
         self.is_clip_above = is_clip_above
+        self.classifier_name = classifier_name
 
     def __compute_l2_in_tensor(self, image):
         image_flat = tf.reshape(tensor=image, shape=(-1))
@@ -48,7 +50,7 @@ class slience_ranking:
         return prediction - lamda * l2, prediction, l2
 
     def compute_ranking_matrix(self, saved_image_path, label: int = 0, optimizer=optimizer_adam,
-                               learning_rate: float = 0.1,
+                               learning_rate: float = 0.5,
                                iteration: int = 100,
                                lamda: float = 0.1):
 
@@ -118,7 +120,7 @@ class slience_ranking:
 
         self.result_image = image.numpy()
         image_results = [self.__post_processing(image_i) for image_i in image_per_iterations]
-        shared_file_name = f'label={label},optimizer={optimizer},lr={learning_rate},lamda={lamda}'
+        shared_file_name = f'slience_matrix_{self.classifier_name}_label={label},optimizer={optimizer},lr={learning_rate},lamda={lamda}'
         self.__save_result_example(image_results, term_1_per_iterations, term_2_per_iterations, saved_image_path,
                                    shared_file_name)
         np.save(os.path.join(saved_image_path, shared_file_name + '.npy'), self.result_image)
@@ -153,9 +155,12 @@ class slience_ranking:
 
 if __name__ == '__main__':
     path_to_save = '../attacker/result/slience_map'
-    classifier = tf.keras.models.load_model('../classifier/pretrained_models/Alexnet.h5')
+    classifier_name = 'Alexnet'
+    classifier = tf.keras.models.load_model(f'../classifier/pretrained_models/{classifier_name}.h5')
 
     pre_softmax_classifier = tf.keras.models.Model(inputs=classifier.input,
-                                 outputs=classifier.get_layer('dense_3').output)
-    ranker = slience_ranking(pre_softmax_classifier, data_name=MNIST_DATA_NAME, is_clip_above=True)
-    ranker.compute_ranking_matrix(saved_image_path=path_to_save, label=3)
+                                                   outputs=classifier.get_layer('dense_3').output)
+    ranker = slience_ranking(classifier_name=classifier_name, classifier=pre_softmax_classifier,
+                             data_name=MNIST_DATA_NAME,
+                             is_clip_above=True)
+    ranker.compute_ranking_matrix(saved_image_path=path_to_save, label=9)
