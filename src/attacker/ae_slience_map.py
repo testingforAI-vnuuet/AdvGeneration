@@ -89,40 +89,49 @@ class ae_slience_map:
 
     def autoencoder_attack(self, input_shape=(MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL)):
         self.start = time.time()
-        logger.debug(
-            '[training] training autoencoder for: origin_label={origin_label}, target_label={target_label}'.format(
-                origin_label=self.origin_label, target_label=self.target_label))
+        print(self.autoencoder_file_path)
+        custom_objects = {'concate_start_to_end': concate_start_to_end}
 
-        input_img = keras.layers.Input(shape=input_shape)
-        x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(input_img)
-        x = keras.layers.MaxPooling2D((2, 2), padding='same')(x)
-        x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
-        encoded = keras.layers.MaxPooling2D((2, 2), padding='same')(x)
-        # Dense
-        x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(encoded)
-        x = keras.layers.UpSampling2D((2, 2))(x)
-        x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
-        x = keras.layers.UpSampling2D((2, 2))(x)
-        decoded = keras.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
+        if os.path.isfile(self.autoencoder_file_path):
+            logger.debug('[training] found pre-trained autoencoder')
+            with keras.utils.custom_object_scope(custom_objects):
+                self.autoencoder = tf.keras.models.load_model(self.autoencoder_file_path, compile=False)
+        else:
 
-        decoded = concate_start_to_end(important_pixels=self.important_features)([decoded, input_img])
-        self.autoencoder = keras.models.Model(input_img, decoded)
+            logger.debug(
+                '[training] training autoencoder for: origin_label={origin_label}, target_label={target_label}'.format(
+                    origin_label=self.origin_label, target_label=self.target_label))
 
-        adam = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
-        self.autoencoder.compile(optimizer=adam,
-                                 loss=AE_LOSSES.cross_entropy_loss(self.classifier, self.target_vector, self.weight),
-                                 run_eagerly=True)
+            input_img = keras.layers.Input(shape=input_shape)
+            x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(input_img)
+            x = keras.layers.MaxPooling2D((2, 2), padding='same')(x)
+            x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
+            encoded = keras.layers.MaxPooling2D((2, 2), padding='same')(x)
+            # Dense
+            x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(encoded)
+            x = keras.layers.UpSampling2D((2, 2))(x)
+            x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
+            x = keras.layers.UpSampling2D((2, 2))(x)
+            decoded = keras.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
 
-        # early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
-        # model_checkpoint = ModelCheckpoint(self.autoencoder_file_path,
-        #                                    save_best_only=True, monitor='loss',
-        #                                    mode='min')
-        # history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
-        #                                callbacks=[early_stopping, model_checkpoint], verbose=1)
-        history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=50, batch_size=256,
-                                       verbose=1)
-        self.autoencoder.save(self.autoencoder_file_path)
-        self.optimal_epoch = len(history.history['loss'])
+            decoded = concate_start_to_end(important_pixels=self.important_features)([decoded, input_img])
+            self.autoencoder = keras.models.Model(input_img, decoded)
+            adam = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+            self.autoencoder.compile(optimizer=adam,
+                                     loss=AE_LOSSES.cross_entropy_loss(self.classifier, self.target_vector,
+                                                                       self.weight),
+                                     run_eagerly=True)
+
+            # early_stopping = EarlyStopping(monitor='loss', verbose=0, mode='min')
+            # model_checkpoint = ModelCheckpoint(self.autoencoder_file_path,
+            #                                    save_best_only=True, monitor='loss',
+            #                                    mode='min')
+            # history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
+            #                                callbacks=[early_stopping, model_checkpoint], verbose=1)
+            history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=20, batch_size=256,
+                                           verbose=1)
+            self.autoencoder.save(self.autoencoder_file_path)
+            self.optimal_epoch = len(history.history['loss'])
 
         self.generated_candidates = self.autoencoder.predict(self.origin_images)
         self.adv_result, _, self.origin_adv_result, self.origin_adv_result_label = filter_candidate_adv(
@@ -159,7 +168,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
-    for weight_index in range(0, 11):
+    for weight_index in range(1, 2):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []

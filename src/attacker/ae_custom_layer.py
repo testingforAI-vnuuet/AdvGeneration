@@ -10,8 +10,8 @@ tf.config.experimental_run_functions_eagerly(True)
 
 
 class concate_start_to_end(tf.keras.layers.Layer):
-    def __init__(self, important_pixels, num_pixels=784):
-        super(concate_start_to_end, self).__init__()
+    def __init__(self, important_pixels, num_pixels=784, **kwargs):
+        super(concate_start_to_end, self).__init__(**kwargs)
         self.important_pixels = np.array(important_pixels)
 
         self.not_important_pixels = np.array(
@@ -21,7 +21,8 @@ class concate_start_to_end(tf.keras.layers.Layer):
         self.batch_size = None
 
     def get_config(self):
-        config = super().get_config().copy()
+        config = super(concate_start_to_end, self).get_config()
+        config.update({'important_pixels': self.important_pixels})
         return config
 
     def call(self, inputs):
@@ -48,11 +49,11 @@ class concate_start_to_end(tf.keras.layers.Layer):
         not_important_pixel_array = tf.Variable(not_important_pixel_array, trainable=False, dtype=float32_type)
 
         # get result
-        result = tf.add(tf.math.multiply(generated, important_pixels_array), tf.multiply(origin, not_important_pixel_array))
+        result = tf.add(tf.math.multiply(generated, important_pixels_array),
+                        tf.multiply(origin, not_important_pixel_array))
         # print(result.shape)
         # print(origin.numpy()[:, self.important_pixels])
         result = tf.reshape(tensor=result, shape=origin_shape)
-
 
         # print(tf.subtract(result, ))
         return result
