@@ -50,7 +50,7 @@ class concate_start_to_end(tf.keras.layers.Layer):
         # get result
         result = tf.add(tf.math.multiply(generated, important_pixels_array), tf.multiply(origin, not_important_pixel_array))
         # print(result.shape)
-        # print(result.numpy()[:, self.important_pixels])
+        # print(origin.numpy()[:, self.important_pixels])
         result = tf.reshape(tensor=result, shape=origin_shape)
 
 

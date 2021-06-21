@@ -196,43 +196,11 @@ class MyThread(threading.Thread):
     def run(self):
         run_thread_V2(self.classifier_name, self.trainX, self.trainY)
 
-if __name__ == '__main__':
-    # target_position = 2
 
-    logger.debug('pre-processing data')
-    (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
-
-    trainX, trainY = MnistPreprocessing.quick_preprocess_data(trainX, trainY, num_classes=MNIST_NUM_CLASSES,
-                                                              rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
-                                                              chl=MNIST_IMG_CHL)
-    testX, testY = MnistPreprocessing.quick_preprocess_data(testX, testY, num_classes=MNIST_NUM_CLASSES,
-                                                            rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
-                                                            chl=MNIST_IMG_CHL)
-    logger.debug('pre-processing data DONE !')
-
-    logger.debug('robustness testing start')
-
-    logger.debug('starting multi-thread')
-    saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-                                               'slience_map/label=3,optimizer=adam,lr=0.1,lamda=0.1.npy')
-    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
-    # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
-    # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
-
-    thread1.start()
-    # thread2.start()
-    # thread3.start()
-    # thread4.start()
-
-    thread1.join()
-    # thread2.join()
-    # thread3.join()
-    # thread4.join()
-
-    logger.debug('Exiting Main Thread')
-    logger.debug('robustness testing DONE !')
 # if __name__ == '__main__':
+#     # target_position = 2
+#
+#     logger.debug('pre-processing data')
 #     (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
 #
 #     trainX, trainY = MnistPreprocessing.quick_preprocess_data(trainX, trainY, num_classes=MNIST_NUM_CLASSES,
@@ -241,27 +209,60 @@ if __name__ == '__main__':
 #     testX, testY = MnistPreprocessing.quick_preprocess_data(testX, testY, num_classes=MNIST_NUM_CLASSES,
 #                                                             rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
 #                                                             chl=MNIST_IMG_CHL)
+#     logger.debug('pre-processing data DONE !')
 #
-#     classifier_name = pretrained_model_name[0]
-#     classifier = tf.keras.models.load_model(os.path.join(PRETRAIN_CLASSIFIER_PATH, classifier_name + '.h5'))
+#     logger.debug('robustness testing start')
 #
+#     logger.debug('starting multi-thread')
 #     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
 #                                                'slience_map/label=3,optimizer=adam,lr=0.1,lamda=0.1.npy')
+#     thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+#     # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+#     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
+#     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 #
-#     print(saved_ranking_features_file)
-#     attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=3, target_position=None, classifier=classifier,
-#                               weight=0.1, saved_ranking_features_file=saved_ranking_features_file,
-#                               classifier_name=classifier_name, target_label=5, num_images=1000, num_features=20)
-#     attacker.autoencoder_attack()
+#     thread1.start()
+#     # thread2.start()
+#     # thread3.start()
+#     # thread4.start()
 #
-#     # a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Alexnet_3_5weight=1,0_5000adv.npy'))
-#     # print(a.shape)
-#     # n = 10
-#     # matplotlib.use('TkAgg')
-#     # plt.figure(figsize=(16, 4))
-#     # for i in range(n):
-#     #     ax = plt.subplot(1, n, i + 1)
-#     #     plt.imshow(a[i].reshape((28, 28)), cmap='gray')
-#     #     ax.get_xaxis().set_visible(False)
-#     #     ax.get_yaxis().set_visible(False)
-#     # plt.show()
+#     thread1.join()
+#     # thread2.join()
+#     # thread3.join()
+#     # thread4.join()
+#
+#     logger.debug('Exiting Main Thread')
+#     logger.debug('robustness testing DONE !')
+if __name__ == '__main__':
+    (trainX, trainY), (testX, testY) = keras.datasets.mnist.load_data()
+
+    trainX, trainY = MnistPreprocessing.quick_preprocess_data(trainX, trainY, num_classes=MNIST_NUM_CLASSES,
+                                                              rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
+                                                              chl=MNIST_IMG_CHL)
+    testX, testY = MnistPreprocessing.quick_preprocess_data(testX, testY, num_classes=MNIST_NUM_CLASSES,
+                                                            rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
+                                                            chl=MNIST_IMG_CHL)
+
+    classifier_name = pretrained_model_name[0]
+    classifier = tf.keras.models.load_model(os.path.join(PRETRAIN_CLASSIFIER_PATH, classifier_name + '.h5'))
+
+    saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
+                                               'slience_map/label=3,optimizer=adam,lr=0.1,lamda=0.1.npy')
+
+    print(saved_ranking_features_file)
+    attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=3, target_position=None, classifier=classifier,
+                              weight=0.1, saved_ranking_features_file=saved_ranking_features_file,
+                              classifier_name=classifier_name, target_label=5, num_images=1000, num_features=100)
+    attacker.autoencoder_attack()
+
+    a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Alexnet_3_5weight=0,1_1000adv.npy'))
+    print(a.shape)
+    n = 10
+    matplotlib.use('TkAgg')
+    plt.figure(figsize=(16, 4))
+    for i in range(n):
+        ax = plt.subplot(1, n, i + 1)
+        plt.imshow(a[i].reshape((28, 28)), cmap='gray')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+    plt.show()
