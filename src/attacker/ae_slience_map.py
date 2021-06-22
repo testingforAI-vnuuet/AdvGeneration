@@ -189,7 +189,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
-    for weight_index in range(1, 2):
+    for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
