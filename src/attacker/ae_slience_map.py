@@ -16,7 +16,7 @@ from utility.statistics import *
 tf.config.experimental_run_functions_eagerly(True)
 
 logger = MyLogger.getLog()
-pretrained_model_name = ['Alexnet', 'Lenet', 'vgg13', 'vgg16']
+pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 
 
 class ae_slience_map:
@@ -128,7 +128,7 @@ class ae_slience_map:
             #                                    mode='min')
             # history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=500, batch_size=512,
             #                                callbacks=[early_stopping, model_checkpoint], verbose=1)
-            history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=20, batch_size=256,
+            history = self.autoencoder.fit(self.origin_images, self.origin_images, epochs=50, batch_size=256,
                                            verbose=1)
             self.autoencoder.save(self.autoencoder_file_path)
             self.optimal_epoch = len(history.history['loss'])
@@ -224,19 +224,19 @@ if __name__ == '__main__':
 
     logger.debug('starting multi-thread')
     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-                                               'slience_map/slience_matrix_Alexnet_label=9,optimizer=adam,lr=0.1,lamda=0.1.npy')
-    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+                                               'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
+    # thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    thread1.start()
-    # thread2.start()
+    # thread1.start()
+    thread2.start()
     # thread3.start()
     # thread4.start()
 
-    thread1.join()
-    # thread2.join()
+    # thread1.join()
+    thread2.join()
     # thread3.join()
     # thread4.join()
 
@@ -252,11 +252,11 @@ if __name__ == '__main__':
 #                                                             rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
 #                                                             chl=MNIST_IMG_CHL)
 #
-#     classifier_name = pretrained_model_name[0]
+#     classifier_name = pretrained_model_name[1]
 #     classifier = tf.keras.models.load_model(os.path.join(PRETRAIN_CLASSIFIER_PATH, classifier_name + '.h5'))
 #
 #     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-#                                                'slience_map/slience_matrix_Alexnet_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
+#                                                'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
 #
 #     print(saved_ranking_features_file)
 #     attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=9, target_position=2, classifier=classifier,
@@ -264,7 +264,7 @@ if __name__ == '__main__':
 #                               classifier_name=classifier_name, target_label=None, num_images=1000, num_features=100)
 #     attacker.autoencoder_attack()
 #
-#     a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Alexnet_9_7weight=0,1_1000adv.npy'))
+#     a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Lenet_v2_9_4weight=0,1_1000adv.npy'))
 #     print(a.shape)
 #     n = 10
 #     matplotlib.use('TkAgg')
