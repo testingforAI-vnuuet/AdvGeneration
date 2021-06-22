@@ -23,7 +23,7 @@ pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 class ae_slience_map:
     def __init__(self, trainX, trainY, origin_label, target_position, classifier, weight, saved_ranking_features_file,
                  classifier_name='noname',
-                 num_images=1000, target_label=None, pre_softmax_layer_name='pre_softmax_layer', num_features=10, step=6):
+                 num_images=1000, target_label=None, pre_softmax_layer_name='pre_softmax_layer', num_features=10, step=1):
         """
 
         :param trainX:
@@ -247,18 +247,18 @@ if __name__ == '__main__':
     logger.debug('starting multi-thread')
     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
-    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    # thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    thread1.start()
-    # thread2.start()
+    # thread1.start()
+    thread2.start()
     # thread3.start()
     # thread4.start()
 
-    thread1.join()
-    # thread2.join()
+    # thread1.join()
+    thread2.join()
     # thread3.join()
     # thread4.join()
 
