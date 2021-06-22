@@ -257,7 +257,7 @@ def smooth_vet_can_step_adaptive(ori, adv, dnn, target_label, initial_step, stra
 
 
 #
-def smooth_adv_border_V3(classifier, generated_advs, origin_images, border_indexs, target_label, step=1, K=784):
+def smooth_adv_border_V3(classifier, generated_advs, origin_images, target_label, step=1, K=784):
     result = []
     ranking_strategy = 'jsma'
     for adv, ori in zip(generated_advs, origin_images):

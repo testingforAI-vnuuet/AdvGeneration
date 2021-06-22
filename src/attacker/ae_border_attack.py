@@ -5,12 +5,10 @@ import os.path
 import threading
 import time
 
-import numpy as np
-
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
-from utility.filters.filter_advs import smooth_adv_border_V3, get_important_pixel_vetcan_all_images
+from utility.filters.filter_advs import smooth_adv_border_V3
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -26,7 +24,7 @@ def combined_function(set1, set2, set3):
 
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=12,
+                 step=6,
                  num_images=1000):
         """
 
@@ -152,7 +150,7 @@ class AutoencoderBorder:
                                                                              cnn_model=self.classifier)
 
         self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-                                               get_border(self.origin_adv_result[:-1]), self.target_label)
+                                               self.target_label, step=self.step)
 
         # tmp_path = os.path.join('result', self.method_name)
         # _, _ = get_important_pixel_vetcan_all_images(self.adv_result, self.classifier, os.path.abspath(tmp_path), self.file_shared_name)
@@ -255,7 +253,6 @@ def run_thread(classifier_name, trainX, trainY):
         logger.debug("=======================++++============================")
 
 
-
 class MyThread(threading.Thread):
     def __init__(self, classifier_name, trainX, trainY):
         super(MyThread, self).__init__()
@@ -295,13 +292,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    thread1.start()
-    # thread2.start()
+    # thread1.start()
+    thread2.start()
     # thread3.start()
     # thread4.start()
 
-    thread1.join()
-    # thread2.join()
+    # thread1.join()
+    thread2.join()
     # thread3.join()
     # thread4.join()
 
