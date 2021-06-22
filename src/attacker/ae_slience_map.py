@@ -11,6 +11,7 @@ from attacker.constants import SAVED_ATTACKER_PATH, PRETRAIN_CLASSIFIER_PATH, RE
 from attacker.losses import AE_LOSSES
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
+from utility.filters.filter_advs import smooth_adv_border_V3
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -22,7 +23,7 @@ pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 class ae_slience_map:
     def __init__(self, trainX, trainY, origin_label, target_position, classifier, weight, saved_ranking_features_file,
                  classifier_name='noname',
-                 num_images=1000, target_label=None, pre_softmax_layer_name='pre_softmax_layer', num_features=10):
+                 num_images=1000, target_label=None, pre_softmax_layer_name='pre_softmax_layer', num_features=10, step=6):
         """
 
         :param trainX:
@@ -81,14 +82,16 @@ class ae_slience_map:
         self.generated_candidates = None
         self.adv_result = None
         self.origin_adv_result_label = None
-        self.start = None
-        self.end = None
+        self.start_time = None
+        self.end_time = None
         self.adv_file_path = os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + 'adv.npy')
         self.origin_file_path = os.path.join(RESULT_FOLDER_PATH, self.method_name,
                                              self.file_shared_name + 'origin.npy')
+        self.smooth_adv = None
+        self.step = step
 
     def autoencoder_attack(self, input_shape=(MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL)):
-        self.start = time.time()
+        self.start_time = time.time()
         print(self.autoencoder_file_path)
         custom_objects = {'concate_start_to_end': concate_start_to_end}
 
@@ -141,6 +144,10 @@ class ae_slience_map:
             cnn_model=self.classifier)
 
         self.end_time = time.time()
+
+        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+                                               self.target_label, step=self.step)
+
         logger.debug('[training] sucess_rate={sucess_rate}'.format(sucess_rate=self.adv_result.shape))
         np.save(self.adv_file_path, self.adv_result)
         np.save(self.origin_file_path, self.origin_adv_result)
@@ -156,6 +163,20 @@ class ae_slience_map:
         ranking_matrix = ranking_matrix.flatten()
         return np.argsort(ranking_matrix)[::-1][:self.num_features]
 
+    def export_resultV2(self):
+        result = '<=========='
+        result = ''
+        if self.smooth_adv is not None:
+            str_smooth_adv = list(map(str, self.smooth_adv))
+            result += '\n' + '\n'.join(str_smooth_adv)
+
+        f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
+                 'w')
+        f.write(result)
+        f.close()
+        #
+        return result, self.end_time - self.start_time
+
     def export_result(self):
 
         return self.adv_result.shape[0] / float(self.num_images)
@@ -168,7 +189,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
-    for weight_index in range(0, 11):
+    for weight_index in range(1, 2):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
@@ -181,6 +202,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                                           classifier_name=classifier_name, num_features=100)
                 attacker.autoencoder_attack()
                 weight_result_i_j.append(attacker.export_result())
+                attacker.export_resultV2()
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.average(weight_result_i, axis=0)
@@ -224,19 +246,19 @@ if __name__ == '__main__':
 
     logger.debug('starting multi-thread')
     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-                                               'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
-    # thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+                                               'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.1,lamda=0.5.npy')
+    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
     thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
@@ -256,13 +278,13 @@ if __name__ == '__main__':
 #     classifier = tf.keras.models.load_model(os.path.join(PRETRAIN_CLASSIFIER_PATH, classifier_name + '.h5'))
 #
 #     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-#                                                'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
+#                                                'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.1,lamda=0.5.npy')
 #
 #     print(saved_ranking_features_file)
-#     attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=9, target_position=2, classifier=classifier,
-#                               weight=0.1, saved_ranking_features_file=saved_ranking_features_file,
-#                               classifier_name=classifier_name, target_label=None, num_images=1000, num_features=100)
-#     attacker.autoencoder_attack()
+#     # attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=9, target_position=2, classifier=classifier,
+#     #                           weight=0.1, saved_ranking_features_file=saved_ranking_features_file,
+#     #                           classifier_name=classifier_name, target_label=None, num_images=1000, num_features=100)
+#     # attacker.autoencoder_attack()
 #
 #     a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Lenet_v2_9_4weight=0,1_1000adv.npy'))
 #     print(a.shape)

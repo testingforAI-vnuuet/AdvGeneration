@@ -50,9 +50,9 @@ class slience_ranking:
         return prediction - lamda * l2, prediction, l2
 
     def compute_ranking_matrix(self, saved_image_path, label: int = 0, optimizer=optimizer_adam,
-                               learning_rate: float = 0.5,
-                               iteration: int = 100,
-                               lamda: float = 0.1):
+                               learning_rate: float = 0.1,
+                               iteration: int = 50,
+                               lamda: float = 0.5):
 
         """
         computing ranking matrix for each label
@@ -81,7 +81,7 @@ class slience_ranking:
         lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
             learning_rate,
             decay_steps=10,
-            decay_rate=0.96,
+            decay_rate=0.9,
             staircase=True)
 
         opt = None
@@ -155,11 +155,11 @@ class slience_ranking:
 
 if __name__ == '__main__':
     path_to_save = '../attacker/result/slience_map'
-    classifier_name = 'Alexnet'
+    classifier_name = 'Lenet_v2'
     classifier = tf.keras.models.load_model(f'../classifier/pretrained_models/{classifier_name}.h5')
 
     pre_softmax_classifier = tf.keras.models.Model(inputs=classifier.input,
-                                                   outputs=classifier.get_layer('dense_3').output)
+                                                   outputs=classifier.get_layer('pre_softmax_layer').output)
     ranker = slience_ranking(classifier_name=classifier_name, classifier=pre_softmax_classifier,
                              data_name=MNIST_DATA_NAME,
                              is_clip_above=True)
