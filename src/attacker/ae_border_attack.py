@@ -24,7 +24,7 @@ def combined_function(set1, set2, set3):
 
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=1,
+                 step=6,
                  num_images=1000):
         """
 
