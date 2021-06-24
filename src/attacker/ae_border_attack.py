@@ -94,6 +94,7 @@ class AutoencoderBorder:
         self.smooth_adv = None
         logger.debug('init attacking DONE!')
 
+
     def autoencoder_attack(self, loss):
         ae_trainee = MnistAutoEncoder()
         autoencoder_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name)
