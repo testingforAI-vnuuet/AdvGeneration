@@ -136,11 +136,13 @@ class PrimaryAutoencoderBorder:
         # self.generated_borders = []
         # self.generated_candidates = []
         logger.debug('getting advs')
-        candidate_generated_borders = self.autoencoder.predict(self.origin_images[:1000]) * self.border_origin_images[:1000]
+        candidate_generated_borders = self.autoencoder.predict(
+            self.origin_images[:self.num_images]) * self.border_origin_images[:self.num_images]
 
-        self.generated_candidates = np.clip(candidate_generated_borders + self.internal_origin_images[:1000], 0, 1)
+        self.generated_candidates = np.clip(candidate_generated_borders + self.internal_origin_images[:self.num_images],
+                                            0, 1)
         self.generated_borders = np.array(candidate_generated_borders)
-        self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images[:1000],
+        self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images[:self.num_images],
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
@@ -255,8 +257,8 @@ def run_thread(classifier_name, trainX, trainY):
             for weight_index in range(0, 11):
                 weight_value = weight_index * 0.1
                 attacker = PrimaryAutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                             target_position=target_position, classifier_name=classifier_name,
-                                             weight=weight_value)
+                                                    target_position=target_position, classifier_name=classifier_name,
+                                                    weight=weight_value)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
                 attacker.get_border_and_adv()
                 attacker.export_result()
@@ -288,8 +290,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
             weight_result_i_j = []
             for target_position in range(2, 3):
                 attacker = PrimaryAutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                             target_position=target_position, classifier_name=classifier_name,
-                                             weight=weight_value)
+                                                    target_position=target_position, classifier_name=classifier_name,
+                                                    weight=weight_value)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
                 attacker.get_border_and_adv()
                 weight_result_i_j.append(attacker.export_result())
