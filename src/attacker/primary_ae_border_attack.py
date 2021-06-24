@@ -14,7 +14,7 @@ tf.config.experimental_run_functions_eagerly(True)
 
 logger = MyLogger.getLog()
 
-pretrained_model_name = ['Alexnet', 'Lenet', 'vgg13', 'vgg16']
+pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 
 
 def combined_function(set1, set2, set3):
