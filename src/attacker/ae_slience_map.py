@@ -24,7 +24,7 @@ class ae_slience_map:
     def __init__(self, trainX, trainY, origin_label, target_position, classifier, weight, saved_ranking_features_file,
                  classifier_name='noname',
                  num_images=1000, target_label=None, pre_softmax_layer_name='pre_softmax_layer', num_features=10,
-                 step=6):
+                 step=1):
         """
 
         :param trainX:
