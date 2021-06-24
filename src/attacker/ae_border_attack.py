@@ -92,8 +92,9 @@ class AutoencoderBorder:
         self.adv_result = np.array([])
         self.origin_adv_result = None
         self.smooth_adv = None
+        self.L0_befores = None
+        self.L0_afters = None
         logger.debug('init attacking DONE!')
-
 
     def autoencoder_attack(self, loss):
         ae_trainee = MnistAutoEncoder()
@@ -150,8 +151,9 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-                                               self.target_label, step=self.step)
+        self.smooth_adv, self.L0_befores, self.L0_afters = smooth_adv_border_V3(self.classifier, self.adv_result[:2],
+                                                                                self.origin_adv_result[:2],
+                                                                                self.target_label, step=self.step)
 
         # tmp_path = os.path.join('result', self.method_name)
         # _, _ = get_important_pixel_vetcan_all_images(self.adv_result, self.classifier, os.path.abspath(tmp_path), self.file_shared_name)
@@ -171,6 +173,26 @@ class AutoencoderBorder:
         f.write(result)
         f.close()
         #
+        L0_before_txt = np.array2string(self.L0_befores, separator=' ')
+        L0_before_txt = L0_before_txt.replace('[', '')
+        L0_before_txt = L0_before_txt.replace(']', '')
+        L0_before_txt = L0_before_txt.replace(' ', '\n')
+
+        L0_after_txt = np.array2string(self.L0_afters, separator=' ')
+        L0_after_txt = L0_after_txt.replace(']', '')
+        L0_after_txt = L0_after_txt.replace('[', '')
+        L0_after_txt = L0_after_txt.replace(' ', '\n')
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
+        f.write(L0_before_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
+        f.write(L0_after_txt)
+        f.close()
+
         return result, self.end_time - self.start_time
 
     def save_images(self):
@@ -293,13 +315,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
