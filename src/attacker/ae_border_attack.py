@@ -158,6 +158,10 @@ class AutoencoderBorder:
             self.origin_adv_result[:-1],
             self.target_label, step=self.step)
 
+        self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = reject_outliers(
+            self.L0_befores), reject_outliers(self.L0_afters), reject_outliers(self.L2_befores), reject_outliers(
+            self.L2_afters)
+
         # tmp_path = os.path.join('result', self.method_name)
         # _, _ = get_important_pixel_vetcan_all_images(self.adv_result, self.classifier, os.path.abspath(tmp_path), self.file_shared_name)
 

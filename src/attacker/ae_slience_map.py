@@ -9,6 +9,7 @@ import time
 from attacker.ae_custom_layer import *
 from attacker.constants import SAVED_ATTACKER_PATH, PRETRAIN_CLASSIFIER_PATH, RESULT_FOLDER_PATH
 from attacker.losses import AE_LOSSES
+from attacker.mnist_utils import reject_outliers
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
 from utility.filters.filter_advs import smooth_adv_border_V3
@@ -153,6 +154,10 @@ class ae_slience_map:
         self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
             self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
             self.target_label, step=self.step)
+
+        self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = reject_outliers(
+            self.L0_befores), reject_outliers(self.L0_afters), reject_outliers(self.L2_befores), reject_outliers(
+            self.L2_afters)
 
         logger.debug('[training] sucess_rate={sucess_rate}'.format(sucess_rate=self.adv_result.shape))
         np.save(self.adv_file_path, self.adv_result)

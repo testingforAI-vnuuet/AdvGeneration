@@ -113,7 +113,6 @@ def smooth_vet_can_step(ori, adv, dnn, target_label, step, strategy):
     diff_pixel_arr, _ = feature_ranker.jsma_ranking_borderV2(adv, ori, None, target_label, dnn, diff_pixel_arr)
 
     diff_pixel_arr = np.asarray(diff_pixel_arr)
-    print(diff_pixel_arr)
     #
     count = 0
     old_indexes = []
