@@ -94,6 +94,8 @@ class AutoencoderBorder:
         self.smooth_adv = None
         self.L0_befores = None
         self.L0_afters = None
+        self.L2_befores = None
+        self.L2_afters = None
         logger.debug('init attacking DONE!')
 
     def autoencoder_attack(self, loss):
@@ -151,9 +153,10 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv, self.L0_befores, self.L0_afters = smooth_adv_border_V3(self.classifier, self.adv_result[:-1],
-                                                                                self.origin_adv_result[:-1],
-                                                                                self.target_label, step=self.step)
+        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+            self.classifier, self.adv_result[:-1],
+            self.origin_adv_result[:-1],
+            self.target_label, step=self.step)
 
         # tmp_path = os.path.join('result', self.method_name)
         # _, _ = get_important_pixel_vetcan_all_images(self.adv_result, self.classifier, os.path.abspath(tmp_path), self.file_shared_name)
@@ -183,6 +186,16 @@ class AutoencoderBorder:
         L0_after_txt = L0_after_txt.replace('[', '')
         L0_after_txt = L0_after_txt.replace(' ', '\n')
 
+        L2_before_txt = np.array2string(self.L2_befores, separator=' ')
+        L2_before_txt = L2_before_txt.replace('[', '')
+        L2_before_txt = L2_before_txt.replace(']', '')
+        L2_before_txt = L2_before_txt.replace(' ', '\n')
+
+        L2_after_txt = np.array2string(self.L2_afters, separator=' ')
+        L2_after_txt = L2_after_txt.replace('[', '')
+        L2_after_txt = L2_after_txt.replace(']', '')
+        L2_after_txt = L2_after_txt.replace(' ', '\n')
+
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
         f.write(L0_before_txt)
@@ -191,6 +204,16 @@ class AutoencoderBorder:
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
         f.write(L0_after_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        f.write(L2_before_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
+        f.write(L2_after_txt)
         f.close()
 
         return result, self.end_time - self.start_time

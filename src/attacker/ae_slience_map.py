@@ -92,6 +92,8 @@ class ae_slience_map:
         self.step = step
         self.L0_befores = None
         self.L0_afters = None
+        self.L2_befores = None
+        self.L2_afters = None
 
     def autoencoder_attack(self, input_shape=(MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL)):
         self.start_time = time.time()
@@ -148,8 +150,9 @@ class ae_slience_map:
 
         self.end_time = time.time()
 
-        self.smooth_adv, self.L0_befores, self.L0_afters = smooth_adv_border_V3(self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-                                               self.target_label, step=self.step)
+        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+            self.target_label, step=self.step)
 
         logger.debug('[training] sucess_rate={sucess_rate}'.format(sucess_rate=self.adv_result.shape))
         np.save(self.adv_file_path, self.adv_result)
@@ -187,6 +190,16 @@ class ae_slience_map:
         L0_after_txt = L0_after_txt.replace('[', '')
         L0_after_txt = L0_after_txt.replace(' ', '\n')
 
+        L2_before_txt = np.array2string(self.L2_befores, separator=' ')
+        L2_before_txt = L2_before_txt.replace('[', '')
+        L2_before_txt = L2_before_txt.replace(']', '')
+        L2_before_txt = L2_before_txt.replace(' ', '\n')
+
+        L2_after_txt = np.array2string(self.L2_afters, separator=' ')
+        L2_after_txt = L2_after_txt.replace('[', '')
+        L2_after_txt = L2_after_txt.replace(']', '')
+        L2_after_txt = L2_after_txt.replace(' ', '\n')
+
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
         f.write(L0_before_txt)
@@ -195,6 +208,16 @@ class ae_slience_map:
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
         f.write(L0_after_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        f.write(L2_before_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
+        f.write(L2_after_txt)
         f.close()
 
         return result, self.end_time - self.start_time

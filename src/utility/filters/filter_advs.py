@@ -266,6 +266,10 @@ def smooth_adv_border_V3(classifier, generated_advs, origin_images, target_label
     ranking_strategy = 'jsma'
     L0_befores = []
     L0_afters = []
+
+    L2_befores = []
+    L2_afters = []
+
     for adv, ori in zip(generated_advs, origin_images):
         smooth_adv, L0_after, L0_before, L2_after, L2_before, restored_pixel_by_prediction = \
             smooth_vet_can_step_adaptive(
@@ -278,7 +282,9 @@ def smooth_adv_border_V3(classifier, generated_advs, origin_images, target_label
         result.append(per_pixel_by_prediction)
         L0_befores.append(L0_before)
         L0_afters.append(L0_after)
-    return np.average(result, axis=0), np.array(L0_befores), np.array(L0_afters)
+        L2_befores.append(L2_before)
+        L2_afters.append(L2_after)
+    return np.average(result, axis=0), np.array(L0_befores), np.array(L0_afters), np.array(L2_befores), np.array(L2_afters)
 
 
 def get_important_pixel_vetcan_all_images(images, classifier, path, shared_file_name):
