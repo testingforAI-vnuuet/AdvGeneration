@@ -9,7 +9,7 @@ import time
 from attacker.ae_custom_layer import *
 from attacker.constants import SAVED_ATTACKER_PATH, PRETRAIN_CLASSIFIER_PATH, RESULT_FOLDER_PATH
 from attacker.losses import AE_LOSSES
-from attacker.mnist_utils import reject_outliers
+from attacker.mnist_utils import reject_outliers_v2
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
 from utility.filters.filter_advs import smooth_adv_border_V3
@@ -155,9 +155,9 @@ class ae_slience_map:
             self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
             self.target_label, step=self.step)
 
-        self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = reject_outliers(
-            self.L0_befores), reject_outliers(self.L0_afters), reject_outliers(self.L2_befores), reject_outliers(
-            self.L2_afters)
+        # self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = reject_outliers(
+        #     self.L0_befores), reject_outliers(self.L0_afters), reject_outliers(self.L2_befores), reject_outliers(
+        #     self.L2_afters)
 
         logger.debug('[training] sucess_rate={sucess_rate}'.format(sucess_rate=self.adv_result.shape))
         np.save(self.adv_file_path, self.adv_result)
@@ -225,7 +225,7 @@ class ae_slience_map:
         f.write(L2_after_txt)
         f.close()
 
-        return result, self.end_time - self.start_time
+        return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
 
     def export_result(self):
 
@@ -239,6 +239,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
+    L0s = []
+    L2s = []
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -252,7 +254,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
                                           classifier_name=classifier_name, num_features=100)
                 attacker.autoencoder_attack()
                 weight_result_i_j.append(attacker.export_result())
-                attacker.export_resultV2()
+                _, _, L0, L2 = attacker.export_resultV2()
+                L0s.append(L0)
+                L2s.append(L2)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.average(weight_result_i, axis=0)
@@ -265,6 +269,20 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f = open('./result/ae_slience_map/' + classifier_name + '.txt', 'w')
     f.write(s)
     f.close()
+
+    L0s = np.array(L0s)
+    L2s = np.array(L2s)
+    L0s = reject_outliers_v2(L0s)
+    L2s = reject_outliers_v2(L2s)
+
+    min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
+    min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
+
+    l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
+    f = open('./result/ae_slience_map/' + classifier_name + 'l0l2.txt', 'w')
+    f.write(l0_l2_txt)
+    f.close()
+
 
 
 class MyThread(threading.Thread):
@@ -300,17 +318,17 @@ if __name__ == '__main__':
     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                'slience_map/slience_matrix_Alexnet_label=9,optimizer=adam,lr=0.1,lamda=0.1.npy')
     thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
     thread1.join()
-    thread2.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 

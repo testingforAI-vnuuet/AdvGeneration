@@ -67,6 +67,17 @@ def reject_outliers(data):
     return np.array(filtered)
 
 
+def reject_outliers_v2(data: np.ndarray):
+    if data.shape[0] == 0:
+        return np.array([])
+
+    data = np.array(data.flatten())
+    Q1 = np.quantile(data, .25)
+    Q3 = np.quantile(data, .75)
+    IQR = Q3 - Q1
+    filtered_data = [data_i for data_i in data if data_i >= Q1 - 1.5 * IQR and data_i <= Q3 + 1.5 * IQR]
+    return np.array(filtered_data)
+
 def L0(gen, test):
     threshold = 10e-4
     gen_new = np.array(gen)
@@ -74,9 +85,10 @@ def L0(gen, test):
 
     return sum(0 if abs(g - t) < threshold else 1 for g, t in zip(gen_new.flatten(), test_new.flatten()))
 
+
 def compute_l0_V2(adv: np.ndarray,
-               ori: np.ndarray,
-               normalized=False):  # 1d array, value in range of [0 .. 1]
+                  ori: np.ndarray,
+                  normalized=False):  # 1d array, value in range of [0 .. 1]
     if not normalized:
         adv = np.round(adv * 255)
         ori = np.round(ori * 255)
@@ -88,13 +100,15 @@ def compute_l0_V2(adv: np.ndarray,
             l0_dist += 1
     return l0_dist
 
+
 def compute_l2_V2(adv: np.ndarray,
-               ori: np.ndarray):
+                  ori: np.ndarray):
     if not (np.min(adv) >= 0 and np.max(adv) <= 1):
         adv = adv / 255
     if not (np.min(ori) >= 0 and np.max(ori) <= 1):
         ori = ori / 255
     return np.linalg.norm(adv.reshape(-1) - ori.reshape(-1))
+
 
 def L2(gen, test):
     gen = gen.flatten()

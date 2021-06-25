@@ -214,7 +214,7 @@ def smooth_vet_can_stepV2(ori, adv, dnn, target_label, step, strategy=None):
     L0_after = compute_l0_V2(ori_0_255, smooth_adv_0_255, normalized=True)
     # print(f"L0_after = {L0_after}")
 
-    L2_after = compute_l0_V2(ori_0_255, smooth_adv_0_255)
+    L2_after = compute_l2_V2(ori_0_255, smooth_adv_0_255)
     L2_before = compute_l2_V2(ori_0_255, original_adv_0_255)
 
     # highlight = utilities.highlight_diff(original_adv_0_255, smooth_adv_0_255)
