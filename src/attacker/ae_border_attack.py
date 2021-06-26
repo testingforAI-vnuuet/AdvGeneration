@@ -293,7 +293,7 @@ def run_thread(classifier_name, trainX, trainY):
     for origin_label in range(9, 10):
         # exe_time_sum = 0
         for target_position in range(2, 3):
-            for weight_index in range(1, 2):
+            for weight_index in range(1, 11):
                 weight_value = weight_index * 0.1
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                              target_position=target_position, classifier_name=classifier_name,
@@ -361,12 +361,12 @@ if __name__ == '__main__':
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
     thread1.join()
-    thread2.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
