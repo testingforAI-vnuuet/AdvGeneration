@@ -318,17 +318,17 @@ if __name__ == '__main__':
     saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                'slience_map/slience_matrix_Alexnet_label=9,optimizer=adam,lr=0.1,lamda=0.1.npy')
     thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
-    # thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
+    thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    thread1.start()
-    # thread2.start()
+    # thread1.start()
+    thread2.start()
     # thread3.start()
     # thread4.start()
 
-    thread1.join()
-    # thread2.join()
+    # thread1.join()
+    thread2.join()
     # thread3.join()
     # thread4.join()
 
