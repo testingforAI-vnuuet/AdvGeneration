@@ -251,7 +251,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
 
             if origin_label == 9 and classifier_name == 'Lenet_v2':
                 saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-                                                           'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.1,lamda=0.5.npy')
+                                                           'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
 
             for target_position in range(2, 11):
                 attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=origin_label,
