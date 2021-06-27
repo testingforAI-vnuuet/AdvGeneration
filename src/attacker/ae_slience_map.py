@@ -240,7 +240,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     for weight_index in [0.01, 0.05, 0.5, 1.0]:
-        weight_value = weight_index * 0.1
+        weight_value = weight_index
         # weight_value = weight_index
         weight_result_i = []
         for origin_label in range(0, 10):
