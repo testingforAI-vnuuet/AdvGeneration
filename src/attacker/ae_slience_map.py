@@ -165,7 +165,7 @@ class ae_slience_map:
     def __get_important_features(self):
         ranking_matrix = None
         if not os.path.isfile(self.saved_ranking_features_file):
-            print(self.saved_ranking_features_file)
+            logger.debug(self.saved_ranking_features_file)
             logger.error('not found ranking matrix')
             raise NotImplementedError('not found ranking matrix')
         if os.path.isfile(self.saved_ranking_features_file):
@@ -272,7 +272,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     s = np.array2string(weight_result, separator=' ')
     s = s.replace('[', ' ')
     s = s.replace(']', ' ')
-    f = open('./result/ae_slience_map/' + classifier_name + '.txt', 'w')
+    f = open('./result/ae_slience_map/' + classifier_name + '2.txt', 'w')
     f.write(s)
     f.close()
 
