@@ -165,6 +165,7 @@ class ae_slience_map:
     def __get_important_features(self):
         ranking_matrix = None
         if not os.path.isfile(self.saved_ranking_features_file):
+            print(self.saved_ranking_features_file)
             logger.error('not found ranking matrix')
             raise NotImplementedError('not found ranking matrix')
         if os.path.isfile(self.saved_ranking_features_file):
@@ -243,7 +244,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
         weight_value = weight_index
         # weight_value = weight_index
         weight_result_i = []
-        for origin_label in range(0, 10):
+        for origin_label in range(9, 10):
             weight_result_i_j = []
             saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                        f'slience_map/slience_matrix_{classifier_name}_label={origin_label},optimizer=adam,lr=0.1,lamda=0.1.npy')
@@ -252,7 +253,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                            'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.1,lamda=0.5.npy')
 
-            for target_position in range(2, 11):
+            for target_position in range(2, 3):
                 attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=origin_label,
                                           target_position=target_position, classifier=cnn_model, weight=weight_value,
                                           saved_ranking_features_file=saved_ranking_features_file,
@@ -266,6 +267,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
+        break
 
     weight_result = np.array(weight_result)
     s = np.array2string(weight_result, separator=' ')
