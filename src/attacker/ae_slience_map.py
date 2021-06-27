@@ -244,7 +244,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
         weight_value = weight_index
         # weight_value = weight_index
         weight_result_i = []
-        for origin_label in range(9, 10):
+        for origin_label in range(0, 10):
             weight_result_i_j = []
             saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                        f'slience_map/slience_matrix_{classifier_name}_label={origin_label},optimizer=adam,lr=0.1,lamda=0.1.npy')
@@ -253,7 +253,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                            'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.1,lamda=0.5.npy')
 
-            for target_position in range(2, 3):
+            for target_position in range(2, 11):
                 attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=origin_label,
                                           target_position=target_position, classifier=cnn_model, weight=weight_value,
                                           saved_ranking_features_file=saved_ranking_features_file,
@@ -267,7 +267,6 @@ def run_thread_V2(classifier_name, trainX, trainY):
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
-        break
 
     weight_result = np.array(weight_result)
     s = np.array2string(weight_result, separator=' ')
@@ -282,8 +281,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
     # L0s = reject_outliers_v2(L0s)
     # L2s = reject_outliers_v2(L2s)
 
-    min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
-    min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
+    # min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
+    # min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
     #
     # l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
     # f = open('./result/ae_slience_map/' + classifier_name + 'l0l2.txt', 'w')
