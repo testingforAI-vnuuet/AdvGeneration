@@ -154,7 +154,7 @@ class slience_ranking:
 
 
 if __name__ == '__main__':
-    path_to_save = '../attacker/result/slience_map/test'
+    path_to_save = '../attacker/result/slience_map'
     classifier_name = 'Lenet_v2'
     classifier = tf.keras.models.load_model(f'../classifier/pretrained_models/{classifier_name}.h5')
 
@@ -166,5 +166,5 @@ if __name__ == '__main__':
     ranker = slience_ranking(classifier_name=classifier_name, classifier=pre_softmax_classifier,
                              data_name=MNIST_DATA_NAME,
                              is_clip_above=True)
-    for i in range(9, 10):
+    for i in range(5, 6):
         ranker.compute_ranking_matrix(saved_image_path=path_to_save, label=i)
