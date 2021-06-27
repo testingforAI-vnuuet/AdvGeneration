@@ -151,9 +151,9 @@ class ae_slience_map:
 
         self.end_time = time.time()
 
-        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-            self.target_label, step=self.step)
+        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+        #     self.target_label, step=self.step)
 
         # self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = reject_outliers(
         #     self.L0_befores), reject_outliers(self.L0_afters), reject_outliers(self.L2_befores), reject_outliers(
@@ -205,25 +205,25 @@ class ae_slience_map:
         L2_after_txt = L2_after_txt.replace(']', '')
         L2_after_txt = L2_after_txt.replace(' ', '\n')
 
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        f.write(L0_before_txt)
-        f.close()
-
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
-        f.write(L0_after_txt)
-        f.close()
-
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        f.write(L2_before_txt)
-        f.close()
-
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
-        f.write(L2_after_txt)
-        f.close()
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
+        # f.write(L0_before_txt)
+        # f.close()
+        #
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
+        # f.write(L0_after_txt)
+        # f.close()
+        #
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        # f.write(L2_before_txt)
+        # f.close()
+        #
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
+        # f.write(L2_after_txt)
+        # f.close()
 
         return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
 
@@ -254,9 +254,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
                                           classifier_name=classifier_name, num_features=100)
                 attacker.autoencoder_attack()
                 weight_result_i_j.append(attacker.export_result())
-                _, _, L0, L2 = attacker.export_resultV2()
-                L0s.append(L0)
-                L2s.append(L2)
+                # _, _, L0, L2 = attacker.export_resultV2()
+                # L0s.append(L0)
+                # L2s.append(L2)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.average(weight_result_i, axis=0)
@@ -277,11 +277,11 @@ def run_thread_V2(classifier_name, trainX, trainY):
 
     min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
     min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
-
-    l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    f = open('./result/ae_slience_map/' + classifier_name + 'l0l2.txt', 'w')
-    f.write(l0_l2_txt)
-    f.close()
+    #
+    # l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
+    # f = open('./result/ae_slience_map/' + classifier_name + 'l0l2.txt', 'w')
+    # f.write(l0_l2_txt)
+    # f.close()
 
 
 
