@@ -52,7 +52,7 @@ class slience_ranking:
     def compute_ranking_matrix(self, saved_image_path, label: int = 0, optimizer=optimizer_adam,
                                learning_rate: float = 0.1,
                                iteration: int = 50,
-                               lamda: float = 0.5):
+                               lamda: float = 0.1):
 
         """
         computing ranking matrix for each label
@@ -119,7 +119,7 @@ class slience_ranking:
                 term_2_per_iterations.append(term_2)
 
         self.result_image = image.numpy()
-        image_results = [self.__post_processing(image_i) for image_i in image_per_iterations]
+        image_results = [self.__post_processing(image_i, need_to_normalize=True) for image_i in image_per_iterations]
         shared_file_name = f'slience_matrix_{self.classifier_name}_label={label},optimizer={optimizer},lr={learning_rate},lamda={lamda}'
         self.__save_result_example(image_results, term_1_per_iterations, term_2_per_iterations, saved_image_path,
                                    shared_file_name)
@@ -154,13 +154,17 @@ class slience_ranking:
 
 
 if __name__ == '__main__':
-    path_to_save = '../attacker/result/slience_map'
+    path_to_save = '../attacker/result/slience_map/test'
     classifier_name = 'Lenet_v2'
     classifier = tf.keras.models.load_model(f'../classifier/pretrained_models/{classifier_name}.h5')
+
+    # pre_softmax_classifier = tf.keras.models.Model(inputs=classifier.input,
+    #                                                outputs=classifier.get_layer('dense_3').output)
 
     pre_softmax_classifier = tf.keras.models.Model(inputs=classifier.input,
                                                    outputs=classifier.get_layer('pre_softmax_layer').output)
     ranker = slience_ranking(classifier_name=classifier_name, classifier=pre_softmax_classifier,
                              data_name=MNIST_DATA_NAME,
                              is_clip_above=True)
-    ranker.compute_ranking_matrix(saved_image_path=path_to_save, label=9)
+    for i in range(9, 10):
+        ranker.compute_ranking_matrix(saved_image_path=path_to_save, label=i)
