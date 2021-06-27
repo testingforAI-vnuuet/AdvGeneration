@@ -240,7 +240,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in [0.5, 1.0]:
+    for weight_index in [0.01, 0.05]:
         weight_value = weight_index
         # weight_value = weight_index
         weight_result_i = []
@@ -272,7 +272,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     s = np.array2string(weight_result, separator=' ')
     s = s.replace('[', ' ')
     s = s.replace(']', ' ')
-    f = open('./result/ae_slience_map/' + classifier_name + '22.txt', 'w')
+    f = open('./result/ae_slience_map/' + classifier_name + '2.txt', 'w')
     f.write(s)
     f.close()
 
