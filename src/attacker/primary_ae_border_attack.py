@@ -4,6 +4,7 @@ Created At: 23/03/2021 16:22
 
 import threading
 import time
+from collections import defaultdict
 
 from attacker.autoencoder import *
 from attacker.constants import *
@@ -46,7 +47,7 @@ class PrimaryAutoencoderBorder:
         self.optimal_epoch = 0
         self.weight = weight
         self.num_images = num_images
-        self.method_name = 'ae_border'
+        self.method_name = PRIMARY_BORDER_METHOD_NAME
 
         logger.debug('init attacking: origin_label = {origin_label}'.format(origin_label=self.origin_label))
 
@@ -184,6 +185,9 @@ class PrimaryAutoencoderBorder:
         # f.close()
         #
         # return result, self.end_time - self.start_time
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + 'sucess_rate.txt'), 'w')
+        # f.write(str(self.adv_result.shape[0] / float(self.num_images)))
+        # f.close()
         return self.adv_result.shape[0] / float(self.num_images)
 
     def save_images(self):
@@ -245,34 +249,56 @@ class PrimaryAutoencoderBorder:
                     l2_l0_best, l0_worst, l0_best, path_l0, self.classifier, worst_l0_index, best_l0_index)
 
 
-def run_thread(classifier_name, trainX, trainY):
-    logger.debug("\n=======================================================")
-    logger.debug('processing model: ' + classifier_name)
-    cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
-    result_txt = classifier_name + '\n'
-    # AE_LOSS = AE_LOSSES.border_loss
-    for origin_label in range(9, 10):
-        # exe_time_sum = 0
-        for target_position in range(2, 3):
-            for weight_index in range(0, 11):
-                weight_value = weight_index * 0.1
-                attacker = PrimaryAutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                                    target_position=target_position, classifier_name=classifier_name,
-                                                    weight=weight_value)
-                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
-                attacker.get_border_and_adv()
-                attacker.export_result()
-                del attacker
-                # attacker.save_images()
-                # res_txt, exe_time = attacker.export_result()
-        #         result_txt += res_txt
-        #         exe_time_sum += exe_time
-        # f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
-        # result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
-        # f.write(result_txt)
-        # f.close()
-        logger.debug('processing model: ' + classifier_name + ' DONE!')
-        logger.debug("=======================++++============================")
+# def run_thread(classifier_name, trainX, trainY):
+#     logger.debug("\n=======================================================")
+#     logger.debug('processing model: ' + classifier_name)
+#     cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
+#     result_txt = classifier_name + '\n'
+#     # AE_LOSS = AE_LOSSES.border_loss
+#
+#     sucess_rate_dict = defaultdict(int)
+#     for origin_label in range(1, 2):
+#         # exe_time_sum = 0
+#         for target_position in range(2, 3):
+#             for weight_index in [0.01, 0.05, 0.5, 1.0]:
+#                 weight_value = weight_index
+#                 attacker = PrimaryAutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
+#                                                     target_position=target_position, classifier_name=classifier_name,
+#                                                     weight=weight_value)
+#                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
+#                 attacker.get_border_and_adv()
+#                 attacker.export_result()
+#                 success_rate = attacker.export_result()
+#                 # _, _, L0, L2 = attacker.export_resultV2()
+#                 # L0s.append(L0)
+#                 # L2s.append(L2)
+#                 success_rate_single = {f'{origin_label}_{target_position}_{weight_value}': success_rate}
+#                 sucess_rate_dict.update(success_rate_single)
+#
+#                 del attacker
+#                 # attacker.save_images()
+#                 # res_txt, exe_time = attacker.export_result()
+#         #         result_txt += res_txt
+#         #         exe_time_sum += exe_time
+#         # f = open('./result/' + classifier_name + str(origin_label) + '.txt', 'w')
+#         # result_txt += '\n average_time = ' + str(exe_time_sum / 9.) + '\n'
+#         # f.write(result_txt)
+#         # f.close()
+#     key_max = max(sucess_rate_dict, key=sucess_rate_dict.get)
+#     value = sucess_rate_dict[key_max]
+#     result_max = f'{key_max}: {value}'
+#
+#     key_min = min(sucess_rate_dict, key=sucess_rate_dict.get)
+#     value = sucess_rate_dict[key_min]
+#     result_min = f'{key_min}: {value}'
+#     result = result_max + '\n' + result_min
+#
+#     f = open('./result/ae_border/' + classifier_name + 'success_rate.txt', 'w')
+#     f.write(result)
+#     f.close()
+#
+#     logger.debug('processing model: ' + classifier_name + ' DONE!')
+#     logger.debug("=======================++++============================")
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -282,13 +308,13 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
-    for weight_index in range(0, 11):
-        weight_value = weight_index * 0.1
+    for weight_index in [0.01, 0.05, 0.5, 1.0]:
+        weight_value = weight_index
         # weight_value = weight_index
         weight_result_i = []
-        for origin_label in range(9, 10):
+        for origin_label in range(0, 10):
             weight_result_i_j = []
-            for target_position in range(2, 3):
+            for target_position in range(2, 11):
                 attacker = PrimaryAutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                                     target_position=target_position, classifier_name=classifier_name,
                                                     weight=weight_value)
@@ -337,7 +363,7 @@ if __name__ == '__main__':
     logger.debug('robustness testing start')
 
     logger.debug('starting multi-thread')
-    # thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
+    thread1 = MyThread(pretrained_model_name[0], trainX, trainY)
     thread2 = MyThread(pretrained_model_name[1], trainX, trainY)
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
