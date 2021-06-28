@@ -272,8 +272,11 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 sucess_rate_dict.update(success_rate_single)
                 del attacker
             weight_result_i.append(weight_result_i_j)
+        weight_result_i = np.array(weight_result_i)
+        np.savetxt(f'./result/ae_slience_map/{classifier_name}_{weight_value}.csv', weight_result_i, delimiter=",")
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
+
 
     key_max = max(sucess_rate_dict, key=sucess_rate_dict.get)
     value = sucess_rate_dict[key_max]
