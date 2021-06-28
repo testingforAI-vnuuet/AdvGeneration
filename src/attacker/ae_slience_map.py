@@ -7,7 +7,8 @@ import threading
 import time
 
 from attacker.ae_custom_layer import *
-from attacker.constants import SAVED_ATTACKER_PATH, PRETRAIN_CLASSIFIER_PATH, RESULT_FOLDER_PATH
+from attacker.constants import SAVED_ATTACKER_PATH, PRETRAIN_CLASSIFIER_PATH, RESULT_FOLDER_PATH, \
+    SLIENCE_MAP_METHOD_NAME
 from attacker.losses import AE_LOSSES
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
@@ -47,7 +48,7 @@ class ae_slience_map:
         self.origin_label, self.target_position = origin_label, target_position
         self.classifier, self.classifier_name = classifier, classifier_name
         self.weight, self.num_images = weight, num_images
-        self.method_name = 'ae_slience_map'
+        self.method_name = SLIENCE_MAP_METHOD_NAME
 
         logger.debug('init attacking: origin_label = {origin_label}'.format(origin_label=self.origin_label))
         # for training autoenencoder
@@ -96,7 +97,6 @@ class ae_slience_map:
 
     def autoencoder_attack(self, input_shape=(MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL)):
         self.start_time = time.time()
-        print(self.autoencoder_file_path)
         custom_objects = {'concate_start_to_end': concate_start_to_end}
 
         if os.path.isfile(self.autoencoder_file_path):
@@ -228,6 +228,9 @@ class ae_slience_map:
 
     def export_result(self):
 
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + 'sucess_rate.txt'), 'w')
+        f.write(str(self.adv_result.shape[0] / float(self.num_images)))
+        f.close()
         return self.adv_result.shape[0] / float(self.num_images)
 
 
@@ -240,11 +243,11 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in [0.5, 1.0]:
-        weight_value = weight_index
+    for weight_index in [0.5]:
+        weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
-        for origin_label in range(0, 10):
+        for origin_label in range(9, 10):
             weight_result_i_j = []
             saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                        f'slience_map/slience_matrix_{classifier_name}_label={origin_label},optimizer=adam,lr=0.1,lamda=0.1.npy')
@@ -253,7 +256,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                            'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
 
-            for target_position in range(2, 11):
+            for target_position in range(2, 6):
                 attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=origin_label,
                                           target_position=target_position, classifier=cnn_model, weight=weight_value,
                                           saved_ranking_features_file=saved_ranking_features_file,
@@ -268,13 +271,13 @@ def run_thread_V2(classifier_name, trainX, trainY):
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
 
-    weight_result = np.array(weight_result)
-    s = np.array2string(weight_result, separator=' ')
-    s = s.replace('[', ' ')
-    s = s.replace(']', ' ')
-    f = open('./result/ae_slience_map/' + classifier_name + '22.txt', 'w')
-    f.write(s)
-    f.close()
+    # weight_result = np.array(weight_result)
+    # s = np.array2string(weight_result, separator=' ')
+    # s = s.replace('[', ' ')
+    # s = s.replace(']', ' ')
+    # f = open('./result/ae_slience_map/' + classifier_name + '22.txt', 'w')
+    # f.write(s)
+    # f.close()
 
     # L0s = np.array(L0s)
     # L2s = np.array(L2s)
@@ -327,13 +330,13 @@ if __name__ == '__main__':
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
