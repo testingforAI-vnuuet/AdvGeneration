@@ -157,8 +157,8 @@ class ae_slience_map:
         #     self.L2_afters)
 
         logger.debug('[training] sucess_rate={sucess_rate}'.format(sucess_rate=self.adv_result.shape))
-        np.save(self.adv_file_path, self.adv_result)
-        np.save(self.origin_file_path, self.origin_adv_result)
+        # np.save(self.adv_file_path, self.adv_result)
+        # np.save(self.origin_file_path, self.origin_adv_result)
         logger.debug('[training] training autoencoder DONE!')
 
     def __get_important_features(self):
@@ -329,13 +329,13 @@ if __name__ == '__main__':
     # thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     # thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    thread1.start()
-    # thread2.start()
+    # thread1.start()
+    thread2.start()
     # thread3.start()
     # thread4.start()
 
-    thread1.join()
-    # thread2.join()
+    # thread1.join()
+    thread2.join()
     # thread3.join()
     # thread4.join()
 
