@@ -242,7 +242,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in [0.5]:
+    for weight_index in [0.05, 0.5]:
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
