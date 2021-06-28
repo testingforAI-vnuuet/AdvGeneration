@@ -5,6 +5,7 @@ Created At: 11/06/2021 09:43
 import os
 import threading
 import time
+from collections import defaultdict
 
 from attacker.ae_custom_layer import *
 from attacker.constants import *
@@ -12,7 +13,6 @@ from attacker.losses import AE_LOSSES
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
 from utility.statistics import *
-from collections import defaultdict
 
 tf.config.experimental_run_functions_eagerly(True)
 
@@ -275,10 +275,14 @@ def run_thread_V2(classifier_name, trainX, trainY):
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
 
+    key_max = max(sucess_rate_dict, key=sucess_rate_dict.get)
+    value = sucess_rate_dict[key_max]
+    result_max = f'{key_max}: {value}'
 
-    key = max(sucess_rate_dict, key=sucess_rate_dict.get)
-    value = sucess_rate_dict[key]
-    result = f'{key}: {value}'
+    key_min = min(sucess_rate_dict, key=sucess_rate_dict.get)
+    value = sucess_rate_dict[key_min]
+    result_min = f'{key_min}: {value}'
+    result = result_max + '\n' + result_min
 
     # weight_result = np.array(weight_result)
     # s = np.array2string(weight_result, separator=' ')
