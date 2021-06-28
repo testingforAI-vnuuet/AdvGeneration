@@ -12,6 +12,7 @@ from attacker.losses import AE_LOSSES
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
 from utility.statistics import *
+from collections import defaultdict
 
 tf.config.experimental_run_functions_eagerly(True)
 
@@ -242,11 +243,12 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in [0.05, 0.5]:
-        weight_value = weight_index * 0.1
+    sucess_rate_dict = defaultdict(int)
+    for weight_index in [0.01, 0.05, 0.5, 1.0]:
+        weight_value = weight_index
         # weight_value = weight_index
         weight_result_i = []
-        for origin_label in range(9, 10):
+        for origin_label in range(0, 10):
             weight_result_i_j = []
             saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
                                                        f'slience_map/slience_matrix_{classifier_name}_label={origin_label},optimizer=adam,lr=0.1,lamda=0.1.npy')
@@ -262,13 +264,21 @@ def run_thread_V2(classifier_name, trainX, trainY):
                                           classifier_name=classifier_name, num_features=100)
                 attacker.autoencoder_attack()
                 weight_result_i_j.append(attacker.export_result())
+                success_rate = attacker.export_result()
                 # _, _, L0, L2 = attacker.export_resultV2()
                 # L0s.append(L0)
                 # L2s.append(L2)
+                success_rate_single = {f'{origin_label}_{target_position}_{weight_value}': success_rate}
+                sucess_rate_dict.update(success_rate_single)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
+
+
+    key = max(sucess_rate_dict, key=sucess_rate_dict.get)
+    value = sucess_rate_dict[key]
+    result = f'{key}: {value}'
 
     # weight_result = np.array(weight_result)
     # s = np.array2string(weight_result, separator=' ')
@@ -287,9 +297,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
     # min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
     #
     # l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    # f = open('./result/ae_slience_map/' + classifier_name + 'l0l2.txt', 'w')
-    # f.write(l0_l2_txt)
-    # f.close()
+    f = open('./result/ae_slience_map/' + classifier_name + 'success_rate.txt', 'w')
+    f.write(result)
+    f.close()
 
 
 class MyThread(threading.Thread):
@@ -358,10 +368,10 @@ if __name__ == '__main__':
 #                                                'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.1,lamda=0.5.npy')
 #
 #     print(saved_ranking_features_file)
-#     # attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=9, target_position=2, classifier=classifier,
-#     #                           weight=0.1, saved_ranking_features_file=saved_ranking_features_file,
-#     #                           classifier_name=classifier_name, target_label=None, num_images=1000, num_features=100)
-#     # attacker.autoencoder_attack()
+#     attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=9, target_position=2, classifier=classifier,
+#                               weight=0.1, saved_ranking_features_file=saved_ranking_features_file,
+#                               classifier_name=classifier_name, target_label=None, num_images=1000, num_features=100)
+#     attacker.autoencoder_attack()
 #
 #     a = np.load(os.path.join(RESULT_FOLDER_PATH, 'ae_slience_map', 'ae_slience_map_Lenet_v2_9_4weight=0,1_1000adv.npy'))
 #     print(a.shape)
