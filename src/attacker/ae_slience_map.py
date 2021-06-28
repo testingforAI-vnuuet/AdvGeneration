@@ -7,8 +7,7 @@ import threading
 import time
 
 from attacker.ae_custom_layer import *
-from attacker.constants import SAVED_ATTACKER_PATH, PRETRAIN_CLASSIFIER_PATH, RESULT_FOLDER_PATH, \
-    SLIENCE_MAP_METHOD_NAME
+from attacker.constants import *
 from attacker.losses import AE_LOSSES
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
