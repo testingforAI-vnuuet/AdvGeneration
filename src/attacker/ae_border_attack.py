@@ -49,7 +49,7 @@ class AutoencoderBorder:
         self.optimal_epoch = 0
         self.weight = weight
         self.num_images = num_images
-        self.method_name = 'ae_border'
+        self.method_name = BORDER_METHOD_NAME
         self.step = step
 
         logger.debug('init attacking: origin_label = {origin_label}'.format(origin_label=self.origin_label))
@@ -76,7 +76,7 @@ class AutoencoderBorder:
         logger.debug('border_origin_image shape: {shape}'.format(shape=self.border_origin_images.shape))
         self.internal_origin_images = get_internal_images(self.origin_images, border_images=self.border_origin_images)
         logger.debug('internal_origin_image shape: {shape}'.format(shape=self.internal_origin_images.shape))
-        self.file_shared_name = self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
+        self.file_shared_name = self.method_name + '_simpleae_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
             self.weight).replace('.', ',') + '_' + str(self.num_images)
 
         self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
@@ -124,7 +124,7 @@ class AutoencoderBorder:
             logger.debug('training autoencoder for: origin_label={origin_label}, target_label={target_label}'.format(
                 origin_label=self.origin_label, target_label=self.target_label))
 
-            self.autoencoder = ae_trainee.get_architecture()
+            self.autoencoder = ae_trainee.get_architecture_simple()
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
                                      loss=loss(self.classifier, self.target_vector, self.weight))
@@ -360,13 +360,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
