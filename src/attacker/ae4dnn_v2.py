@@ -123,7 +123,7 @@ class AE4DNN_V2:
             logger.debug('training autoencoder for: origin_label={origin_label}, target_label={target_label}'.format(
                 origin_label=self.origin_label, target_label=self.target_label))
 
-            self.autoencoder = ae_trainee.get_architecture_simple()
+            self.autoencoder = ae_trainee.get_architecture()
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
                                      loss=loss(self.classifier, self.target_vector, self.weight))
