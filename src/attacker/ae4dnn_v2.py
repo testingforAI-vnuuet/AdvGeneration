@@ -75,7 +75,7 @@ class AE4DNN_V2:
         logger.debug('border_origin_image shape: {shape}'.format(shape=self.border_origin_images.shape))
         self.internal_origin_images = get_internal_images(self.origin_images, border_images=self.border_origin_images)
         logger.debug('internal_origin_image shape: {shape}'.format(shape=self.internal_origin_images.shape))
-        self.file_shared_name = self.method_name + '_simpleae_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
+        self.file_shared_name = self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
             self.weight).replace('.', ',') + '_' + str(self.num_images)
 
         self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
