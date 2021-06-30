@@ -115,7 +115,6 @@ class AE4DNN_V2:
             #                          loss=loss(self.classifier, self.target_vector, self.weight))
             self.end_time = time.time()
 
-            return
 
         else:
             logger.debug(
