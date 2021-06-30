@@ -207,7 +207,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
-    for weight_index in [0.01, 0.05, 0.5, 1.0]:
+    for weight_index in [0.5, 1.0]:
         weight_value = weight_index
         # weight_value = weight_index
         weight_result_i = []
@@ -267,13 +267,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
