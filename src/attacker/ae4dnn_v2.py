@@ -8,6 +8,7 @@ import time
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
+from utility.filters.filter_advs import smooth_adv_border_V3
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -143,61 +144,64 @@ class AE4DNN_V2:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
+        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+            self.target_label, step=self.step)
 
     def export_result(self):
-        # result = '<=========='
-        # result = ''
-        # if self.smooth_adv is not None:
-        #     str_smooth_adv = list(map(str, self.smooth_adv))
-        #     result += '\n' + '\n'.join(str_smooth_adv)
+        result = '<=========='
+        result = ''
+        if self.smooth_adv is not None:
+            str_smooth_adv = list(map(str, self.smooth_adv))
+            result += '\n' + '\n'.join(str_smooth_adv)
+
+        f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
+                 'w')
+        f.write(result)
+        f.close()
         #
-        # f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
-        #          'w')
-        # f.write(result)
-        # f.close()
-        # #
-        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        # L0_before_txt = L0_before_txt.replace('[', '')
-        # L0_before_txt = L0_before_txt.replace(']', '')
-        # L0_before_txt = L0_before_txt.replace(' ', '\n')
-        #
-        # L0_after_txt = np.array2string(self.L0_afters, separator=' ')
-        # L0_after_txt = L0_after_txt.replace(']', '')
-        # L0_after_txt = L0_after_txt.replace('[', '')
-        # L0_after_txt = L0_after_txt.replace(' ', '\n')
-        #
-        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        # L2_before_txt = L2_before_txt.replace('[', '')
-        # L2_before_txt = L2_before_txt.replace(']', '')
-        # L2_before_txt = L2_before_txt.replace(' ', '\n')
-        #
-        # L2_after_txt = np.array2string(self.L2_afters, separator=' ')
-        # L2_after_txt = L2_after_txt.replace('[', '')
-        # L2_after_txt = L2_after_txt.replace(']', '')
-        # L2_after_txt = L2_after_txt.replace(' ', '\n')
-        #
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        # f.write(L0_before_txt)
-        # f.close()
-        #
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
-        # f.write(L0_after_txt)
-        # f.close()
-        #
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        # f.write(L2_before_txt)
-        # f.close()
-        #
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
-        # f.write(L2_after_txt)
-        # f.close()
-        #
+        L0_before_txt = np.array2string(self.L0_befores, separator=' ')
+        L0_before_txt = L0_before_txt.replace('[', '')
+        L0_before_txt = L0_before_txt.replace(']', '')
+        L0_before_txt = L0_before_txt.replace(' ', '\n')
+
+        L0_after_txt = np.array2string(self.L0_afters, separator=' ')
+        L0_after_txt = L0_after_txt.replace(']', '')
+        L0_after_txt = L0_after_txt.replace('[', '')
+        L0_after_txt = L0_after_txt.replace(' ', '\n')
+
+        L2_before_txt = np.array2string(self.L2_befores, separator=' ')
+        L2_before_txt = L2_before_txt.replace('[', '')
+        L2_before_txt = L2_before_txt.replace(']', '')
+        L2_before_txt = L2_before_txt.replace(' ', '\n')
+
+        L2_after_txt = np.array2string(self.L2_afters, separator=' ')
+        L2_after_txt = L2_after_txt.replace('[', '')
+        L2_after_txt = L2_after_txt.replace(']', '')
+        L2_after_txt = L2_after_txt.replace(' ', '\n')
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
+        f.write(L0_before_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
+        f.write(L0_after_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        f.write(L2_before_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
+        f.write(L2_after_txt)
+        f.close()
+
         # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
-        return self.adv_result.shape[0] / float(self.num_images)
+        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -207,18 +211,23 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
-    for weight_index in [0.5, 1.0]:
-        weight_value = weight_index
+    L0s = []
+    L2s = []
+    for weight_index in range(1, 11):
+        weight_value = weight_index*0.1
         # weight_value = weight_index
         weight_result_i = []
-        for origin_label in range(0, 10):
+        for origin_label in range(9, 10):
             weight_result_i_j = []
-            for target_position in range(2, 11):
+            for target_position in range(2, 3):
                 attacker = AE4DNN_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                      target_position=target_position, classifier_name=classifier_name,
                                      weight=weight_value)
                 attacker.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
-                weight_result_i_j.append(attacker.export_result())
+                sucess_rate_i, L0, L2 = attacker.export_result()
+                weight_result_i_j.append(sucess_rate_i)
+                L0s.append(L0)
+                L2s.append(L2)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.array(weight_result_i)
@@ -233,6 +242,20 @@ def run_thread_V2(classifier_name, trainX, trainY):
     s = s.replace(']', ' ')
     f = open('./result/ae4dnn/' + classifier_name + '.txt', 'w')
     f.write(s)
+    f.close()
+
+
+    L0s = np.array(L0s)
+    L2s = np.array(L2s)
+    L0s = reject_outliers_v2(L0s)
+    L2s = reject_outliers_v2(L2s)
+
+    min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
+    min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
+
+    l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
+    f = open('./result/ae4dnn/' + classifier_name + 'l0_l2.txt', 'w')
+    f.write(l0_l2_txt)
     f.close()
 
 
