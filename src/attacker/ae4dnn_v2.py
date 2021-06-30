@@ -111,8 +111,8 @@ class AE4DNN_V2:
                 autoencoder_path,
                 compile=False)
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
-            self.autoencoder.compile(optimizer=adam,
-                                     loss=loss(self.classifier, self.target_vector, self.origin_images, self.weight))
+            # self.autoencoder.compile(optimizer=adam,
+            #                          loss=loss(self.classifier, self.target_vector, self.weight))
             self.end_time = time.time()
 
             return
