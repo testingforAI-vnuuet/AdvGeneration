@@ -143,61 +143,61 @@ class AE4DNN_V2:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
-        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-            self.target_label, step=self.step)
+        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+        #     self.target_label, step=self.step)
 
     def export_result(self):
-        result = '<=========='
-        result = ''
-        if self.smooth_adv is not None:
-            str_smooth_adv = list(map(str, self.smooth_adv))
-            result += '\n' + '\n'.join(str_smooth_adv)
-
-        f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
-                 'w')
-        f.write(result)
-        f.close()
+        # result = '<=========='
+        # result = ''
+        # if self.smooth_adv is not None:
+        #     str_smooth_adv = list(map(str, self.smooth_adv))
+        #     result += '\n' + '\n'.join(str_smooth_adv)
         #
-        L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        L0_before_txt = L0_before_txt.replace('[', '')
-        L0_before_txt = L0_before_txt.replace(']', '')
-        L0_before_txt = L0_before_txt.replace(' ', '\n')
-
-        L0_after_txt = np.array2string(self.L0_afters, separator=' ')
-        L0_after_txt = L0_after_txt.replace(']', '')
-        L0_after_txt = L0_after_txt.replace('[', '')
-        L0_after_txt = L0_after_txt.replace(' ', '\n')
-
-        L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        L2_before_txt = L2_before_txt.replace('[', '')
-        L2_before_txt = L2_before_txt.replace(']', '')
-        L2_before_txt = L2_before_txt.replace(' ', '\n')
-
-        L2_after_txt = np.array2string(self.L2_afters, separator=' ')
-        L2_after_txt = L2_after_txt.replace('[', '')
-        L2_after_txt = L2_after_txt.replace(']', '')
-        L2_after_txt = L2_after_txt.replace(' ', '\n')
-
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        f.write(L0_before_txt)
-        f.close()
-
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
-        f.write(L0_after_txt)
-        f.close()
-
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        f.write(L2_before_txt)
-        f.close()
-
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
-        f.write(L2_after_txt)
-        f.close()
+        # f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
+        #          'w')
+        # f.write(result)
+        # f.close()
+        # #
+        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
+        # L0_before_txt = L0_before_txt.replace('[', '')
+        # L0_before_txt = L0_before_txt.replace(']', '')
+        # L0_before_txt = L0_before_txt.replace(' ', '\n')
+        #
+        # L0_after_txt = np.array2string(self.L0_afters, separator=' ')
+        # L0_after_txt = L0_after_txt.replace(']', '')
+        # L0_after_txt = L0_after_txt.replace('[', '')
+        # L0_after_txt = L0_after_txt.replace(' ', '\n')
+        #
+        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
+        # L2_before_txt = L2_before_txt.replace('[', '')
+        # L2_before_txt = L2_before_txt.replace(']', '')
+        # L2_before_txt = L2_before_txt.replace(' ', '\n')
+        #
+        # L2_after_txt = np.array2string(self.L2_afters, separator=' ')
+        # L2_after_txt = L2_after_txt.replace('[', '')
+        # L2_after_txt = L2_after_txt.replace(']', '')
+        # L2_after_txt = L2_after_txt.replace(' ', '\n')
+        #
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
+        # f.write(L0_before_txt)
+        # f.close()
+        #
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
+        # f.write(L0_after_txt)
+        # f.close()
+        #
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        # f.write(L2_before_txt)
+        # f.close()
+        #
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
+        # f.write(L2_after_txt)
+        # f.close()
 
         # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
         return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters
@@ -258,6 +258,43 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f.close()
 
 
+def run_thread_V1(classifier_name, trainX, trainY):
+    logger.debug("\n=======================================================")
+    logger.debug('processing model: ' + classifier_name)
+    cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
+    result_txt = classifier_name + '\n'
+    # AE_LOSS = AE_LOSSES.border_loss
+    weight_result = []
+    for weight_index in [1.0]:
+        weight_value = weight_index
+        # weight_value = weight_index
+        weight_result_i = []
+        for origin_label in range(0, 10):
+            weight_result_i_j = []
+            for target_position in range(2, 11):
+                attacker = AE4DNN_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
+                                     target_position=target_position, classifier_name=classifier_name,
+                                     weight=weight_value)
+                attacker.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
+                sucess_rate_i, _, _ = attacker.export_result()
+                weight_result_i_j.append(sucess_rate_i)
+                del attacker
+            weight_result_i.append(weight_result_i_j)
+        weight_result_i = np.array(weight_result_i)
+        np.savetxt(f'./result/ae4dnn/{classifier_name}_{weight_value}.csv', weight_result_i, delimiter=",")
+
+        weight_result_i = np.average(weight_result_i, axis=0)
+        weight_result.append(weight_result_i)
+
+    weight_result = np.array(weight_result)
+    s = np.array2string(weight_result, separator=' ')
+    s = s.replace('[', ' ')
+    s = s.replace(']', ' ')
+    f = open('./result/ae4dnn/' + classifier_name + '.txt', 'w')
+    f.write(s)
+    f.close()
+
+
 class MyThread(threading.Thread):
     def __init__(self, classifier_name, trainX, trainY):
         super(MyThread, self).__init__()
@@ -266,7 +303,7 @@ class MyThread(threading.Thread):
         self.trainY = trainY
 
     def run(self):
-        run_thread_V2(self.classifier_name, self.trainX, self.trainY)
+        run_thread_V1(self.classifier_name, self.trainX, self.trainY)
 
 
 if __name__ == '__main__':
@@ -289,13 +326,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
