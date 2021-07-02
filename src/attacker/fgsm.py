@@ -17,7 +17,7 @@ logger = MyLogger.getLog()
 
 pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 pre_softmax_layer_name_dict = {pretrained_model_name[0]: 'dense_3', pretrained_model_name[1]: 'pre_softmax_layer',
-                          pretrained_model_name[2]: None, pretrained_model_name[3]: None}
+                               pretrained_model_name[2]: None, pretrained_model_name[3]: None}
 
 
 def combined_function(set1, set2, set3):
@@ -55,7 +55,6 @@ class FGSM:
         self.method_name = FGSM_METHOD_NAME
         self.step = step
 
-
         logger.debug('init attacking: origin_label = {origin_label}'.format(origin_label=self.origin_label))
 
         self.origin_images, self.origin_labels = filter_by_label(self.origin_label, self.trainX, self.trainY)
@@ -77,7 +76,8 @@ class FGSM:
         # logger.debug('ranking sample DONE!')
         if pre_softmax_layer_name is None:
             self.pre_softmax_classifier = tf.keras.models.Model(inputs=classifier.input,
-                                                            outputs=classifier.get_layer(pre_softmax_layer_name).output)
+                                                                outputs=classifier.get_layer(
+                                                                    pre_softmax_layer_name).output)
         else:
             self.pre_softmax_classifier = self.classifier
 
@@ -105,8 +105,8 @@ class FGSM:
         self.L0_afters = None
         self.L2_befores = None
         self.L2_afters = None
-        self.adv_file_path = os.path.join(RESULT_FOLDER_PATH, self.file_shared_name + 'adv.npy')
-        self.ori_file_path = os.path.join(RESULT_FOLDER_PATH, self.file_shared_name + 'ori.npy')
+        self.adv_file_path = os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + 'adv.npy')
+        self.ori_file_path = os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + 'ori.npy')
         logger.debug('init attacking DONE!')
 
     @staticmethod
@@ -127,7 +127,6 @@ class FGSM:
             loss = loss_object(target_vector, prediction)
         gradient = tape.gradient(loss, input)
         sign = tf.sign(gradient) if get_sign == True else gradient
-        print(np.sum(sign))
         return sign
 
     def attack(self):
@@ -144,6 +143,8 @@ class FGSM:
                                                                                  self.generated_candidates,
                                                                                  self.target_label,
                                                                                  cnn_model=self.classifier)
+            np.save(self.adv_file_path, self.adv_result)
+            np.save(self.ori_file_path, self.origin_adv_result)
 
         logger.debug(f'adv shape: {self.adv_result.shape}')
         self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
@@ -214,7 +215,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in range(1, 2):
+    for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
@@ -246,18 +247,20 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f.write(s)
     f.close()
 
-    # L0s = np.array(L0s)
-    # L2s = np.array(L2s)
-    # L0s = reject_outliers_v2(L0s)
-    # L2s = reject_outliers_v2(L2s)
-    #
-    # min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
-    # min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
-    #
-    # l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    # f = open('./result/ae4dnn/' + classifier_name + 'l0_l2.txt', 'w')
-    # f.write(l0_l2_txt)
-    # f.close()
+    L0s = np.array(L0s)
+    L2s = np.array(L2s)
+    if L0s.shape[0] == 0:
+        return
+    L0s = reject_outliers_v2(L0s)
+    L2s = reject_outliers_v2(L2s)
+
+    min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
+    min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
+
+    l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
+    f = open('./result/ae4dnn/' + classifier_name + 'l0_l2.txt', 'w')
+    f.write(l0_l2_txt)
+    f.close()
 
 
 def run_thread_V1(classifier_name, trainX, trainY):
@@ -331,12 +334,12 @@ if __name__ == '__main__':
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
     thread1.join()
-    thread2.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
