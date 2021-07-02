@@ -49,7 +49,7 @@ class AAE_V2:
         self.optimal_epoch = 0
         self.weight = weight
         self.num_images = num_images
-        self.method_name = AE4DNN_METHOD_NAME
+        self.method_name = AAE_METHOD_NAME
         self.step = step
 
         logger.debug('init attacking: origin_label = {origin_label}'.format(origin_label=self.origin_label))
@@ -275,7 +275,7 @@ def run_thread_V1(classifier_name, trainX, trainY):
                 attacker = AAE_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                      target_position=target_position, classifier_name=classifier_name,
                                      weight=weight_value)
-                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
+                attacker.autoencoder_attack(loss=AE_LOSSES.re_rank_loss)
                 sucess_rate_i, _, _ = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
                 del attacker
