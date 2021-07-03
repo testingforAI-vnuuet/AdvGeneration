@@ -157,55 +157,55 @@ class LBFGS_V2:
         #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
 
     def export_result(self):
-        # result = ''
-        # if self.smooth_adv is not None:
-        #     str_smooth_adv = list(map(str, self.smooth_adv))
-        #     result += '\n' + '\n'.join(str_smooth_adv)
+        result = ''
+        if self.smooth_adv is not None:
+            str_smooth_adv = list(map(str, self.smooth_adv))
+            result += '\n' + '\n'.join(str_smooth_adv)
+
+        f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
+                 'w')
+        f.write(result)
+        f.close()
         #
-        # f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
-        #          'w')
-        # f.write(result)
-        # f.close()
-        # #
-        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        # L0_before_txt = L0_before_txt.replace('[', '')
-        # L0_before_txt = L0_before_txt.replace(']', '')
-        # L0_before_txt = L0_before_txt.replace(' ', '\n')
-        #
-        # L0_after_txt = np.array2string(self.L0_afters, separator=' ')
-        # L0_after_txt = L0_after_txt.replace(']', '')
-        # L0_after_txt = L0_after_txt.replace('[', '')
-        # L0_after_txt = L0_after_txt.replace(' ', '\n')
-        #
-        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        # L2_before_txt = L2_before_txt.replace('[', '')
-        # L2_before_txt = L2_before_txt.replace(']', '')
-        # L2_before_txt = L2_before_txt.replace(' ', '\n')
-        #
-        # L2_after_txt = np.array2string(self.L2_afters, separator=' ')
-        # L2_after_txt = L2_after_txt.replace('[', '')
-        # L2_after_txt = L2_after_txt.replace(']', '')
-        # L2_after_txt = L2_after_txt.replace(' ', '\n')
-        #
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        # f.write(L0_before_txt)
-        # f.close()
-        #
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
-        # f.write(L0_after_txt)
-        # f.close()
-        #
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        # f.write(L2_before_txt)
-        # f.close()
-        #
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
-        # f.write(L2_after_txt)
-        # f.close()
+        L0_before_txt = np.array2string(self.L0_befores, separator=' ')
+        L0_before_txt = L0_before_txt.replace('[', '')
+        L0_before_txt = L0_before_txt.replace(']', '')
+        L0_before_txt = L0_before_txt.replace(' ', '\n')
+
+        L0_after_txt = np.array2string(self.L0_afters, separator=' ')
+        L0_after_txt = L0_after_txt.replace(']', '')
+        L0_after_txt = L0_after_txt.replace('[', '')
+        L0_after_txt = L0_after_txt.replace(' ', '\n')
+
+        L2_before_txt = np.array2string(self.L2_befores, separator=' ')
+        L2_before_txt = L2_before_txt.replace('[', '')
+        L2_before_txt = L2_before_txt.replace(']', '')
+        L2_before_txt = L2_before_txt.replace(' ', '\n')
+
+        L2_after_txt = np.array2string(self.L2_afters, separator=' ')
+        L2_after_txt = L2_after_txt.replace('[', '')
+        L2_after_txt = L2_after_txt.replace(']', '')
+        L2_after_txt = L2_after_txt.replace(' ', '\n')
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
+        f.write(L0_before_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
+        f.write(L0_after_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        f.write(L2_before_txt)
+        f.close()
+
+        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                              self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
+        f.write(L2_after_txt)
+        f.close()
 
         # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
         return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters
@@ -252,20 +252,20 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f.write(s)
     f.close()
 
-    # L0s = np.array(L0s)
-    # L2s = np.array(L2s)
-    # if L0s.shape[0] == 0:
-    #     return
-    # L0s = reject_outliers_v2(L0s)
-    # L2s = reject_outliers_v2(L2s)
-    #
-    # min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
-    # min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
-    #
-    # l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    # f = open('./result/lbfgs/' + classifier_name + 'l0_l2.txt', 'w')
-    # f.write(l0_l2_txt)
-    # f.close()
+    L0s = np.array(L0s)
+    L2s = np.array(L2s)
+    if L0s.shape[0] == 0:
+        return
+    L0s = reject_outliers_v2(L0s)
+    L2s = reject_outliers_v2(L2s)
+
+    min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
+    min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
+
+    l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
+    f = open('./result/lbfgs/' + classifier_name + 'l0_l2.txt', 'w')
+    f.write(l0_l2_txt)
+    f.close()
 
 
 def run_thread_V1(classifier_name, trainX, trainY):
