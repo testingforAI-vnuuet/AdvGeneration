@@ -153,8 +153,8 @@ class LBFGS_V2:
             np.save(self.ori_file_path, self.origin_adv_result)
 
         logger.debug(f'adv shape: {self.adv_result.shape}')
-        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
 
     def export_result(self):
         result = ''
