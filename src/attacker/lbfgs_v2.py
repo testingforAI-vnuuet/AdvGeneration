@@ -8,7 +8,6 @@ import time
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
-from utility.filters.filter_advs import smooth_adv_border_V3
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -142,7 +141,7 @@ class LBFGS_V2:
             self.origin_adv_result = np.load(self.ori_file_path)
         else:
             self.generated_candidates = np.array(
-                [img - self.create_adv_single_image(img)[0] for
+                [self.create_adv_single_image(img)[0] for
                  img
                  in self.origin_images])
             self.generated_candidates = np.clip(self.generated_candidates, 0, 1)
