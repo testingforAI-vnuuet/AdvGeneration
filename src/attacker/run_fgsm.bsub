@@ -1,6 +1,6 @@
 
-#BSUB -e std1.error
-#BSUB -o std1.output
+#BSUB -e std.error
+#BSUB -o std.output
 #BSUB -q gpu
 export PYTHONPATH=/home/khamd/AdvGeneration/src:$PYTHONPATH
-python3 fgsm.py
+python3 request.py
