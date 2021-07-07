@@ -25,7 +25,7 @@ def combined_function(set1, set2, set3):
 class AE4DNN_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=12,
-                 num_images=1000, is_train=False):
+                 num_images=1000, is_train=True):
         """
 
         :param origin_label:
@@ -348,13 +348,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
