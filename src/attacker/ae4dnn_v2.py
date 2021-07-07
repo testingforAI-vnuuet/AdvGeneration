@@ -25,7 +25,7 @@ def combined_function(set1, set2, set3):
 class AE4DNN_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=12,
-                 num_images=1000):
+                 num_images=1000, is_train=False):
         """
 
         :param origin_label:
@@ -56,8 +56,13 @@ class AE4DNN_V2:
 
         self.origin_images, self.origin_labels = filter_by_label(self.origin_label, self.trainX, self.trainY)
 
-        self.origin_images = np.array(self.origin_images[:self.num_images])
-        self.origin_labels = np.array(self.origin_labels[:self.num_images])
+        self.num_images_for_prediction = len(self.origin_images)
+        if is_train is False:
+            self.origin_images = np.array(self.origin_images[:self.num_images_for_prediction])
+            self.origin_labels = np.array(self.origin_labels[:self.num_images_for_prediction])
+        else:
+            self.origin_images = np.array(self.origin_images[:self.num_images])
+            self.origin_labels = np.array(self.origin_labels[:self.num_images])
 
         logger.debug('shape of origin_images: {shape}'.format(shape=self.origin_images.shape))
         logger.debug('shape of origin_labels: {shape}'.format(shape=self.origin_labels.shape))
@@ -110,7 +115,7 @@ class AE4DNN_V2:
             self.autoencoder = tf.keras.models.load_model(
                 autoencoder_path,
                 compile=False)
-            adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
+            # adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             # self.autoencoder.compile(optimizer=adam,
             #                          loss=loss(self.classifier, self.target_vector, self.weight))
             self.end_time = time.time()
@@ -146,6 +151,24 @@ class AE4DNN_V2:
         self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
             self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
             self.target_label, step=self.step)
+        self.export_dataset_rnn()
+
+    def export_dataset_rnn(self):
+        labels = []
+
+        for adv, ori in zip(self.adv_result, self.origin_adv_result):
+            adv_flat = adv.flatten()
+            ori_flat = ori.flatten()
+            label = adv_flat == ori_flat
+            label = label.astype(int)
+            labels.append(label)
+        labels = np.array(labels)
+
+        np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                             self.file_shared_name + f'step={self.step}_training.npy'), self.adv_result)
+        np.save(
+            os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step={self.step}_label.npy'),
+            labels)
 
     def export_result(self):
         # result = '<=========='
@@ -213,7 +236,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     for weight_index in range(1, 11):
-        weight_value = weight_index*0.1
+        weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
         for origin_label in range(9, 10):
@@ -242,7 +265,6 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f = open('./result/ae4dnn/' + classifier_name + '.txt', 'w')
     f.write(s)
     f.close()
-
 
     L0s = np.array(L0s)
     L2s = np.array(L2s)
@@ -326,13 +348,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
