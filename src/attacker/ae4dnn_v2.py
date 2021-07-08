@@ -150,7 +150,7 @@ class AE4DNN_V2:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
         self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:2], self.origin_adv_result[:2],
+            self.classifier, self.adv_result[:4000], self.origin_adv_result[:4000],
             self.target_label, step=self.step, return_adv=True)
         self.export_dataset_rnn()
 
