@@ -101,6 +101,7 @@ class AE4DNN_V2:
         self.L0_afters = None
         self.L2_befores = None
         self.L2_afters = None
+        self.restored_advs = None
         logger.debug('init attacking DONE!')
 
     def autoencoder_attack(self, loss):
@@ -148,17 +149,17 @@ class AE4DNN_V2:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
-        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-            self.target_label, step=self.step)
+        self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+            self.classifier, self.adv_result[:2], self.origin_adv_result[:2],
+            self.target_label, step=self.step, return_adv=True)
         self.export_dataset_rnn()
 
     def export_dataset_rnn(self):
         labels = []
 
-        for adv, ori in zip(self.adv_result, self.origin_adv_result):
-            adv_flat = adv.flatten()
-            ori_flat = ori.flatten()
+        for adv, ori in zip(self.restored_advs, self.origin_adv_result):
+            adv_flat = np.round(adv.flatten())
+            ori_flat = np.round(ori.flatten() * 255.0)
             label = adv_flat == ori_flat
             label = label.astype(int)
             labels.append(label)
@@ -235,7 +236,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in range(1, 11):
+    for weight_index in range(1, 2):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
