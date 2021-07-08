@@ -24,8 +24,8 @@ def combined_function(set1, set2, set3):
 
 class AE4DNN_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=12,
-                 num_images=1000, is_train=True):
+                 step=1,
+                 num_images=1000, is_train=False):
         """
 
         :param origin_label:
