@@ -271,7 +271,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
 
     l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    f = open('./result/ae4dnn/' + classifier_name + 'l0_l2.txt', 'w')
+    f = open('./result/fgsm/' + classifier_name + 'l0_l2.txt', 'w')
     f.write(l0_l2_txt)
     f.close()
 
