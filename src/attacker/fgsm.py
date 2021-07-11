@@ -168,7 +168,6 @@ class FGSM:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n' + '\n'.join(str_smooth_adv)
         else:
-            logger.debug('ok')
             return 0, [], []
         f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
                  'w')
@@ -242,8 +241,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 attacker.attack()
                 sucess_rate_i, L0, L2 = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
-                L0s.append(L0)
-                L2s.append(L2)
+                if len(L0) != 0:
+                    L0s.append(L0)
+                    L2s.append(L2)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.array(weight_result_i)
