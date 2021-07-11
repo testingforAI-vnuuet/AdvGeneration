@@ -170,20 +170,20 @@ class FGSM:
         f.write(result)
         f.close()
         #
-        L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        L0_before_txt = L0_before_txt.replace('[', '')
-        L0_before_txt = L0_before_txt.replace(']', '')
-        L0_before_txt = L0_before_txt.replace(' ', '\n')
+        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
+        # L0_before_txt = L0_before_txt.replace('[', '')
+        # L0_before_txt = L0_before_txt.replace(']', '')
+        # L0_before_txt = L0_before_txt.replace(' ', '\n')
 
         L0_after_txt = np.array2string(self.L0_afters, separator=' ')
         L0_after_txt = L0_after_txt.replace(']', '')
         L0_after_txt = L0_after_txt.replace('[', '')
         L0_after_txt = L0_after_txt.replace(' ', '\n')
 
-        L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        L2_before_txt = L2_before_txt.replace('[', '')
-        L2_before_txt = L2_before_txt.replace(']', '')
-        L2_before_txt = L2_before_txt.replace(' ', '\n')
+        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
+        # L2_before_txt = L2_before_txt.replace('[', '')
+        # L2_before_txt = L2_before_txt.replace(']', '')
+        # L2_before_txt = L2_before_txt.replace(' ', '\n')
 
         L2_after_txt = np.array2string(self.L2_afters, separator=' ')
         L2_after_txt = L2_after_txt.replace('[', '')
