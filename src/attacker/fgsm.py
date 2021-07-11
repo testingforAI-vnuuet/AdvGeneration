@@ -150,7 +150,9 @@ class FGSM:
 
         logger.debug(f'adv shape: {self.adv_result.shape}')
 
-        if self.adv_result is None or self.adv_result.shape[0] == 0:
+        if self.adv_result is None:
+            return
+        if self.adv_result.shape[0] == 0:
             return
         # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
         #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
@@ -160,7 +162,7 @@ class FGSM:
             self.L0_afters.append(compute_l0_V2(adv, ori))
             self.L2_afters.append(compute_l2_V2(adv, ori))
         self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
-
+        logger.debug(f'adv shape: {self.adv_result.shape}')
 
     def export_result(self):
         result = ''
