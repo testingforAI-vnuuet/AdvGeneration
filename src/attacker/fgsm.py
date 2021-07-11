@@ -162,7 +162,6 @@ class FGSM:
             self.L0_afters.append(compute_l0_V2(adv, ori))
             self.L2_afters.append(compute_l2_V2(adv, ori))
         self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
-        logger.debug(f'adv shape: {self.L0_afters.shape}')
 
     def export_result(self):
         result = ''
@@ -170,6 +169,7 @@ class FGSM:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n' + '\n'.join(str_smooth_adv)
         else:
+            logger.debug('bug')
             return 0, [], []
         f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
                  'w')
