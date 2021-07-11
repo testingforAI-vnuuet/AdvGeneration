@@ -162,7 +162,7 @@ class FGSM:
             self.L0_afters.append(compute_l0_V2(adv, ori))
             self.L2_afters.append(compute_l2_V2(adv, ori))
         self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
-        logger.debug(f'adv shape: {self.adv_result.shape}')
+        logger.debug(f'adv shape: {self.L0_afters.shape}')
 
     def export_result(self):
         result = ''
