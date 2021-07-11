@@ -264,6 +264,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
 
     L0s = np.array(L0s).flatten()
     L2s = np.array(L2s).flatten()
+    logger.debug(L0s.shape)
     if L0s.shape[0] == 0:
         return
     L0s = reject_outliers_v2(L0s)
