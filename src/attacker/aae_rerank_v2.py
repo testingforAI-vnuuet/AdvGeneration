@@ -157,7 +157,7 @@ class AAE_V2:
             self.L0_afters.append(compute_l0_V2(adv, ori))
             self.L2_afters.append(compute_l2_V2(adv, ori))
         self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
-        logger.debug(f'adv shape {self.adv_result.reshape}')
+        logger.debug(f'adv shape {self.adv_result.shape}')
 
     def export_result(self):
         # result = '<=========='
@@ -343,13 +343,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    thread1.start()
-    # thread2.start()
+    # thread1.start()
+    thread2.start()
     # thread3.start()
     # thread4.start()
 
-    thread1.join()
-    # thread2.join()
+    # thread1.join()
+    thread2.join()
     # thread3.join()
     # thread4.join()
 
