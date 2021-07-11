@@ -301,6 +301,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f = open('./result/ae4dnn/' + classifier_name + 'l0_l2(1).txt', 'w')
     f.write(l0_l2_txt)
     f.close()
+    logger.debug('ok')
 
 
 def run_thread_V1(classifier_name, trainX, trainY):
