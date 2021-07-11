@@ -3,4 +3,4 @@
 #BSUB -o std.output
 #BSUB -q gpu
 export PYTHONPATH=/home/khamd/AdvGeneration/src:$PYTHONPATH
-python3 request.py
+python3 fgsm.py
