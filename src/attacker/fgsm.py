@@ -168,8 +168,7 @@ class FGSM:
         if self.smooth_adv is not None:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n' + '\n'.join(str_smooth_adv)
-        else:
-            logger.debug('bug')
+        if self.adv_result is None:
             return 0, [], []
         f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
                  'w')
