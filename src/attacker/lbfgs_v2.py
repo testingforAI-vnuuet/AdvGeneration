@@ -154,54 +154,67 @@ class LBFGS_V2:
             np.save(self.ori_file_path, self.origin_adv_result)
 
         logger.debug(f'adv shape: {self.adv_result.shape}')
-        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        if self.adv_result is None:
+            return
+        if self.adv_result.shape[0] == 0:
+            return
+        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        self.L0_afters = []
+        self.L2_afters = []
+        for adv, ori in zip(self.adv_result, self.origin_adv_result):
+            self.L0_afters.append(compute_l0_V2(adv, ori))
+            self.L2_afters.append(compute_l2_V2(adv, ori))
+        self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
 
     def export_result(self):
         result = ''
         if self.smooth_adv is not None:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n' + '\n'.join(str_smooth_adv)
-
+        if self.adv_result is None or self.adv_result.shape[0] == 0:
+            return 0, [], []
         f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
                  'w')
         f.write(result)
         f.close()
         #
-        L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        L0_before_txt = L0_before_txt.replace('[', '')
-        L0_before_txt = L0_before_txt.replace(']', '')
-        L0_before_txt = L0_before_txt.replace(' ', '\n')
+        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
+        # L0_before_txt = L0_before_txt.replace('[', '')
+        # L0_before_txt = L0_before_txt.replace(']', '')
+        # L0_before_txt = L0_before_txt.replace(' ', '\n')
 
         L0_after_txt = np.array2string(self.L0_afters, separator=' ')
         L0_after_txt = L0_after_txt.replace(']', '')
         L0_after_txt = L0_after_txt.replace('[', '')
         L0_after_txt = L0_after_txt.replace(' ', '\n')
 
-        L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        L2_before_txt = L2_before_txt.replace('[', '')
-        L2_before_txt = L2_before_txt.replace(']', '')
-        L2_before_txt = L2_before_txt.replace(' ', '\n')
+        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
+        # L2_before_txt = L2_before_txt.replace('[', '')
+        # L2_before_txt = L2_before_txt.replace(']', '')
+        # L2_before_txt = L2_before_txt.replace(' ', '\n')
 
         L2_after_txt = np.array2string(self.L2_afters, separator=' ')
         L2_after_txt = L2_after_txt.replace('[', '')
         L2_after_txt = L2_after_txt.replace(']', '')
         L2_after_txt = L2_after_txt.replace(' ', '\n')
 
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        f.write(L0_before_txt)
-        f.close()
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
+        # f.write(L0_before_txt)
+        # f.close()
 
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
         f.write(L0_after_txt)
         f.close()
 
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        f.write(L2_before_txt)
-        f.close()
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        # f.write(L2_before_txt)
+        # f.close()
 
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
@@ -235,8 +248,12 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 attacker.attack()
                 sucess_rate_i, L0, L2 = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
-                L0s.append(L0)
-                L2s.append(L2)
+                if len(L0) != 0:
+                    for L0_i, L2_i in zip(L0, L2):
+                        L0s.append(L0_i)
+                        L2s.append(L2_i)
+                # L0s.append(L0)
+                # L2s.append(L2)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.array(weight_result_i)
@@ -340,12 +357,12 @@ if __name__ == '__main__':
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
     thread1.join()
-    thread2.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
