@@ -8,7 +8,6 @@ import time
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
-from utility.filters.filter_advs import smooth_adv_border_V3
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -158,7 +157,7 @@ class AAE_V2:
             self.L0_afters.append(compute_l0_V2(adv, ori))
             self.L2_afters.append(compute_l2_V2(adv, ori))
         self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
-
+        logger.debug(f'adv shape {self.adv_result.reshape}')
 
     def export_result(self):
         # result = '<=========='
@@ -228,15 +227,15 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     for weight_index in range(1, 11):
-        weight_value = weight_index*0.1
+        weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
         for origin_label in range(9, 10):
             weight_result_i_j = []
             for target_position in range(2, 3):
                 attacker = AAE_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                     target_position=target_position, classifier_name=classifier_name,
-                                     weight=weight_value)
+                                  target_position=target_position, classifier_name=classifier_name,
+                                  weight=weight_value)
                 attacker.autoencoder_attack(loss=AE_LOSSES.re_rank_loss)
                 sucess_rate_i, L0, L2 = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
@@ -260,9 +259,10 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f.write(s)
     f.close()
 
-
     L0s = np.array(L0s).flatten()
     L2s = np.array(L2s).flatten()
+    if L0s.shape[0] == 0:
+        return
     L0s = reject_outliers_v2(L0s)
     L2s = reject_outliers_v2(L2s)
 
@@ -290,8 +290,8 @@ def run_thread_V1(classifier_name, trainX, trainY):
             weight_result_i_j = []
             for target_position in range(2, 11):
                 attacker = AAE_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                     target_position=target_position, classifier_name=classifier_name,
-                                     weight=weight_value)
+                                  target_position=target_position, classifier_name=classifier_name,
+                                  weight=weight_value)
                 attacker.autoencoder_attack(loss=AE_LOSSES.re_rank_loss)
                 sucess_rate_i, _, _ = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
