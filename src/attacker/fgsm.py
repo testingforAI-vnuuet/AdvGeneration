@@ -241,6 +241,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 attacker.attack()
                 sucess_rate_i, L0, L2 = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
+                logger.debug(f'L0: {L0}')
                 if len(L0) != 0:
                     L0s.append(L0)
                     L2s.append(L2)
