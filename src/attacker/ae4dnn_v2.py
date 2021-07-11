@@ -24,7 +24,7 @@ def combined_function(set1, set2, set3):
 
 class AE4DNN_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=12,
+                 step=6,
                  num_images=1000, is_train=True):
         """
 
@@ -152,6 +152,9 @@ class AE4DNN_V2:
         self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
             self.classifier, self.adv_result[:4000], self.origin_adv_result[:4000],
             self.target_label, step=self.step, return_adv=True)
+        np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_restored_advs.npy'), self.restored_advs)
+        np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_origin.npy'), self.origin_adv_result)
+
         # self.export_dataset_rnn()
 
     def export_dataset_rnn(self):
@@ -236,7 +239,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in range(1, 11):
+    for weight_index in range(1, 3):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
@@ -349,13 +352,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
