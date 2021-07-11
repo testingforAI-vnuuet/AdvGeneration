@@ -5,6 +5,8 @@ import os.path
 import threading
 import time
 
+import numpy as np
+
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
@@ -147,8 +149,15 @@ class FGSM:
             np.save(self.ori_file_path, self.origin_adv_result)
 
         logger.debug(f'adv shape: {self.adv_result.shape}')
-        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        self.L0_afters = []
+        self.L2_afters = []
+        for adv, ori in zip(self.adv_result, self.origin_adv_result):
+            self.L0_afters.append(compute_l0_V2(adv, ori))
+            self.L2_afters.append(compute_l2_V2(adv, ori))
+        self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
+
 
     def export_result(self):
         result = ''
@@ -181,20 +190,20 @@ class FGSM:
         L2_after_txt = L2_after_txt.replace(']', '')
         L2_after_txt = L2_after_txt.replace(' ', '\n')
 
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        f.write(L0_before_txt)
-        f.close()
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
+        # f.write(L0_before_txt)
+        # f.close()
 
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
         f.write(L0_after_txt)
         f.close()
 
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        f.write(L2_before_txt)
-        f.close()
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        # f.write(L2_before_txt)
+        # f.close()
 
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
@@ -214,7 +223,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in range(8, 11):
+    for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
@@ -332,13 +341,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
