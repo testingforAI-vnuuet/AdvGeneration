@@ -138,10 +138,10 @@ class AAE_V2:
             logger.debug('training autoencoder DONE!')
 
         self.generated_candidates = self.autoencoder.predict(self.origin_images)
-        # self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images,
-        #                                                                      self.generated_candidates,
-        #                                                                      self.target_label,
-        #                                                                      cnn_model=self.classifier)
+        self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(self.origin_images,
+                                                                             self.generated_candidates,
+                                                                             self.target_label,
+                                                                             cnn_model=self.classifier)
         # # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
         #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
         #     self.target_label, step=self.step)
