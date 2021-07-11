@@ -244,8 +244,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 weight_result_i_j.append(sucess_rate_i)
                 logger.debug(f'L0: {L0}')
                 if len(L0) != 0:
-                    L0s.append(L0)
-                    L2s.append(L2)
+                    for L0_i, L2_i in zip(L0, L2):
+                        L0s.append(L0_i)
+                        L2s.append(L2_i)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.array(weight_result_i)
