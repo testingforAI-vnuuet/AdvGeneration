@@ -5,6 +5,8 @@ import os.path
 import threading
 import time
 
+import numpy as np
+
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
@@ -149,6 +151,8 @@ class AE4DNN_V2:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
+        np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+                             self.file_shared_name + f'step={self.step}_advs.npy'), np.array(self.adv_result))
         # self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
         #     self.classifier, self.adv_result[:4000], self.origin_adv_result[:4000],
         #     self.target_label, step=self.step, return_adv=True)
@@ -254,7 +258,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in range(1, 11):
+    for weight_index in range(1, 2):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
@@ -372,13 +376,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
