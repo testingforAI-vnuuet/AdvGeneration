@@ -174,7 +174,9 @@ def smooth_vet_can_stepV2(ori, adv, dnn, target_label, step, strategy=None):
             diff_pixel_arr.append(diff_pixel_idx)
 
     # diff_pixel_arr = rank_pixel_S2(diff_pixel_arr)
-    diff_pixel_arr, diff_value_arr = feature_ranker.jsma_ranking_borderV2(adv, ori, None, target_label, dnn,
+    # diff_pixel_arr, diff_value_arr = feature_ranker.jsma_ranking_borderV2(adv, ori, None, target_label, dnn,
+    #                                                                       diff_pixel_arr)
+    diff_pixel_arr, diff_value_arr = feature_ranker.jsma_ranking_original(adv, ori, None, target_label, dnn,
                                                                           diff_pixel_arr)
     curr_diff_pixel_arr = np.array(diff_pixel_arr)
     curr_diff_value_arr = np.array(diff_value_arr)

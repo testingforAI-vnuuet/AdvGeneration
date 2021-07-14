@@ -153,9 +153,9 @@ class AE4DNN_V2:
                                                                              cnn_model=self.classifier)
         np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                              self.file_shared_name + f'step={self.step}_advs.npy'), np.array(self.adv_result))
-        # self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-        #     self.classifier, self.adv_result[:4000], self.origin_adv_result[:4000],
-        #     self.target_label, step=self.step, return_adv=True)
+        self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+            self.target_label, step=self.step, return_adv=True)
         # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_restored_advs.npy'), self.restored_advs)
         # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_origin.npy'), self.origin_adv_result)
 
@@ -196,7 +196,7 @@ class AE4DNN_V2:
         result = ''
         if self.smooth_adv is not None:
             str_smooth_adv = list(map(str, self.smooth_adv))
-            result += '\n' + '\n'.join(str_smooth_adv)
+            result += '\n'.join(str_smooth_adv)
         if self.adv_result is None or self.adv_result.shape[0] == 0:
             return 0, [], []
 
@@ -258,7 +258,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
-    for weight_index in range(1, 2):
+    for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
@@ -278,7 +278,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.array(weight_result_i)
-        np.savetxt(f'./result/ae4dnn/{classifier_name}_{weight_value}(1).csv', weight_result_i, delimiter=",")
+        np.savetxt(f'./result/ae4dnn/{classifier_name}_{weight_value}.csv', weight_result_i, delimiter=",")
 
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
@@ -287,7 +287,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     s = np.array2string(weight_result, separator=' ')
     s = s.replace('[', ' ')
     s = s.replace(']', ' ')
-    f = open('./result/ae4dnn/' + classifier_name + '(1).txt', 'w')
+    f = open('./result/ae4dnn/' + classifier_name + 'success_rate.txt', 'w')
     f.write(s)
     f.close()
 

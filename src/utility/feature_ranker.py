@@ -238,12 +238,60 @@ class feature_ranker:
             if adv_2_dimension[row, col] > ori_2_dimension[row, col]:
 
                 if dF_t_i < 0 or sum_dF_rest_i > 0:
-                    SX_i = -1 * 1.0/abs(dF_t_i*sum_dF_rest_i)
+                    SX_i = -1 * 1.0 / abs(dF_t_i * sum_dF_rest_i)
                 else:
                     SX_i = dF_t_i * abs(sum_dF_rest_i)
             else:
                 if dF_t_i > 0 or sum_dF_rest_i < 0:
-                    SX_i = -1 * 1.0/abs(dF_t_i*sum_dF_rest_i)
+                    SX_i = -1 * 1.0 / abs(dF_t_i * sum_dF_rest_i)
+                else:
+                    SX_i = abs(dF_t_i) * sum_dF_rest_i
+
+            SX[row, col] = SX_i
+            # print(f'dF_t_i={dF_t_i}')
+            # print(f'sum_dF_rest_i={sum_dF_rest_i}')
+
+        # get the rank of diff_pixels
+        SX_flat = SX.flatten()
+        a = SX_flat[diff_pixels]
+        a_argsort = np.argsort(a)
+        return np.array(diff_pixels)[a_argsort], a[a_argsort]
+
+    @staticmethod
+    def jsma_ranking_original(generated_adv, origin_image, border_index, target_label, classifier, diff_pixels,
+                              num_expected_features=1,
+                              num_classes=10):
+        # compute gradient respect to generated_adv for each label
+        dF_t = None  # gradient for target_label
+        dF_rest = []  # array of gradient for the rest
+        for i in range(num_classes):
+            dF_i = feature_ranker.compute_gradient_wrt_features(
+                input=tf.convert_to_tensor([generated_adv.reshape(28, 28, 1)]),
+                target_neuron=i, classifier=classifier)
+            if i != target_label:
+                dF_rest.append(dF_i)
+            else:
+                dF_t = dF_i
+
+        ori_2_dimension = origin_image.reshape(28, 28)
+        adv_2_dimension = generated_adv.reshape(28, 28)
+        # compute the importance of each pixel
+        SX = np.zeros_like(origin_image)
+        for index in range(np.prod(origin_image.shape)):
+            row, col = int(index // 28), int(index % 28)
+            dF_t_i = dF_t[row, col][0]
+            sum_dF_rest_i = sum([abs(dF_rest_i[row, col][0]) for dF_rest_i in dF_rest])
+
+            SX_i = 0
+            if adv_2_dimension[row, col] > ori_2_dimension[row, col]:
+
+                if dF_t_i < 0 or sum_dF_rest_i > 0:
+                    SX_i = 0
+                else:
+                    SX_i = dF_t_i * abs(sum_dF_rest_i)
+            else:
+                if dF_t_i > 0 or sum_dF_rest_i < 0:
+                    SX_i = 0
                 else:
                     SX_i = abs(dF_t_i) * sum_dF_rest_i
 
