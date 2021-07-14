@@ -5,8 +5,6 @@ import os.path
 import threading
 import time
 
-import numpy as np
-
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
@@ -153,9 +151,7 @@ class AE4DNN_V2:
                                                                              cnn_model=self.classifier)
         np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                              self.file_shared_name + f'step={self.step}_advs.npy'), np.array(self.adv_result))
-        self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-            self.target_label, step=self.step, return_adv=True)
+
         # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_restored_advs.npy'), self.restored_advs)
         # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_origin.npy'), self.origin_adv_result)
 
@@ -166,6 +162,10 @@ class AE4DNN_V2:
             return
         # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
         #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+            self.target_label, step=self.step, return_adv=True)
+
         self.L0_afters = []
         self.L2_afters = []
         for adv, ori in zip(self.adv_result, self.origin_adv_result):

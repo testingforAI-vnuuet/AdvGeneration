@@ -96,6 +96,7 @@ class AutoencoderBorder:
         self.L0_afters = None
         self.L2_befores = None
         self.L2_afters = None
+        self.restored_advs = None
         logger.debug('init attacking DONE!')
 
     def autoencoder_attack(self, loss):
@@ -124,7 +125,7 @@ class AutoencoderBorder:
             logger.debug('training autoencoder for: origin_label={origin_label}, target_label={target_label}'.format(
                 origin_label=self.origin_label, target_label=self.target_label))
 
-            self.autoencoder = ae_trainee.get_architecture_simple()
+            self.autoencoder = ae_trainee.get_architecture()
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
                                      loss=loss(self.classifier, self.target_vector, self.weight))
@@ -153,132 +154,83 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1],
-            self.origin_adv_result[:-1],
-            self.target_label, step=self.step)
+        self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
+            self.target_label, step=self.step, return_adv=True)
+        # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_restored_advs.npy'), self.restored_advs)
+        # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_origin.npy'), self.origin_adv_result)
 
-        # self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = reject_outliers(
-        #     self.L0_befores), reject_outliers(self.L0_afters), reject_outliers(self.L2_befores), reject_outliers(
-        #     self.L2_afters)
-
-        # tmp_path = os.path.join('result', self.method_name)
-        # _, _ = get_important_pixel_vetcan_all_images(self.adv_result, self.classifier, os.path.abspath(tmp_path), self.file_shared_name)
-
-        self.end_time = time.time()
-        logger.debug('get advs DONE!')
+        # self.export_dataset_rnn()
+        if self.adv_result is None:
+            return
+        if self.adv_result.shape[0] == 0:
+            return
+        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        self.L0_afters = []
+        self.L2_afters = []
+        for adv, ori in zip(self.adv_result, self.origin_adv_result):
+            self.L0_afters.append(compute_l0_V2(adv, ori))
+            self.L2_afters.append(compute_l2_V2(adv, ori))
+        self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
+        logger.debug(f'adv shape {self.adv_result.shape}')
 
     def export_result(self):
-        result = '<=========='
+        # result = '<=========='
         result = ''
         if self.smooth_adv is not None:
             str_smooth_adv = list(map(str, self.smooth_adv))
-            result += '\n' + '\n'.join(str_smooth_adv)
+            result += '\n'.join(str_smooth_adv)
+        if self.adv_result is None or self.adv_result.shape[0] == 0:
+            return 0, [], []
 
         f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
                  'w')
         f.write(result)
         f.close()
         #
-        L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        L0_before_txt = L0_before_txt.replace('[', '')
-        L0_before_txt = L0_before_txt.replace(']', '')
-        L0_before_txt = L0_before_txt.replace(' ', '\n')
+        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
+        # L0_before_txt = L0_before_txt.replace('[', '')
+        # L0_before_txt = L0_before_txt.replace(']', '')
+        # L0_before_txt = L0_before_txt.replace(' ', '\n')
 
         L0_after_txt = np.array2string(self.L0_afters, separator=' ')
         L0_after_txt = L0_after_txt.replace(']', '')
         L0_after_txt = L0_after_txt.replace('[', '')
         L0_after_txt = L0_after_txt.replace(' ', '\n')
 
-        L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        L2_before_txt = L2_before_txt.replace('[', '')
-        L2_before_txt = L2_before_txt.replace(']', '')
-        L2_before_txt = L2_before_txt.replace(' ', '\n')
+        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
+        # L2_before_txt = L2_before_txt.replace('[', '')
+        # L2_before_txt = L2_before_txt.replace(']', '')
+        # L2_before_txt = L2_before_txt.replace(' ', '\n')
 
         L2_after_txt = np.array2string(self.L2_afters, separator=' ')
         L2_after_txt = L2_after_txt.replace('[', '')
         L2_after_txt = L2_after_txt.replace(']', '')
         L2_after_txt = L2_after_txt.replace(' ', '\n')
 
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        f.write(L0_before_txt)
-        f.close()
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
+        # f.write(L0_before_txt)
+        # f.close()
 
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
         f.write(L0_after_txt)
         f.close()
 
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        f.write(L2_before_txt)
-        f.close()
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        # f.write(L2_before_txt)
+        # f.close()
 
         f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
                               self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
         f.write(L2_after_txt)
         f.close()
 
-        return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
-
-    def save_images(self):
-
-        l2 = np.array([L2(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
-        # l2 = reject_outliers(l2)
-        l0 = np.array([L0(gen, test) for gen, test in zip(self.adv_result, self.origin_adv_result)])
-        # l0 = reject_outliers(l0)
-        if l2.shape[0] == 0:
-            return
-
-        origin_adv_result_borders = get_border(self.origin_adv_result)
-
-        sum_adv_borders = [np.sum(origin_adv_result_border.flatten()) for origin_adv_result_border in
-                           origin_adv_result_borders]
-
-        l2_argsort = np.argsort(l2)
-        worst_l2_index = l2_argsort[-1]
-        best_l2_index = l2_argsort[0]
-
-        l0_avg = l0 / sum_adv_borders
-        l0_argsort = np.argsort(l0_avg)
-        worst_l0_index = l0_argsort[-1]
-        best_l0_index = l0_argsort[0]
-
-        path_l2 = SAVED_IMAGE_SAMPLE_PATH + '/epsilon1/l2/' + 'figure_' + self.file_shared_name + '.png'
-        path_l0 = SAVED_IMAGE_SAMPLE_PATH + '/epsilon1/l0/' + 'figure_' + self.file_shared_name + '.png'
-
-        # show for l2
-        origin_image_worst_l2 = self.origin_adv_result[worst_l2_index]
-        origin_image_best_l2 = self.origin_adv_result[best_l2_index]
-
-        gen_image_worst_l2 = self.adv_result[worst_l2_index]
-        gen_image_best_l2 = self.adv_result[best_l2_index]
-
-        l2_worst = l2[worst_l2_index]
-        l2_best = l2[best_l2_index]
-
-        l0_l2_worst = l0[worst_l2_index]
-        l0_l2_best = l0[best_l2_index]
-
-        # plot_images(origin_image_worst_l2, origin_image_best_l2, gen_image_worst_l2, gen_image_best_l2, l2_worst,
-        # l2_best, l0_l2_worst, l0_l2_best, path_l2, self.classifier, worst_l2_index, worst_l0_index)
-
-        # show for l0
-        origin_image_worst_l0 = self.origin_adv_result[worst_l0_index]
-        origin_image_best_l0 = self.origin_adv_result[best_l0_index]
-
-        gen_image_worst_l0 = self.adv_result[worst_l0_index]
-        gen_image_best_l0 = self.adv_result[best_l0_index]
-
-        l0_worst = l0[worst_l0_index]
-        l0_best = l0[best_l0_index]
-
-        l2_l0_worst = l2[worst_l0_index]
-        l2_l0_best = l0[best_l0_index]
-
-        plot_images(origin_image_worst_l0, origin_image_best_l0, gen_image_worst_l0, gen_image_best_l0, l2_l0_worst,
-                    l2_l0_best, l0_worst, l0_best, path_l0, self.classifier, worst_l0_index, best_l0_index)
+        # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
+        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters
 
 
 def run_thread(classifier_name, trainX, trainY):
@@ -321,6 +273,65 @@ def run_thread(classifier_name, trainX, trainY):
     logger.debug("=======================++++============================")
 
 
+def run_thread_V2(classifier_name, trainX, trainY):
+    logger.debug("\n=======================================================")
+    logger.debug('processing model: ' + classifier_name)
+    cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
+    result_txt = classifier_name + '\n'
+    # AE_LOSS = AE_LOSSES.border_loss
+    weight_result = []
+    L0s = []
+    L2s = []
+    for weight_index in range(1, 11):
+        weight_value = weight_index * 0.1
+        # weight_value = weight_index
+        weight_result_i = []
+        for origin_label in range(9, 10):
+            weight_result_i_j = []
+            for target_position in range(2, 3):
+                attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
+                                             target_position=target_position, classifier_name=classifier_name,
+                                             weight=weight_value)
+                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
+                sucess_rate_i, L0, L2 = attacker.export_result()
+                weight_result_i_j.append(sucess_rate_i)
+                if len(L0) != 0:
+                    for L0_i, L2_i in zip(L0, L2):
+                        L0s.append(L0_i)
+                        L2s.append(L2_i)
+                del attacker
+            weight_result_i.append(weight_result_i_j)
+        weight_result_i = np.array(weight_result_i)
+        np.savetxt(f'./result/ae_border/{classifier_name}_{weight_value}.csv', weight_result_i, delimiter=",")
+
+        weight_result_i = np.average(weight_result_i, axis=0)
+        weight_result.append(weight_result_i)
+
+    weight_result = np.array(weight_result)
+    s = np.array2string(weight_result, separator=' ')
+    s = s.replace('[', ' ')
+    s = s.replace(']', ' ')
+    f = open('./result/ae_border/' + classifier_name + 'success_rate.txt', 'w')
+    f.write(s)
+    f.close()
+
+    L0s = np.array(L0s).flatten()
+    L2s = np.array(L2s).flatten()
+
+    L0s = reject_outliers_v2(L0s)
+    L2s = reject_outliers_v2(L2s)
+    if L0s.shape[0] == 0:
+        return
+    min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
+    min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
+
+    l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
+    f = open('./result/ae_border/' + classifier_name + 'l0_l2.txt', 'w')
+    f.write(l0_l2_txt)
+    f.close()
+    logger.debug('ok')
+
+
 class MyThread(threading.Thread):
     def __init__(self, classifier_name, trainX, trainY):
         super(MyThread, self).__init__()
@@ -360,13 +371,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    thread1.start()
-    # thread2.start()
+    # thread1.start()
+    thread2.start()
     # thread3.start()
     # thread4.start()
 
-    thread1.join()
-    # thread2.join()
+    # thread1.join()
+    thread2.join()
     # thread3.join()
     # thread4.join()
 
