@@ -181,7 +181,7 @@ class AutoencoderBorder:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n'.join(str_smooth_adv)
         if self.adv_result is None or self.adv_result.shape[0] == 0:
-            return 0, [], []
+            return 0, [], [], []
 
         # f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
         #          'w')
