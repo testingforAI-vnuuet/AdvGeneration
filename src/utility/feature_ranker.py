@@ -238,12 +238,12 @@ class feature_ranker:
             if adv_2_dimension[row, col] > ori_2_dimension[row, col]:
 
                 if dF_t_i < 0 or sum_dF_rest_i > 0:
-                    SX_i = -1 * 1.0 / abs(dF_t_i * sum_dF_rest_i)
+                    SX_i = -1 * 1.0 / (abs(dF_t_i * sum_dF_rest_i) + 0.1)
                 else:
                     SX_i = dF_t_i * abs(sum_dF_rest_i)
             else:
                 if dF_t_i > 0 or sum_dF_rest_i < 0:
-                    SX_i = -1 * 1.0 / abs(dF_t_i * sum_dF_rest_i)
+                    SX_i = -1 * 1.0 / (abs(dF_t_i * sum_dF_rest_i) + 0.1)
                 else:
                     SX_i = abs(dF_t_i) * sum_dF_rest_i
 
