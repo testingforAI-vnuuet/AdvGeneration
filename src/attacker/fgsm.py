@@ -5,8 +5,6 @@ import os.path
 import threading
 import time
 
-import numpy as np
-
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
@@ -24,6 +22,8 @@ pre_softmax_layer_name_dict = {pretrained_model_name[0]: 'dense_3', pretrained_m
 
 def combined_function(set1, set2, set3):
     return np.array([list(combined) for combined in zip(set1, set2, set3)])
+
+
 
 
 class FGSM:
@@ -229,7 +229,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 0.1
+    step = 0.3
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -245,7 +245,12 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 sucess_rate_i, L0, L2, smooth_adv_i = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
                 logger.debug(f'L0: {L0}')
-                if len(L0) != 0:
+                if len(L0) == 0 and sucess_rate_i > 0.0:
+                    L0, L2 = [0] * (round(sucess_rate_i * 1000)), [0] * (round(sucess_rate_i * 1000))
+                    for L0_i, L2_i in zip(L0, L2):
+                        L0s.append(L0_i)
+                        L2s.append(L2_i)
+                elif len(L0) != 0:
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
@@ -267,8 +272,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f.close()
     smooth_adv_speed = np.asarray(smooth_adv_speed)
     smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
-    np.savetxt(f'./result/fgsm/{classifier_name}_avg_recover_speed_step={step}.csv', smooth_adv_speed, delimiter=',')
-
+    ranking_type = 'jsma_ka'
+    np.savetxt(f'./result/fgsm/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed,
+               delimiter=',')
 
     L0s = np.array(L0s).flatten()
     L2s = np.array(L2s).flatten()
@@ -282,7 +288,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
 
     l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    f = open('./result/fgsm/' + classifier_name + 'l0_l2.txt', 'w')
+    f = open('./result/fgsm/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
     f.write(l0_l2_txt)
     f.close()
 

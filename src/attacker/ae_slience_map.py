@@ -305,7 +305,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 0.1
+    step = 0.3
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index

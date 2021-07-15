@@ -21,10 +21,9 @@ pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 def combined_function(set1, set2, set3):
     return np.array([list(combined) for combined in zip(set1, set2, set3)])
 
-
 class AAE_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=6,
+                 step=6.,
                  num_images=1000):
         """
 
@@ -228,7 +227,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 0.1
+    step = 0.3
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -265,7 +264,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
 
     smooth_adv_speed = np.asarray(smooth_adv_speed)
     smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
-    np.savetxt(f'./result/aae/{classifier_name}_avg_recover_speed_step={step}.csv', smooth_adv_speed, delimiter=',')
+    ranking_type = 'jsma_ka'
+
+    np.savetxt(f'./result/aae/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed, delimiter=',')
 
 
     L0s = np.array(L0s).flatten()
@@ -279,7 +280,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
 
     l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    f = open('./result/aae/' + classifier_name + 'l0_l2.txt', 'w')
+    f = open('./result/aae/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
     f.write(l0_l2_txt)
     f.close()
 

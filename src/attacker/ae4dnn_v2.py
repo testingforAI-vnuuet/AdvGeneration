@@ -23,7 +23,6 @@ pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 def combined_function(set1, set2, set3):
     return np.array([list(combined) for combined in zip(set1, set2, set3)])
 
-
 class AE4DNN_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=6.0,
@@ -151,8 +150,8 @@ class AE4DNN_V2:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
-        np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                             self.file_shared_name + f'step={self.step}_advs.npy'), np.array(self.adv_result))
+        # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                      self.file_shared_name + f'step={self.step}_advs.npy'), np.array(self.adv_result))
 
         # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_restored_advs.npy'), self.restored_advs)
         # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_origin.npy'), self.origin_adv_result)
@@ -202,50 +201,50 @@ class AE4DNN_V2:
         if self.adv_result is None or self.adv_result.shape[0] == 0:
             return 0, [], []
 
-        f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
-                 'w')
-        f.write(result)
-        f.close()
+        # f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
+        #          'w')
+        # f.write(result)
+        # f.close()
         #
         # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
         # L0_before_txt = L0_before_txt.replace('[', '')
         # L0_before_txt = L0_before_txt.replace(']', '')
         # L0_before_txt = L0_before_txt.replace(' ', '\n')
 
-        L0_after_txt = np.array2string(self.L0_afters, separator=' ')
-        L0_after_txt = L0_after_txt.replace(']', '')
-        L0_after_txt = L0_after_txt.replace('[', '')
-        L0_after_txt = L0_after_txt.replace(' ', '\n')
+        # L0_after_txt = np.array2string(self.L0_afters, separator=' ')
+        # L0_after_txt = L0_after_txt.replace(']', '')
+        # L0_after_txt = L0_after_txt.replace('[', '')
+        # L0_after_txt = L0_after_txt.replace(' ', '\n')
 
         # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
         # L2_before_txt = L2_before_txt.replace('[', '')
         # L2_before_txt = L2_before_txt.replace(']', '')
         # L2_before_txt = L2_before_txt.replace(' ', '\n')
 
-        L2_after_txt = np.array2string(self.L2_afters, separator=' ')
-        L2_after_txt = L2_after_txt.replace('[', '')
-        L2_after_txt = L2_after_txt.replace(']', '')
-        L2_after_txt = L2_after_txt.replace(' ', '\n')
+        # L2_after_txt = np.array2string(self.L2_afters, separator=' ')
+        # L2_after_txt = L2_after_txt.replace('[', '')
+        # L2_after_txt = L2_after_txt.replace(']', '')
+        # L2_after_txt = L2_after_txt.replace(' ', '\n')
 
         # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
         #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
         # f.write(L0_before_txt)
         # f.close()
 
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
-        f.write(L0_after_txt)
-        f.close()
-
         # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        # f.write(L2_before_txt)
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
+        # f.write(L0_after_txt)
         # f.close()
-
-        f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-                              self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
-        f.write(L2_after_txt)
-        f.close()
+        #
+        # # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        # #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
+        # # f.write(L2_before_txt)
+        # # f.close()
+        #
+        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
+        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
+        # f.write(L2_after_txt)
+        # f.close()
 
         # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
         return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
@@ -261,7 +260,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 0.1
+    step = 0.3
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -290,7 +289,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
 
     smooth_adv_speed = np.asarray(smooth_adv_speed)
     smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
-    np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}.csv', smooth_adv_speed, delimiter=',')
+    ranking_type = 'jsma_ka'
+
+    np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed, delimiter=',')
     weight_result = np.array(weight_result)
     s = np.array2string(weight_result, separator=' ')
     s = s.replace('[', ' ')
@@ -310,7 +311,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
 
     l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    f = open('./result/ae4dnn/' + classifier_name + 'l0_l2.txt', 'w')
+    f = open('./result/ae4dnn/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
     f.write(l0_l2_txt)
     f.close()
     logger.debug('ok')
