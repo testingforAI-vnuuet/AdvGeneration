@@ -5,6 +5,8 @@ import os.path
 import threading
 import time
 
+import numpy as np
+
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
@@ -246,7 +248,7 @@ class AE4DNN_V2:
         f.close()
 
         # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
-        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters
+        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -258,6 +260,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
+    smooth_adv_speed = []
+    step = 12
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -267,14 +271,15 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 3):
                 attacker = AE4DNN_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                      target_position=target_position, classifier_name=classifier_name,
-                                     weight=weight_value)
+                                     weight=weight_value, step=12)
                 attacker.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
-                sucess_rate_i, L0, L2 = attacker.export_result()
+                sucess_rate_i, L0, L2, smooth_adv_i = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
                 if len(L0) != 0:
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
+                    smooth_adv_speed.append(smooth_adv_i)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.array(weight_result_i)
@@ -283,6 +288,9 @@ def run_thread_V2(classifier_name, trainX, trainY):
         weight_result_i = np.average(weight_result_i, axis=0)
         weight_result.append(weight_result_i)
 
+    smooth_adv_speed = np.asarray(smooth_adv_speed)
+    smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
+    np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}.csv', smooth_adv_speed, delimiter=',')
     weight_result = np.array(weight_result)
     s = np.array2string(weight_result, separator=' ')
     s = s.replace('[', ' ')
