@@ -77,7 +77,8 @@ class ae_slience_map:
 
         self.num_features = num_features
         self.saved_ranking_features_file = saved_ranking_features_file
-        self.important_features = self.__get_important_features()
+        # self.important_features = self.__get_important_features()
+        self.important_features = [0]*100
         self.autoencoder = None
         self.autoencoder_file_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name,
                                                   self.file_shared_name + 'autoencoder.h5')
