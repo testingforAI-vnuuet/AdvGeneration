@@ -28,7 +28,7 @@ def combined_function(set1, set2, set3):
 
 class FGSM:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=6,
+                 step=6.,
                  num_images=1000,
                  pre_softmax_layer_name='pre_softmax_layer'):
         """
@@ -216,7 +216,7 @@ class FGSM:
         f.close()
 
         # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
-        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters
+        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
