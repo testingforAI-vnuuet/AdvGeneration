@@ -195,7 +195,7 @@ class AutoencoderNPix:
         sum_gradient = np.zeros(shape=(MNIST_IMG_ROWS, MNIST_IMG_COLS, MNIST_IMG_CHL))
         for index, image in enumerate(self.Sx_for_training_n_pix):
             sum_gradient += self.__gradient_by_target(image)
-        flat_sum = np.array(sum_gradient).reshape(784, )
+        flat_sum = np.array(sum_gradient).flatten()
         return np.argsort(flat_sum)[-1 * self.num_pixel:]
 
     def l0_attack_by_n_pix(self, iterations):

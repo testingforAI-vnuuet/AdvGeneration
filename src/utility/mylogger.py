@@ -4,7 +4,7 @@ Reference: https://stackoverflow.com/questions/384076/how-can-i-color-python-log
 '''
 import logging
 
-
+logging.getLogger('tensorflow').disabled = True
 class MyLogger:
     logger = None
 

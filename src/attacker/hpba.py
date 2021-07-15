@@ -53,7 +53,7 @@ class HPBA:
             target_label=self.target_label, weight=str(self.weight).replace('.', ','),
             num_images=self.num_images_to_train)
 
-        self.general_result_folder = os.path.join(RESULT_FOLDER_PATH, self.method_name)
+        self.general_result_folder = os.path.abspath(os.path.join(RESULT_FOLDER_PATH, self.method_name))
         self.autoencoder_folder = os.path.join(self.general_result_folder, TEXT_AUTOENCODER)
         self.images_folder = os.path.join(self.general_result_folder, TEXT_IMAGE)
         self.result_summary_folder = os.path.join(self.general_result_folder, TEXT_RESULT_SUMMARY)
@@ -165,11 +165,14 @@ if __name__ == '__main__':
     testX, testY = MnistPreprocessing.quick_preprocess_data(testX, testY, num_classes=MNIST_NUM_CLASSES,
                                                             rows=MNIST_IMG_ROWS, cols=MNIST_IMG_COLS,
                                                             chl=MNIST_IMG_CHL)
-    logger.debug('pre-processing data DONE !')
-    classifier = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/Alexnet.h5')
 
-    logger.debug('robustness testing start')
-    attacker = HPBA(origin_label=9, target_label=None, target_position=2, classifier=classifier, weight=0.5,
-                    trainX=trainX, trainY=trainY, classifier_name='Alexnet')
-    attacker.autoencoder_attack()
-    attacker.export_result()
+    np.save('../../data/mnist/mnist_training.npy', trainX)
+    np.save('../../data/mnist/mnist_label.npy', trainY)
+    # logger.debug('pre-processing data DONE !')
+    # classifier = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/Alexnet.h5')
+    #
+    # logger.debug('robustness testing start')
+    # attacker = HPBA(origin_label=9, target_label=None, target_position=2, classifier=classifier, weight=0.5,
+    #                 trainX=trainX, trainY=trainY, classifier_name='Alexnet')
+    # attacker.autoencoder_attack()
+    # attacker.export_result()

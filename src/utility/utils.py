@@ -17,13 +17,6 @@ def check_path_exists(path):
 
 
 def mkdir(path):
-    """
-    create a directory if not exists
-    :param path: path of expected dir
-    :type path: str
-    :return: None
-    :rtype:
-    """
     if not check_path_exists(path):
         os.makedirs(path)
 
@@ -34,6 +27,15 @@ def mkdirs(paths):
     else:
         for path in paths:
             mkdir(path)
+
+
+def check_file_extension(file_path: str, extension_type: str):
+    return file_path.endswith(extension_type)
+
+
+def get_file_name(file_path: str):
+    full_file_name = os.path.basename(file_path)
+    return os.path.splitext(full_file_name)[0]
 
 
 # image

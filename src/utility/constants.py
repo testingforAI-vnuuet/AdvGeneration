@@ -11,3 +11,6 @@ MNIST_DATA_NAME = 'mnist'
 float32_type = 'float32'
 optimizer_adam = 'adam'
 optimizer_SGD = 'SGD'
+
+MODEL_TF_EXTENSION = '.h5'
+DATA_NP_EXTENSION = '.npy'

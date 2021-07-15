@@ -10,7 +10,7 @@ CLASSIFIER_PATH = '../classifier'
 PRETRAIN_CLASSIFIER_PATH = CLASSIFIER_PATH + '/pretrained_models'
 MNIST_CNN_MODEL_WITH_PRE_SOFTMAX_FILE = '/MNIST_MODEl_WITH_PRE_SOFTMAX.h5'
 
-RESULT_FOLDER_PATH = os.path.abspath('../../results')
+RESULT_FOLDER_PATH = os.path.abspath('results')
 SAVED_ATTACKER_PATH = './saved_models'
 SAVED_IMAGE_SAMPLE_PATH = './saved_images'
 SAVED_NPY_PATH = './saved_npy'
