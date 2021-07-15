@@ -230,7 +230,7 @@ class AutoencoderBorder:
         f.close()
 
         # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
-        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters
+        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
 
 
 def run_thread(classifier_name, trainX, trainY):
@@ -241,7 +241,7 @@ def run_thread(classifier_name, trainX, trainY):
     # AE_LOSS = AE_LOSSES.border_loss
     L0s = []
     L2s = []
-
+    smooth_adv_speed = []
     for origin_label in range(9, 10):
         # exe_time_sum = 0
         for target_position in range(2, 11):
@@ -252,7 +252,7 @@ def run_thread(classifier_name, trainX, trainY):
                                              weight=weight_value)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
                 attacker.get_border_and_adv()
-                _, _, L0, L2 = attacker.export_result()
+                _, _, L0, L2, smooth_adv_i = attacker.export_result()
                 L0s.append(L0)
                 L2s.append(L2)
                 del attacker
@@ -282,6 +282,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
+    smooth_adv_speed = []
+    step = 6
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -291,14 +293,15 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 3):
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                              target_position=target_position, classifier_name=classifier_name,
-                                             weight=weight_value)
+                                             weight=weight_value, step=step)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
-                sucess_rate_i, L0, L2 = attacker.export_result()
+                sucess_rate_i, L0, L2, smooth_adv_i = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
                 if len(L0) != 0:
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
+                        smooth_adv_speed.append(smooth_adv_i)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.array(weight_result_i)
@@ -314,6 +317,10 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f = open('./result/ae_border/' + classifier_name + 'success_rate.txt', 'w')
     f.write(s)
     f.close()
+
+    smooth_adv_speed = np.asarray(smooth_adv_speed)
+    smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
+    np.savetxt(f'./result/ae_border/{classifier_name}_avg_recover_speed_step={step}.csv', smooth_adv_speed, delimiter=',')
 
     L0s = np.array(L0s).flatten()
     L2s = np.array(L2s).flatten()
@@ -340,7 +347,7 @@ class MyThread(threading.Thread):
         self.trainY = trainY
 
     def run(self):
-        run_thread(self.classifier_name, self.trainX, self.trainY)
+        run_thread_V2(self.classifier_name, self.trainX, self.trainY)
 
 
 if __name__ == '__main__':

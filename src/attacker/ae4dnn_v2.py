@@ -261,7 +261,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 12
+    step = 6
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -271,7 +271,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 3):
                 attacker = AE4DNN_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                      target_position=target_position, classifier_name=classifier_name,
-                                     weight=weight_value, step=12)
+                                     weight=weight_value, step=step)
                 attacker.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
                 sucess_rate_i, L0, L2, smooth_adv_i = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
@@ -384,13 +384,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 

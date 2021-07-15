@@ -215,7 +215,7 @@ class AAE_V2:
         f.close()
 
         # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
-        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters
+        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -227,6 +227,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
     weight_result = []
     L0s = []
     L2s = []
+    smooth_adv_speed = []
+    step = 6
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -236,14 +238,15 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 3):
                 attacker = AAE_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                   target_position=target_position, classifier_name=classifier_name,
-                                  weight=weight_value)
+                                  weight=weight_value, step=step)
                 attacker.autoencoder_attack(loss=AE_LOSSES.re_rank_loss)
-                sucess_rate_i, L0, L2 = attacker.export_result()
+                sucess_rate_i, L0, L2, smooth_adv_i = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
                 if len(L0) != 0:
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
+                        smooth_adv_speed.append(smooth_adv_i)
                 del attacker
             weight_result_i.append(weight_result_i_j)
         weight_result_i = np.array(weight_result_i)
@@ -259,6 +262,11 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f = open('./result/aae/' + classifier_name + '.txt', 'w')
     f.write(s)
     f.close()
+
+    smooth_adv_speed = np.asarray(smooth_adv_speed)
+    smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
+    np.savetxt(f'./result/aae/{classifier_name}_avg_recover_speed_step={step}.csv', smooth_adv_speed, delimiter=',')
+
 
     L0s = np.array(L0s).flatten()
     L2s = np.array(L2s).flatten()
@@ -344,13 +352,13 @@ if __name__ == '__main__':
     thread3 = MyThread(pretrained_model_name[2], trainX, trainY)
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
-    # thread1.start()
-    thread2.start()
+    thread1.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
-    # thread1.join()
-    thread2.join()
+    thread1.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 

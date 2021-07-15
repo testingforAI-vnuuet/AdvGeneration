@@ -186,7 +186,7 @@ def smooth_vet_can_stepV2(ori, adv, dnn, target_label, step, strategy=None):
     count_changes = 0
     while curr_diff_pixel_arr is not None:
         count_step += 1
-        curr_pixels, curr_diff_pixel_arr, curr_diff_value_arr = get_all_same_element_by_index(curr_diff_pixel_arr,
+        curr_pixels, curr_diff_pixel_arr, curr_diff_value_arr = get_all_same_element_by_indexV2(curr_diff_pixel_arr,
                                                                                               curr_diff_value_arr)
 
         old_pixels = np.concatenate((old_pixels, curr_pixels))
@@ -330,3 +330,25 @@ def get_all_same_element_by_index(arr_diff, arr_value):
     if stop_index == len(arr_diff) - 1:
         return np.array(result, dtype=np.int32), None, None
     return np.array(result, dtype=np.int32), arr_diff[stop_index:], arr_value[stop_index:]
+
+
+def get_all_same_element_by_indexV2(arr_diff, arr_value):
+    if len(arr_diff) == 0:
+        return None, None, None
+    if len(arr_diff) == 1:
+        return np.array([arr_diff[0]], dtype=np.int32), None, None
+
+    head = arr_value[0]
+    result = []
+    stop_index = 0
+    for index, (diff_index, diff_value) in enumerate(zip(arr_diff, arr_value)):
+        stop_index = index
+        result.append(diff_index)
+        # if diff_value == head:
+        #     result.append(diff_index)
+        # else:
+        #     break
+        break
+    if stop_index == len(arr_diff) - 1:
+        return np.array(result, dtype=np.int32), None, None
+    return np.array(result, dtype=np.int32), arr_diff[stop_index+1:], arr_value[stop_index+1:]
