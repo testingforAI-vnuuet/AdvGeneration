@@ -167,7 +167,10 @@ def smooth_vet_can_step_adaptive(ori, adv, dnn, target_label, initial_step, stra
 
     smooth_adv_0_255 = None
     L0_before = compute_l0_V2(ori, adv)
+    if type(initial_step) is float:
+        initial_step = round(L0_before * initial_step)
     print(f'L0_before={L0_before}')
+    print(f'initial step={initial_step}')
     for idx in range(0, 5):
         smooth_adv_0_255, L0_after, L0_before, L2_after, L2_before, restored_pixel = \
             smooth_vet_can_stepV2(ori, smooth_adv_0_1, dnn, target_label, initial_step, strategy)
