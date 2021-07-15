@@ -85,71 +85,6 @@ def rank_pixel_S2(diff_pixel):  # top-left to bottom-right
     return diff_pixel
 
 
-def smooth_vet_can_step(ori, adv, dnn, target_label, step, strategy):
-    n_restored_pixels = 0
-    restored_pixel_by_prediction = []
-
-    # normalize
-    ori_0_255 = ori.reshape(-1)
-    smooth_adv_0_255 = np.array(adv).reshape(-1)
-    original_adv_0_255 = np.array(adv).reshape(-1)
-    if np.min(ori) >= 0 and np.max(ori) <= 1:
-        ori_0_255 = np.round(ori_0_255 * 255)
-        smooth_adv_0_255 = np.round(smooth_adv_0_255 * 255)
-        original_adv_0_255 = np.round(original_adv_0_255 * 255)
-
-    L0_before = compute_l0_V2(smooth_adv_0_255, ori_0_255, normalized=True)
-    print(f"L0_before = {L0_before}")
-
-    # get different pixels
-    diff_pixel_arr = []
-    for diff_pixel_idx in range(len(ori_0_255)):
-        if ori_0_255[diff_pixel_idx] != smooth_adv_0_255[diff_pixel_idx]:
-            diff_pixel_arr.append(diff_pixel_idx)
-
-    # diff_pixel_arr = rank_pixel_S2(diff_pixel_arr)
-    diff_pixel_arr, _ = feature_ranker.jsma_ranking_borderV2(adv, ori, None, target_label, dnn, diff_pixel_arr)
-
-    diff_pixel_arr = np.asarray(diff_pixel_arr)
-    #
-    count = 0
-    old_indexes = []
-    old_values = []
-    for diff_pixel_idx in diff_pixel_arr:
-        if ori_0_255[diff_pixel_idx] != smooth_adv_0_255[diff_pixel_idx]:
-            count += 1
-            old_indexes.append(diff_pixel_idx)
-            old_values.append(smooth_adv_0_255[diff_pixel_idx])
-            smooth_adv_0_255[diff_pixel_idx] = ori_0_255[diff_pixel_idx]  # try to restore
-
-        if count == step \
-                or diff_pixel_idx == diff_pixel_arr[-1]:
-            Y_pred = dnn.predict((smooth_adv_0_255 / 255).reshape(-1, 28, 28, 1))
-            pred = np.argmax(Y_pred, axis=1)[0]
-
-            if pred != target_label:
-                # revert the changes
-                for jdx, value in zip(old_indexes, old_values):
-                    smooth_adv_0_255[jdx] = value
-            else:
-                n_restored_pixels += count
-
-            old_indexes = []
-            old_values = []
-            count = 0
-            restored_pixel_by_prediction.append(n_restored_pixels)
-
-    L0_after = compute_l0_V2(ori_0_255, smooth_adv_0_255, normalized=True)
-    print(f"L0_after = {L0_after}")
-
-    L2_after = compute_l0_V2(ori_0_255, smooth_adv_0_255)
-    L2_before = compute_l2_V2(ori_0_255, original_adv_0_255)
-
-    # highlight = utilities.highlight_diff(original_adv_0_255, smooth_adv_0_255)
-
-    return smooth_adv_0_255, L0_after, L0_before, L2_after, L2_before, np.asarray(
-        restored_pixel_by_prediction)
-
 
 def smooth_vet_can_stepV2(ori, adv, dnn, target_label, step, strategy=None):
     n_restored_pixels = 0
@@ -174,19 +109,20 @@ def smooth_vet_can_stepV2(ori, adv, dnn, target_label, step, strategy=None):
             diff_pixel_arr.append(diff_pixel_idx)
 
     # diff_pixel_arr = rank_pixel_S2(diff_pixel_arr)
-    # diff_pixel_arr, diff_value_arr = feature_ranker.jsma_ranking_borderV2(adv, ori, None, target_label, dnn,
-    #                                                                       diff_pixel_arr)
-    diff_pixel_arr, diff_value_arr = feature_ranker.jsma_ranking_original(adv, ori, None, target_label, dnn,
+    diff_pixel_arr, diff_value_arr = feature_ranker.jsma_ranking_borderV2(adv, ori, None, target_label, dnn,
                                                                           diff_pixel_arr)
+    # diff_pixel_arr, diff_value_arr = feature_ranker.jsma_ranking_original(adv, ori, None, target_label, dnn,
+    #                                                                       diff_pixel_arr)
     curr_diff_pixel_arr = np.array(diff_pixel_arr)
     curr_diff_value_arr = np.array(diff_value_arr)
     old_pixels = np.array([], dtype=np.int32)
     old_values = np.array([])
     count_step = 0
     count_changes = 0
+    # real_step =
     while curr_diff_pixel_arr is not None:
         count_step += 1
-        curr_pixels, curr_diff_pixel_arr, curr_diff_value_arr = get_all_same_element_by_indexV2(curr_diff_pixel_arr,
+        curr_pixels, curr_diff_pixel_arr, curr_diff_value_arr = get_all_same_element_by_index(curr_diff_pixel_arr,
                                                                                               curr_diff_value_arr)
 
         old_pixels = np.concatenate((old_pixels, curr_pixels))

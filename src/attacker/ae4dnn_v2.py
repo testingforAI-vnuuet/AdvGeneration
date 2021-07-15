@@ -26,7 +26,7 @@ def combined_function(set1, set2, set3):
 
 class AE4DNN_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
-                 step=6,
+                 step=6.0,
                  num_images=1000, is_train=True):
         """
 
@@ -261,7 +261,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 6
+    step = 0.1
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -310,7 +310,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
 
     l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    f = open('./result/ae4dnn/' + classifier_name + 'l0_l2(1).txt', 'w')
+    f = open('./result/ae4dnn/' + classifier_name + 'l0_l2.txt', 'w')
     f.write(l0_l2_txt)
     f.close()
     logger.debug('ok')
@@ -385,12 +385,12 @@ if __name__ == '__main__':
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
     thread1.join()
-    thread2.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
