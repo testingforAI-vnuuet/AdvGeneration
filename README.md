@@ -16,9 +16,10 @@ If you have any questions, please contact me via nguyenducanh@vnu.edu.vn.
   * [Dataset Preparation](#Dataset-Preparation)
     * [Training Data](#Training-data)
     * [Pre-trained DNN](#Pre-trained-DNN)
-  * [View Result](#View-Result)
-* [Run experiment](#Run experiment)
 
+* [Run experiment](#Run experiment)
+  * [Run](#run)
+  * [View Result](#View-Result)
 
 
 ## Getting started
@@ -42,6 +43,10 @@ pip install -r requirements.txt
 - Use pre-trained DNN that was training by chosen training data with high accuracy (example: [mnist-model](https://drive.google.com/file/d/1eBmWjM3HPp2Ci3e6dhd7iMNYCik2Se8q/view?usp=sharing))
 ### Input Configuration
 - Input required configation in file [config.ini](config.ini)
-### View Result
-###Run experiment
 
+###Run experiment
+#### Run
+```sh
+python3 main.py
+```
+#### View Result
