@@ -1,7 +1,7 @@
-import os
-
 from attacker.mnist_utils import compute_l0_V2, compute_l2_V2
 from utility.feature_ranker import *
+
+logger = MyLogger.getLog()
 
 
 def filter_advs(classifier, origin_images, generated_imgs, target):
@@ -192,9 +192,6 @@ def smooth_vet_can_stepV2(ori, adv, dnn, target_label, step, strategy=None):
         count_changes += 0 if curr_pixels is None else len(curr_pixels)
 
         smooth_adv_0_255[curr_pixels] = ori_0_255[curr_pixels]
-        # L0_after = compute_l0_V2(smooth_adv_0_255, ori_0_255, normalized=True)
-        # print(f'{L0_after} is L0 after')
-        # print(len(curr_pixels))
 
         if count_step == step or curr_diff_pixel_arr is None:
             Y_pred = dnn.predict((smooth_adv_0_255 / 255.).reshape(-1, 28, 28, 1))
@@ -210,12 +207,9 @@ def smooth_vet_can_stepV2(ori, adv, dnn, target_label, step, strategy=None):
             restored_pixel_by_prediction.append(n_restored_pixels)
 
     L0_after = compute_l0_V2(ori_0_255, smooth_adv_0_255, normalized=True)
-    # print(f"L0_after = {L0_after}")
 
     L2_after = compute_l2_V2(ori_0_255, smooth_adv_0_255)
     L2_before = compute_l2_V2(ori_0_255, original_adv_0_255)
-
-    # highlight = utilities.highlight_diff(original_adv_0_255, smooth_adv_0_255)
 
     return smooth_adv_0_255, L0_after, L0_before, L2_after, L2_before, np.asarray(
         restored_pixel_by_prediction)
@@ -229,7 +223,10 @@ def smooth_vet_can_step_adaptive(ori, adv, dnn, target_label, initial_step, stra
 
     smooth_adv_0_255 = None
     L0_before = compute_l0_V2(ori, adv)
-    print(f'L0_before={L0_before}')
+    if type(initial_step) is float:
+        initial_step = round(L0_before * initial_step)
+    # print(initial_step)
+    # print(f'L0_before={L0_before}')
     for idx in range(0, 5):
         smooth_adv_0_255, L0_after, L0_before, L2_after, L2_before, restored_pixel = \
             smooth_vet_can_stepV2(ori, smooth_adv_0_1, dnn, target_label, initial_step, strategy)
@@ -253,12 +250,13 @@ def smooth_vet_can_step_adaptive(ori, adv, dnn, target_label, initial_step, stra
             smooth_adv_0_1 = smooth_adv_0_255 / 255
 
     restored_pixel_arr = np.asarray(restored_pixel_arr)
-    print(f'L0_after={L0[-1]}')
-    return smooth_adv_0_255, L0[-1], L0[0], L2[-1], L2[0], restored_pixel_arr
+    # print(f'L0_after={L0[-1]}')
+    return smooth_adv_0_1, L0[-1], L0[0], L2[-1], L2[0], restored_pixel_arr
 
 
 #
-def smooth_adv_border_V3(classifier, generated_advs, origin_images, target_label, step, K=784, return_adv=False):
+def optimize_adv(classifier, generated_advs, origin_images, target_label, step,
+                 K=attack_config.total_element_a_data, return_adv=False):
     result = []
     ranking_strategy = 'jsma'
     L0_befores = []
@@ -268,7 +266,9 @@ def smooth_adv_border_V3(classifier, generated_advs, origin_images, target_label
     L2_afters = []
     advs = []
 
-    for adv, ori in zip(generated_advs, origin_images):
+    for index, (adv, ori) in enumerate(zip(generated_advs, origin_images)):
+        logger.debug(
+            '[optimize-hpba] index:  {index}/{total_index}'.format(index=index, total_index=generated_advs.shape[0]))
         smooth_adv, L0_after, L0_before, L2_after, L2_before, restored_pixel_by_prediction = \
             smooth_vet_can_step_adaptive(
                 ori, adv, classifier,

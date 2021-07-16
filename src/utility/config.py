@@ -73,6 +73,7 @@ def analyze_config(config_path):
     attack_config.input_size = attack_config.training_data.shape[0]
     data_example = attack_config.training_data[:1]
     attack_config.input_shape = data_example[0].shape
+    a = np.prod(attack_config.input_shape)
     attack_config.total_element_a_data = np.prod(attack_config.input_shape)
     attack_config.num_class = len(attack_config.classifier.predict(data_example)[0])
 

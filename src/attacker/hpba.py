@@ -3,6 +3,7 @@ Created At: 14/07/2021 15:39
 """
 import time
 
+import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -11,7 +12,7 @@ from attacker.constants import *
 from attacker.losses import AE_LOSSES
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
-from utility.filters.filter_advs import smooth_adv_border_V3
+from utility.filters.filter_advs import optimize_adv
 from utility.statistics import *
 from utility.utils import *
 
@@ -23,7 +24,9 @@ logger = MyLogger.getLog()
 class HPBA:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_label=None, target_position=2,
                  classifier_name=NONAME,
-                 step_to_recover=12, num_images_to_attack=1000, pattern=ALL_PATTERN, num_class=MNIST_NUM_CLASSES):
+                 step_to_recover=12., num_images_to_attack=1000, pattern=ALL_PATTERN, num_class=MNIST_NUM_CLASSES,
+                 num_images_to_train=1000):
+
         self.origin_label = origin_label
         self.trainX = trainX
         self.trainY = trainY
@@ -37,7 +40,7 @@ class HPBA:
         self.target_position = target_position
         self.pattern = pattern
         self.method_name = HPBA_METHOD_NAME
-        self.num_images_to_train = 1000
+        self.num_images_to_train = num_images_to_train
         self.num_class = num_class
 
         self.origin_images, self.origin_labels = filter_by_label(label=self.origin_label, data_set=self.trainX,
@@ -52,12 +55,14 @@ class HPBA:
             method_name=self.method_name, classifier_name=self.classifier_name, origin_label=self.origin_label,
             target_label=self.target_label, weight=str(self.weight).replace('.', ','),
             num_images=self.num_images_to_train)
+        self.shared_log = f'[{self.method_name}] '
 
         self.general_result_folder = os.path.abspath(os.path.join(RESULT_FOLDER_PATH, self.method_name))
         self.autoencoder_folder = os.path.join(self.general_result_folder, TEXT_AUTOENCODER)
         self.images_folder = os.path.join(self.general_result_folder, TEXT_IMAGE)
         self.result_summary_folder = os.path.join(self.general_result_folder, TEXT_RESULT_SUMMARY)
         self.data_folder = os.path.join(self.general_result_folder, TEXT_DATA)
+
         mkdirs([self.general_result_folder, self.autoencoder_folder, self.images_folder, self.result_summary_folder,
                 self.data_folder])
 
@@ -71,6 +76,7 @@ class HPBA:
         self.origin_adv_result = None
         self.origin_adv_result_path = os.path.join(self.data_folder,
                                                    self.file_shared_name + '_origin_' + get_timestamp() + '.npy')
+
         self.optimal_epoch = None
         self.smooth_adv_speed = None
         self.optimized_adv = None
@@ -78,6 +84,7 @@ class HPBA:
                                                self.file_shared_name + '_optimized_adv_' + get_timestamp() + '.npy')
         self.summary_path = os.path.join(self.result_summary_folder,
                                          self.file_shared_name + '_summary_' + get_timestamp() + '.txt')
+
         self.L0_befores = None
         self.L0_afters = None
         self.L2_befores = None
@@ -88,20 +95,22 @@ class HPBA:
 
     def autoencoder_attack(self):
         ae_trainee = MnistAutoEncoder()
+
         self.start_time = time.time()
         if check_path_exists(self.autoencoder_file_path):
-            logger.debug(
-                'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
-                    origin_label=self.origin_label, target_label=self.target_label))
+            logger.debug(self.shared_log +
+                         'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
+                             origin_label=self.origin_label, target_label=self.target_label))
             self.autoencoder = tf.keras.models.load_model(self.autoencoder_file_path, compile=False)
 
         else:
+            logger.debug(self.shared_log +
+                         'not found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
+                             origin_label=self.origin_label, target_label=self.target_label))
             logger.debug(
-                'not found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
+                self.shared_log + 'training autoencoder for: origin_label={origin_label}, target_label={target_label}'.format(
                     origin_label=self.origin_label, target_label=self.target_label))
-            logger.debug('training autoencoder for: origin_label={origin_label}, target_label={target_label}'.format(
-                origin_label=self.origin_label, target_label=self.target_label))
-            self.autoencoder = ae_trainee.get_architecture()
+            self.autoencoder = ae_trainee.apdative_architecture(input_shape=self.trainX[0].shape)
             adam = keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.9, beta_2=0.999, amsgrad=False)
             self.autoencoder.compile(optimizer=adam,
                                      loss=AE_LOSSES.cross_entropy_loss(self.classifier, self.target_vector,
@@ -114,27 +123,34 @@ class HPBA:
             history = self.autoencoder.fit(self.origin_images[:self.num_images_to_train],
                                            self.origin_images[:self.num_images_to_train], epochs=500, batch_size=256,
                                            callbacks=[early_stopping, model_checkpoint], verbose=1)
+            logger.debug(self.shared_log + 'training autoencoder DONE!')
             self.optimal_epoch = len(history.history['loss'])
 
+        logger.debug(self.shared_log + 'filtering generated candidates!')
         generated_candidates = self.autoencoder.predict(self.origin_images[:self.num_images_to_attack])
         self.adv_result, _, self.origin_adv_result, _ = filter_candidate_adv(
             self.origin_images[:self.num_images_to_attack], generated_candidates, self.target_label,
             cnn_model=self.classifier)
-        self.optimized_adv, self.smooth_adv_speed, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result, self.origin_adv_result,
-            self.target_label, step=self.step_to_recover, return_adv=True)
+        logger.debug(self.shared_log + 'filtering generated candidates DONE!')
+
+        logger.debug(self.shared_log + 'optimizing generated advs')
+        self.optimized_adv, self.smooth_adv_speed, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = optimize_adv(
+            self.classifier, self.adv_result[:5], self.origin_adv_result[:5],
+            self.target_label, step=self.step_to_recover, return_adv=True, K=np.prod(self.trainX[0].shape[:-1]))
+        logger.debug(self.shared_log + 'optimizing generated advs DONE')
+
         self.end_time = time.time()
         np.save(self.adv_result_path, self.adv_result)
         np.save(self.origin_adv_result_path, self.origin_adv_result)
-        np.save(self.optimized_adv)
-
-        self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
+        np.save(self.optimized_adv_path, self.optimized_adv)
+        self.optimized_adv = np.asarray(self.optimized_adv).reshape(self.adv_result.shape)
+        # self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
 
     def export_result(self):
         if self.adv_result is None:
             self.autoencoder_attack()
-        logger.debug('exporting results')
+        logger.debug(self.shared_log + 'exporting results')
         result = ''
         result += 'success_rate: ' + str(self.adv_result.shape[0] / self.num_images_to_attack)
         result += '\n'
@@ -144,8 +160,8 @@ class HPBA:
                                                                                           np.average(self.L0_afters),
                                                                                           2))
         result += '\n'
-        result += 'L2 distance (min/max/avg): ' + '{min_l2}/{max_l2}/{avg_l2}'.format(min_l2=np.min(self.L2_afters),
-                                                                                      max_l2=np.max(self.L2_afters),
+        result += 'L2 distance (min/max/avg): ' + '{min_l2}/{max_l2}/{avg_l2}'.format(min_l2=round(np.min(self.L2_afters), 2),
+                                                                                      max_l2=round(np.max(self.L2_afters), 2),
                                                                                       avg_l2=round(
                                                                                           np.average(self.L2_afters),
                                                                                           2))
@@ -153,6 +169,7 @@ class HPBA:
         result += 'exe_time(second): ' + str(self.end_time - self.start_time)
 
         write_to_file(content=result, path=self.summary_path)
+        logger.debug(self.shared_log + 'exporting results DONE!')
 
 
 if __name__ == '__main__':

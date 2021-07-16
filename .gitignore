@@ -90,3 +90,4 @@ src/attacker/saved_models/
 src/utility/requests/*.json
 src/utility/requests/*.yaml
 data/*
+results/*

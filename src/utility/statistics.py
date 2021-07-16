@@ -47,7 +47,7 @@ def filter_by_label(label: int, data_set: np.ndarray, label_set: np.ndarray) -> 
         if np.argmax(label_i) == label:
             result_data.append(data_i)
             result_label.append(label_i)
-    logger.debug("Filtering for label end!")
+    logger.debug("Filtering for label DONE!")
     return np.array(result_data), np.array(result_label)
 
 

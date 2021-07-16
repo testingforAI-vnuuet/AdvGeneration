@@ -21,5 +21,5 @@ if __name__ == '__main__':
     attacker = HPBA(origin_label=attack_config.original_class, trainX=attack_config.training_data,
                     trainY=attack_config.label_data, target_label=attack_config.target_class,
                     target_position=attack_config.target_position, classifier_name=attack_config.classifier_name,
-                    weight=attack_config.weight, classifier=attack_config.classifier)
+                    weight=attack_config.weight, classifier=attack_config.classifier, step_to_recover=attack_config.recover_speed)
     attacker.export_result()

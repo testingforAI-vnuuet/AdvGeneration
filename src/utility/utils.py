@@ -58,10 +58,9 @@ def get_borders(images: np.ndarray) -> np.ndarray:
 
 
 def write_to_file(content, path: str, mode='w'):
-    if check_path_exists(path):
-        file_writer = open(file=path, mode=mode)
-        file_writer.write(content)
-        file_writer.close()
+    file_writer = open(file=path, mode=mode)
+    file_writer.write(content)
+    file_writer.close()
 
 
 # metric

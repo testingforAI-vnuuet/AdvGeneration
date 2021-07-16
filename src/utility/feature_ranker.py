@@ -1,17 +1,16 @@
 import enum
 
 import matplotlib.pyplot as plt
-import numpy as np
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.datasets import mnist
 from tensorflow.python.keras import Sequential
 
-from attacker.constants import MNIST_IMG_ROWS, MNIST_IMG_COLS, CLASSIFIER_PATH, MNIST_IMG_CHL
+from attacker.constants import CLASSIFIER_PATH
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.mylogger import MyLogger
 
 logger = MyLogger.getLog()
+from utility.config import *
 
 
 class RANKING_ALGORITHM(enum.Enum):
@@ -218,7 +217,7 @@ class feature_ranker:
         dF_rest = []  # array of gradient for the rest
         for i in range(num_classes):
             dF_i = feature_ranker.compute_gradient_wrt_features(
-                input=tf.convert_to_tensor([generated_adv.reshape(28, 28, 1)]),
+                input=tf.convert_to_tensor([generated_adv.reshape(attack_config.input_shape)]),
                 target_neuron=i, classifier=classifier)
             if i != target_label:
                 dF_rest.append(dF_i)
@@ -238,12 +237,12 @@ class feature_ranker:
             if adv_2_dimension[row, col] > ori_2_dimension[row, col]:
 
                 if dF_t_i < 0 or sum_dF_rest_i > 0:
-                    SX_i = -1 * 1.0/abs(dF_t_i*sum_dF_rest_i)
+                    SX_i = -1 * 1.0 / abs(dF_t_i * sum_dF_rest_i)
                 else:
                     SX_i = dF_t_i * abs(sum_dF_rest_i)
             else:
                 if dF_t_i > 0 or sum_dF_rest_i < 0:
-                    SX_i = -1 * 1.0/abs(dF_t_i*sum_dF_rest_i)
+                    SX_i = -1 * 1.0 / abs(dF_t_i * sum_dF_rest_i)
                 else:
                     SX_i = abs(dF_t_i) * sum_dF_rest_i
 

@@ -5,9 +5,9 @@ from tensorflow.keras.datasets import mnist
 from tensorflow.python.keras import Model, Sequential
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint, History
 
-from attacker.constants import *
 from attacker.losses import *
 from data_preprocessing.mnist import MnistPreprocessing
+from utility.config import *
 from utility.statistics import *
 
 logger = MyLogger.getLog()
@@ -59,6 +59,20 @@ class MnistAutoEncoder:
         x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
         x = keras.layers.UpSampling2D((2, 2))(x)
         decoded = keras.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
+        return keras.models.Model(input_img, decoded)
+
+    def apdative_architecture(self, input_shape):
+        input_img = keras.layers.Input(shape=(input_shape))
+        x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(input_img)
+        x = keras.layers.MaxPooling2D((2, 2), padding='same')(x)
+        x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
+        encoded = keras.layers.MaxPooling2D((2, 2), padding='same')(x)
+
+        x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(encoded)
+        x = keras.layers.UpSampling2D((2, 2))(x)
+        x = keras.layers.Conv2D(32, (3, 3), activation='relu', padding='same')(x)
+        x = keras.layers.UpSampling2D((2, 2))(x)
+        decoded = keras.layers.Conv2D(input_shape[-1], (3, 3), activation='sigmoid', padding='same')(x)
         return keras.models.Model(input_img, decoded)
 
     def compute_balanced_point(self,

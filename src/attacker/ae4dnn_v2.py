@@ -10,7 +10,7 @@ import numpy as np
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
-from utility.filters.filter_advs import smooth_adv_border_V3
+from utility.filters.filter_advs import optimize_adv
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
