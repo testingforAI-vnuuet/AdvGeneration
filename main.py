@@ -1,6 +1,6 @@
-
 import os
 import sys
+
 module_path = os.path.abspath(os.getcwd() + '/src')
 if module_path not in sys.path:
     sys.path.append(module_path)
@@ -8,13 +8,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from attacker.hpba import *
 from utility.config import *
-import tensorflow as tf
 
 logger = MyLogger().getLog()
 
 config_file = os.path.abspath('./config.ini')
-
-
 
 if __name__ == '__main__':
     logger.debug('robustness START')
