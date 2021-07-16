@@ -213,7 +213,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
-                    smooth_adv_speed.append(smooth_adv_i)
+                    if len(smooth_adv_i) == 0:
+                        smooth_adv_speed.append([0]*784)
                 del attacker
 
 
