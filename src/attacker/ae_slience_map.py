@@ -5,7 +5,6 @@ Created At: 11/06/2021 09:43
 import os
 import threading
 import time
-from collections import defaultdict
 
 from attacker.ae_custom_layer import *
 from attacker.constants import *
@@ -78,7 +77,7 @@ class ae_slience_map:
         self.num_features = num_features
         self.saved_ranking_features_file = saved_ranking_features_file
         # self.important_features = self.__get_important_features()
-        self.important_features = [0]*100
+        self.important_features = [0] * 100
         self.autoencoder = None
         self.autoencoder_file_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name,
                                                   self.file_shared_name + 'autoencoder.h5')
@@ -179,120 +178,9 @@ class ae_slience_map:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n'.join(str_smooth_adv)
         if self.adv_result is None or self.adv_result.shape[0] == 0:
-            return 0, [], []
+            return 0, [], [], []
 
-        # f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
-        #          'w')
-        # f.write(result)
-        # f.close()
-        #
-        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        # L0_before_txt = L0_before_txt.replace('[', '')
-        # L0_before_txt = L0_before_txt.replace(']', '')
-        # L0_before_txt = L0_before_txt.replace(' ', '\n')
-
-        # L0_after_txt = np.array2string(self.L0_afters, separator=' ')
-        # L0_after_txt = L0_after_txt.replace(']', '')
-        # L0_after_txt = L0_after_txt.replace('[', '')
-        # L0_after_txt = L0_after_txt.replace(' ', '\n')
-
-        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        # L2_before_txt = L2_before_txt.replace('[', '')
-        # L2_before_txt = L2_before_txt.replace(']', '')
-        # L2_before_txt = L2_before_txt.replace(' ', '\n')
-
-        # L2_after_txt = np.array2string(self.L2_afters, separator=' ')
-        # L2_after_txt = L2_after_txt.replace('[', '')
-        # L2_after_txt = L2_after_txt.replace(']', '')
-        # L2_after_txt = L2_after_txt.replace(' ', '\n')
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        # f.write(L0_before_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
-        # f.write(L0_after_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        # f.write(L2_before_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
-        # f.write(L2_after_txt)
-        # f.close()
-
-        # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
         return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
-
-    #
-    # def export_resultV2(self):
-    #
-    #     f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + 'sucess_rate.txt'), 'w')
-    #     f.write(str(self.adv_result.shape[0] / float(self.num_images)))
-    #     f.close()
-    #     return self.adv_result.shape[0] / float(self.num_images)
-
-
-def run_thread(classifier_name, trainX, trainY):
-    logger.debug("\n=======================================================")
-    logger.debug('processing model: ' + classifier_name)
-    cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
-    result_txt = classifier_name + '\n'
-    # AE_LOSS = AE_LOSSES.border_loss
-    weight_result = []
-    L0s = []
-    L2s = []
-    sucess_rate_dict = defaultdict(int)
-    for weight_index in [0.01, 0.05, 0.5, 1.0]:
-        weight_value = weight_index
-        # weight_value = weight_index
-        weight_result_i = []
-        for origin_label in range(0, 10):
-            weight_result_i_j = []
-            saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-                                                       f'slience_map/slience_matrix_{classifier_name}_label={origin_label},optimizer=adam,lr=0.1,lamda=0.1.npy')
-
-            if origin_label == 9 and classifier_name == 'Lenet_v2':
-                saved_ranking_features_file = os.path.join(RESULT_FOLDER_PATH,
-                                                           'slience_map/slience_matrix_Lenet_v2_label=9,optimizer=adam,lr=0.5,lamda=0.1.npy')
-
-            for target_position in range(2, 11):
-                attacker = ae_slience_map(trainX=trainX, trainY=trainY, origin_label=origin_label,
-                                          target_position=target_position, classifier=cnn_model, weight=weight_value,
-                                          saved_ranking_features_file=saved_ranking_features_file,
-                                          classifier_name=classifier_name, num_features=100)
-                attacker.autoencoder_attack()
-                weight_result_i_j.append(attacker.export_result())
-                success_rate = attacker.export_result()
-                # _, _, L0, L2 = attacker.export_resultV2()
-                # L0s.append(L0)
-                # L2s.append(L2)
-                success_rate_single = {f'{origin_label}_{target_position}_{weight_value}': success_rate}
-                sucess_rate_dict.update(success_rate_single)
-                del attacker
-            weight_result_i.append(weight_result_i_j)
-        weight_result_i = np.array(weight_result_i)
-        np.savetxt(f'./result/ae_slience_map/{classifier_name}_{weight_value}.csv', weight_result_i, delimiter=",")
-        weight_result_i = np.average(weight_result_i, axis=0)
-        weight_result.append(weight_result_i)
-
-    key_max = max(sucess_rate_dict, key=sucess_rate_dict.get)
-    value = sucess_rate_dict[key_max]
-    result_max = f'{key_max}: {value}'
-
-    key_min = min(sucess_rate_dict, key=sucess_rate_dict.get)
-    value = sucess_rate_dict[key_min]
-    result_min = f'{key_min}: {value}'
-    result = result_max + '\n' + result_min
-
-    f = open('./result/ae_slience_map/' + classifier_name + 'success_rate.txt', 'w')
-    f.write(result)
-    f.close()
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -305,7 +193,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 0.3
+    step = 0.1
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -335,24 +223,10 @@ def run_thread_V2(classifier_name, trainX, trainY):
                         smooth_adv_speed.append(smooth_adv_i)
                 del attacker
             weight_result_i.append(weight_result_i_j)
-        weight_result_i = np.array(weight_result_i)
-        ranking_type = 'jsma_ka'
-        np.savetxt(f'./result/slience_map/{classifier_name}_{weight_value}{ranking_type}.csv', weight_result_i,
-                   delimiter=",")
-
-        weight_result_i = np.average(weight_result_i, axis=0)
-        weight_result.append(weight_result_i)
-
-    weight_result = np.array(weight_result)
-    s = np.array2string(weight_result, separator=' ')
-    s = s.replace('[', ' ')
-    s = s.replace(']', ' ')
-    f = open('./result/slience_map/' + classifier_name + 'success_rate.txt', 'w')
-    f.write(s)
-    f.close()
 
     smooth_adv_speed = np.asarray(smooth_adv_speed)
     smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
+    ranking_type = 'jsma_ka'
     np.savetxt(f'./result/slience_map/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv',
                smooth_adv_speed, delimiter=',')
 

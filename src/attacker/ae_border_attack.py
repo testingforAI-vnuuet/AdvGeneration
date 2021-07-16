@@ -21,6 +21,7 @@ pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 def combined_function(set1, set2, set3):
     return np.array([list(combined) for combined in zip(set1, set2, set3)])
 
+
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=6.,
@@ -138,6 +139,7 @@ class AutoencoderBorder:
                                            callbacks=[early_stopping, model_checkpoint], verbose=1)
             self.optimal_epoch = len(history.history['loss'])
             logger.debug('training autoencoder DONE!')
+        self.get_border_and_adv()
 
     def get_border_and_adv(self):
 
@@ -156,22 +158,12 @@ class AutoencoderBorder:
         self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
             self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
             self.target_label, step=self.step, return_adv=True)
-        # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_restored_advs.npy'), self.restored_advs)
-        # np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step = {self.step}_origin.npy'), self.origin_adv_result)
 
-        # self.export_dataset_rnn()
         if self.adv_result is None:
             return
         if self.adv_result.shape[0] == 0:
             return
-        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
-        self.L0_afters = []
-        self.L2_afters = []
-        for adv, ori in zip(self.adv_result, self.origin_adv_result):
-            self.L0_afters.append(compute_l0_V2(adv, ori))
-            self.L2_afters.append(compute_l2_V2(adv, ori))
-        self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
+
         logger.debug(f'adv shape {self.adv_result.shape}')
 
     def export_result(self):
@@ -182,94 +174,9 @@ class AutoencoderBorder:
             result += '\n'.join(str_smooth_adv)
         if self.adv_result is None or self.adv_result.shape[0] == 0:
             return 0, [], [], []
-
-        # f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
-        #          'w')
-        # f.write(result)
-        # f.close()
-        #
-        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        # L0_before_txt = L0_before_txt.replace('[', '')
-        # L0_before_txt = L0_before_txt.replace(']', '')
-        # L0_before_txt = L0_before_txt.replace(' ', '\n')
-
-        # L0_after_txt = np.array2string(self.L0_afters, separator=' ')
-        # L0_after_txt = L0_after_txt.replace(']', '')
-        # L0_after_txt = L0_after_txt.replace('[', '')
-        # L0_after_txt = L0_after_txt.replace(' ', '\n')
-
-        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        # L2_before_txt = L2_before_txt.replace('[', '')
-        # L2_before_txt = L2_before_txt.replace(']', '')
-        # L2_before_txt = L2_before_txt.replace(' ', '\n')
-
-        # L2_after_txt = np.array2string(self.L2_afters, separator=' ')
-        # L2_after_txt = L2_after_txt.replace('[', '')
-        # L2_after_txt = L2_after_txt.replace(']', '')
-        # L2_after_txt = L2_after_txt.replace(' ', '\n')
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        # f.write(L0_before_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
-        # f.write(L0_after_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        # f.write(L2_before_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
-        # f.write(L2_after_txt)
-        # f.close()
-
-        # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
         return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
 
 
-def run_thread(classifier_name, trainX, trainY):
-    logger.debug("\n=======================================================")
-    logger.debug('processing model: ' + classifier_name)
-    cnn_model = tf.keras.models.load_model(PRETRAIN_CLASSIFIER_PATH + '/' + classifier_name + '.h5')
-    result_txt = classifier_name + '\n'
-    # AE_LOSS = AE_LOSSES.border_loss
-    L0s = []
-    L2s = []
-    smooth_adv_speed = []
-    for origin_label in range(9, 10):
-        # exe_time_sum = 0
-        for target_position in range(2, 11):
-            for weight_index in range(1, 11):
-                weight_value = weight_index * 0.1
-                attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
-                                             target_position=target_position, classifier_name=classifier_name,
-                                             weight=weight_value)
-                attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
-                attacker.get_border_and_adv()
-                _, _, L0, L2, smooth_adv_i = attacker.export_result()
-                L0s.append(L0)
-                L2s.append(L2)
-                del attacker
-    L0s = np.array(L0s)
-    L2s = np.array(L2s)
-    L0s = reject_outliers_v2(L0s)
-    L2s = reject_outliers_v2(L2s)
-
-    min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
-    min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
-
-    l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
-    f = open('./result/ae_border/' + classifier_name + 'l0l2.txt', 'w')
-    f.write(l0_l2_txt)
-    f.close()
-
-    logger.debug('processing model: ' + classifier_name + ' DONE!')
-    logger.debug("=======================++++============================")
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -282,7 +189,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 0.3
+    step = 0.1
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -297,7 +204,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 sucess_rate_i, L0, L2, smooth_adv_i = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
                 if len(L0) == 0 and sucess_rate_i > 0.0:
-                    L0, L2 = [0]*(round(sucess_rate_i * 1000)), [0]*(round(sucess_rate_i * 1000))
+                    L0, L2 = [0] * (round(sucess_rate_i * 1000)), [0] * (round(sucess_rate_i * 1000))
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
@@ -306,27 +213,16 @@ def run_thread_V2(classifier_name, trainX, trainY):
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
-                        smooth_adv_speed.append(smooth_adv_i)
+                    smooth_adv_speed.append(smooth_adv_i)
                 del attacker
-            weight_result_i.append(weight_result_i_j)
-        weight_result_i = np.array(weight_result_i)
-        np.savetxt(f'./result/ae_border/{classifier_name}_{weight_value}.csv', weight_result_i, delimiter=",")
 
-        weight_result_i = np.average(weight_result_i, axis=0)
-        weight_result.append(weight_result_i)
 
-    weight_result = np.array(weight_result)
-    s = np.array2string(weight_result, separator=' ')
-    s = s.replace('[', ' ')
-    s = s.replace(']', ' ')
-    f = open('./result/ae_border/' + classifier_name + 'success_rate.txt', 'w')
-    f.write(s)
-    f.close()
 
     smooth_adv_speed = np.asarray(smooth_adv_speed)
     smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
     ranking_type = 'jsma_ka'
-    np.savetxt(f'./result/ae_border/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed, delimiter=',')
+    np.savetxt(f'./result/ae_border/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv',
+               smooth_adv_speed, delimiter=',')
 
     L0s = np.array(L0s).flatten()
     L2s = np.array(L2s).flatten()

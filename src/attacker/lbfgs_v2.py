@@ -162,12 +162,6 @@ class LBFGS_V2:
             return
         # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
         #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
-        self.L0_afters = []
-        self.L2_afters = []
-        for adv, ori in zip(self.adv_result, self.origin_adv_result):
-            self.L0_afters.append(compute_l0_V2(adv, ori))
-            self.L2_afters.append(compute_l2_V2(adv, ori))
-        self.L0_afters, self.L2_afters = np.array(self.L0_afters), np.array(self.L2_afters)
 
     def export_result(self):
         result = ''
@@ -175,53 +169,8 @@ class LBFGS_V2:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n' + '\n'.join(str_smooth_adv)
         if self.adv_result is None or self.adv_result.shape[0] == 0:
-            return 0, [], []
-        # f = open(os.path.join('result', self.method_name, self.file_shared_name + 'step=' + str(self.step) + '.txt', ),
-        #          'w')
-        # f.write(result)
-        # f.close()
-        #
-        # L0_before_txt = np.array2string(self.L0_befores, separator=' ')
-        # L0_before_txt = L0_before_txt.replace('[', '')
-        # L0_before_txt = L0_before_txt.replace(']', '')
-        # L0_before_txt = L0_before_txt.replace(' ', '\n')
+            return 0, [], [], []
 
-        # L0_after_txt = np.array2string(self.L0_afters, separator=' ')
-        # L0_after_txt = L0_after_txt.replace(']', '')
-        # L0_after_txt = L0_after_txt.replace('[', '')
-        # L0_after_txt = L0_after_txt.replace(' ', '\n')
-
-        # L2_before_txt = np.array2string(self.L2_befores, separator=' ')
-        # L2_before_txt = L2_before_txt.replace('[', '')
-        # L2_before_txt = L2_before_txt.replace(']', '')
-        # L2_before_txt = L2_before_txt.replace(' ', '\n')
-
-        # L2_after_txt = np.array2string(self.L2_afters, separator=' ')
-        # L2_after_txt = L2_after_txt.replace('[', '')
-        # L2_after_txt = L2_after_txt.replace(']', '')
-        # L2_after_txt = L2_after_txt.replace(' ', '\n')
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_before.txt'), 'w')
-        # f.write(L0_before_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L0_after.txt'), 'w')
-        # f.write(L0_after_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_before.txt'), 'w')
-        # f.write(L2_before_txt)
-        # f.close()
-
-        # f = open(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-        #                       self.file_shared_name + 'step=' + str(self.step) + 'L2_after.txt'), 'w')
-        # f.write(L2_after_txt)
-        # f.close()
-
-        # return result, self.end_time - self.start_time, self.L0_afters, self.L2_afters
         return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
 
 
@@ -235,7 +184,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 0.3
+    step = 0.1
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -251,7 +200,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 sucess_rate_i, L0, L2, smooth_adv_i = attacker.export_result()
                 weight_result_i_j.append(sucess_rate_i)
                 if len(L0) == 0 and sucess_rate_i > 0.0:
-                    L0, L2 = [0]*(round(sucess_rate_i * 1000)), [0]*(round(sucess_rate_i * 1000))
+                    L0, L2 = [0] * (round(sucess_rate_i * 1000)), [0] * (round(sucess_rate_i * 1000))
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
@@ -260,26 +209,15 @@ def run_thread_V2(classifier_name, trainX, trainY):
                     for L0_i, L2_i in zip(L0, L2):
                         L0s.append(L0_i)
                         L2s.append(L2_i)
-                smooth_adv_speed.append(smooth_adv_i)
+                    smooth_adv_speed.append(smooth_adv_i)
                 del attacker
             weight_result_i.append(weight_result_i_j)
-        weight_result_i = np.array(weight_result_i)
-        np.savetxt(f'./result/lbfgs/{classifier_name}_{weight_value}.csv', weight_result_i, delimiter=",")
 
-        weight_result_i = np.average(weight_result_i, axis=0)
-        weight_result.append(weight_result_i)
-
-    weight_result = np.array(weight_result)
-    s = np.array2string(weight_result, separator=' ')
-    s = s.replace('[', ' ')
-    s = s.replace(']', ' ')
-    f = open('./result/lbfgs/' + classifier_name + '.txt', 'w')
-    f.write(s)
-    f.close()
     smooth_adv_speed = np.asarray(smooth_adv_speed)
     smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
     ranking_type = 'jsma_ka'
-    np.savetxt(f'./result/lbfgs/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed, delimiter=',')
+    np.savetxt(f'./result/lbfgs/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed,
+               delimiter=',')
 
     L0s = np.array(L0s)
     L2s = np.array(L2s)
@@ -295,8 +233,6 @@ def run_thread_V2(classifier_name, trainX, trainY):
     f = open('./result/lbfgs/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
     f.write(l0_l2_txt)
     f.close()
-
-
 
 
 class MyThread(threading.Thread):
