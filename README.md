@@ -2,7 +2,7 @@
 
 
 ## About the project
-Contain source code of adversarial example generation methods, namely HPBA 
+Contain source code of adversarial example generation method, namely HPBA 
 
 If you have any questions, please contact me via nguyenducanh@vnu.edu.vn.
 
@@ -61,3 +61,5 @@ python3 main.py
 - To view summary: open folder `results/hpba/result_summary`
 - To access generated advs: open folder `results/hpba/data`
 - To access trained autoencode: open folder `resuts/hpba/autoencoder`
+
+**Note**: Result file name contains time stamp
