@@ -95,12 +95,12 @@ def analyze_config(config_path):
         attack_config.label_data = tf.keras.utils.to_categorical(attack_config.label_data, attack_config.num_class)
 
     # attack
-    attack_config.original_class = int(config_parser['ATTACK']['originalClass'])
+    attack_config.original_class = int(config_parser['ATTACK']['originalLabel'])
     if attack_config.original_class not in range(0, attack_config.num_class):
-        logger.error(f'original class is not correct')
+        logger.error(f'original label is not correct')
         exit_execution(shared_exit_msg)
 
-    target_class = int(config_parser['ATTACK']['targetClass'])
+    target_class = int(config_parser['ATTACK']['targetLabel'])
     target_position = int(config_parser['ATTACK']['targetPosition'])
     if target_class == attack_config.original_class:
         logger.error(f'target label should not be original label')
@@ -133,8 +133,11 @@ def analyze_config(config_path):
             f'number_data_to_attack is not correct. It should be greater than 0 and smaller than {attack_config.input_size}')
         exit_execution(shared_exit_msg)
 
+    attack_config.number_data_to_attack = number_data_to_attack
     number_data_to_train_autoencoder = int(config_parser['ATTACK']['number_data_to_train_autoencoder'])
     if number_data_to_train_autoencoder <= 0 or number_data_to_train_autoencoder > attack_config.input_size:
         logger.error(
             f'number_data_to_train_autoencoder is not correct. It should be greater than 0 and smaller than {attack_config.input_size}')
         exit_execution(shared_exit_msg)
+
+    attack_config.number_data_to_train_autoencoder = number_data_to_train_autoencoder

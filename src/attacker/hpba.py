@@ -14,6 +14,7 @@ from utility.constants import *
 from utility.filters.filter_advs import optimize_adv
 from utility.statistics import *
 from utility.utils import *
+
 tf.config.experimental_run_functions_eagerly(True)
 
 logger = MyLogger.getLog()
@@ -53,6 +54,7 @@ class HPBA:
             method_name=self.method_name, classifier_name=self.classifier_name, origin_label=self.origin_label,
             target_label=self.target_label, weight=str(self.weight).replace('.', ','),
             num_images=self.num_images_to_train)
+        self.short_file_shared_name = f'{self.method_name}_{self.classifier_name}'
         self.shared_log = f'[{self.method_name}] '
 
         self.general_result_folder = os.path.abspath(os.path.join(RESULT_FOLDER_PATH, self.method_name))
@@ -70,18 +72,18 @@ class HPBA:
 
         self.adv_result = None
         self.adv_result_path = os.path.join(self.data_folder,
-                                            self.file_shared_name + '_adv_' + get_timestamp() + '.npy')
+                                            self.short_file_shared_name + '_adv_' + get_timestamp() + '.npy')
         self.origin_adv_result = None
         self.origin_adv_result_path = os.path.join(self.data_folder,
-                                                   self.file_shared_name + '_origin_' + get_timestamp() + '.npy')
+                                                   self.short_file_shared_name + '_origin_' + get_timestamp() + '.npy')
 
         self.optimal_epoch = None
         self.smooth_adv_speed = None
         self.optimized_adv = None
         self.optimized_adv_path = os.path.join(self.data_folder,
-                                               self.file_shared_name + '_optimized_adv_' + get_timestamp() + '.npy')
+                                               self.short_file_shared_name + '_optimized_adv_' + get_timestamp() + '.npy')
         self.summary_path = os.path.join(self.result_summary_folder,
-                                         self.file_shared_name + '_summary_' + get_timestamp() + '.txt')
+                                         self.short_file_shared_name + '_summary_' + get_timestamp() + '.txt')
 
         self.L0_befores = None
         self.L0_afters = None
@@ -148,27 +150,46 @@ class HPBA:
     def export_result(self):
         if self.adv_result is None:
             self.autoencoder_attack()
+
         logger.debug(self.shared_log + 'exporting results')
-        result = ''
-        result += 'success_rate: ' + str(self.adv_result.shape[0] / self.num_images_to_attack)
-        result += '\n'
-        result += 'L0 distance (min/max/avg): ' + '{min_l0}/{max_l0}/{avg_l0}'.format(min_l0=np.min(self.L0_afters),
-                                                                                      max_l0=np.max(self.L0_afters),
-                                                                                      avg_l0=round(
-                                                                                          np.average(self.L0_afters),
-                                                                                          2))
+
+        result = '<=======' + '\n'
+        result += 'Configuration:\n'
+        result += '\tClassifier name: ' + self.classifier_name + '\n'
+        result += '\tOriginal label: ' + str(self.origin_label) + '\n'
+        result += '\tTarget label: ' + str(self.target_label) + '\n'
+        result += '\tRecover speed: ' + str(self.step_to_recover) + '\n'
+        result += '\tWeight: ' + str(self.weight) + '\n'
+        result += '\tNumber data to train autoencoder: ' + str(self.num_images_to_train) + '\n'
+        result += '\tNumber data to attack: ' + str(self.num_images_to_attack) + '\n'
+        result += 'Attack result:\n'
+
+        result += '\tSuccess rate(%): ' + str((self.adv_result.shape[0] / self.num_images_to_attack) * 100) + '\n'
+        result += '\tL0 distance (min/max/avg): ' + '{min_l0}/{max_l0}/{avg_l0}'.format(min_l0=np.min(self.L0_afters),
+                                                                                        max_l0=np.max(self.L0_afters),
+                                                                                        avg_l0=round(
+                                                                                            np.average(self.L0_afters),
+                                                                                            2))
         result += '\n'
         # result += 'L2 distance (min/max/avg): ' + '{min_l2}/{max_l2}/{avg_l2}'.format(min_l2=round(np.min(self.L2_afters), 2),
         #                                                                               max_l2=round(np.max(self.L2_afters), 2),
         #                                                                               avg_l2=round(
         #                                                                                   np.average(self.L2_afters),
         #                                                                                   2))
-        result += 'L2 distance (min/max/avg): ' + f'{np.min(self.L2_afters):2f}/{round(np.max(self.L2_afters), 2):2f}/{round(np.average(self.L2_afters), 2):2f}'
+        result += '\tL2 distance (min/max/avg): ' + f'{np.min(self.L2_afters):2f}/{round(np.max(self.L2_afters), 2):2f}/{round(np.average(self.L2_afters), 2):2f}'
         result += '\n'
-        result += 'exe_time(second): ' + str(self.end_time - self.start_time)
+        result += '\tExe_time(second): ' + str(self.end_time - self.start_time)
+        result += '\n'
+
+        result += '\tAutoencoder path: ' + str(self.autoencoder_file_path) + '\n'
+        result += '\tAdv path: ' + str(self.adv_result_path) + '\n'
+        result += '\tOptimized adv path: ' + str(self.optimized_adv_path) + '\n'
+        result += '\tOriginal data path: ' + str(self.origin_adv_result_path) + '\n'
+        result += '=======>'
 
         write_to_file(content=result, path=self.summary_path)
         logger.debug(self.shared_log + 'exporting results DONE!')
+        logger.info(f'Please open file: {self.summary_path} to view results!')
 
 
 if __name__ == '__main__':
