@@ -63,3 +63,4 @@ python3 main.py
 - To access trained autoencode: open folder `resuts/hpba/autoencoder`
 
 **Note**: Result file name contains time stamp
+**Developers**: Rd320 room, E3 building, 144 Xuan Thuy street, Ha Noi
