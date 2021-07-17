@@ -35,15 +35,20 @@ cd AdvGeneration
 git checkout papers/HPBA
 pip install -r requirements.txt
 ```
-### Dataset Preparation
+### Data Preparation
 
 #### Training data
-- Use training set and label set after being pro-processed (example: [mnist-training](https://drive.google.com/file/d/1R7gvFYTrtH75cV7qDg_zaQJ5J8ccIZCV/view?usp=sharing) & [mnist-label](https://drive.google.com/file/d/1miFdEi1X8Fr6hZx9_9UbWOmC8MPS27AJ/view?usp=sharing))
+- Use training set and label set after being pro-processed
+  - Hand-written digit MNIST: [handwritten_mnist_training](https://drive.google.com/file/d/1R7gvFYTrtH75cV7qDg_zaQJ5J8ccIZCV/view?usp=sharing) & 
+ [handwritten_mnist_label](https://drive.google.com/file/d/1miFdEi1X8Fr6hZx9_9UbWOmC8MPS27AJ/view?usp=sharing)
+  - Fashion MNIST: [handwritten_mnist_training](https://drive.google.com/file/d/1rEDOowWbCvKFPphJMtoSW0UHvEZYAmxV/view?usp=sharing) & [fashion_mnist_label](https://drive.google.com/file/d/1miFdEi1X8Fr6hZx9_9UbWOmC8MPS27AJ/view?usp=sharing)
 #### Pre-trained DNN
-- Use pre-trained DNN that was training by chosen training data with high accuracy (example: [mnist-model](https://drive.google.com/file/d/1eBmWjM3HPp2Ci3e6dhd7iMNYCik2Se8q/view?usp=sharing))
+- Use high accuracy pre-trained DNN that was trained by chosen training data 
+  - Hand-written digit MNIST: [handwritten_mnist_model](https://drive.google.com/file/d/1eBmWjM3HPp2Ci3e6dhd7iMNYCik2Se8q/view?usp=sharing)
+  - Fashion MNIST: [fashion_mnist_model](https://drive.google.com/file/d/1aVk4oMzOSqsh7qzF_zXUC0Qy2ftHmP_B/view?usp=sharing)
 ### Input Configuration
 - Input required configation in file [config.ini](config.ini)
-- Example: //todo
+- Example: Please open [config.ini](config.ini)
 ### Run experiment
 #### Run
 ```sh

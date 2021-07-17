@@ -3,7 +3,6 @@ Created At: 14/07/2021 15:39
 """
 import time
 
-import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -15,7 +14,6 @@ from utility.constants import *
 from utility.filters.filter_advs import optimize_adv
 from utility.statistics import *
 from utility.utils import *
-
 tf.config.experimental_run_functions_eagerly(True)
 
 logger = MyLogger.getLog()
@@ -135,7 +133,7 @@ class HPBA:
 
         logger.debug(self.shared_log + 'optimizing generated advs')
         self.optimized_adv, self.smooth_adv_speed, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = optimize_adv(
-            self.classifier, self.adv_result[:5], self.origin_adv_result[:5],
+            self.classifier, self.adv_result[:2], self.origin_adv_result[:2],
             self.target_label, step=self.step_to_recover, return_adv=True, K=np.prod(self.trainX[0].shape[:-1]))
         logger.debug(self.shared_log + 'optimizing generated advs DONE')
 
@@ -143,7 +141,7 @@ class HPBA:
         np.save(self.adv_result_path, self.adv_result)
         np.save(self.origin_adv_result_path, self.origin_adv_result)
         np.save(self.optimized_adv_path, self.optimized_adv)
-        self.optimized_adv = np.asarray(self.optimized_adv).reshape(self.adv_result.shape)
+        self.optimized_adv = np.asarray(self.optimized_adv).reshape(self.adv_result[:2].shape)
         # self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
 
@@ -160,11 +158,12 @@ class HPBA:
                                                                                           np.average(self.L0_afters),
                                                                                           2))
         result += '\n'
-        result += 'L2 distance (min/max/avg): ' + '{min_l2}/{max_l2}/{avg_l2}'.format(min_l2=round(np.min(self.L2_afters), 2),
-                                                                                      max_l2=round(np.max(self.L2_afters), 2),
-                                                                                      avg_l2=round(
-                                                                                          np.average(self.L2_afters),
-                                                                                          2))
+        # result += 'L2 distance (min/max/avg): ' + '{min_l2}/{max_l2}/{avg_l2}'.format(min_l2=round(np.min(self.L2_afters), 2),
+        #                                                                               max_l2=round(np.max(self.L2_afters), 2),
+        #                                                                               avg_l2=round(
+        #                                                                                   np.average(self.L2_afters),
+        #                                                                                   2))
+        result += 'L2 distance (min/max/avg): ' + f'{np.min(self.L2_afters):2f}/{round(np.max(self.L2_afters), 2):2f}/{round(np.average(self.L2_afters), 2):2f}'
         result += '\n'
         result += 'exe_time(second): ' + str(self.end_time - self.start_time)
 

@@ -6,6 +6,7 @@ from datetime import datetime
 
 import cv2
 import numpy as np
+import sys
 
 
 def get_timestamp(timestamp_format="%d%m%d-%H%M%S"):
@@ -96,3 +97,8 @@ def compute_l2(adv: np.ndarray,
     if not (np.min(ori) >= 0 and np.max(ori) <= 1):
         ori = ori / 255
     return np.linalg.norm(adv.reshape(-1) - ori.reshape(-1))
+
+
+def exit_execution(msg: str):
+    sys.exit(msg)
+
