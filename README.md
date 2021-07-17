@@ -39,9 +39,12 @@ pip install -r requirements.txt
 
 #### Training data
 - Use training set and label set after being pre-processed. Example:
-  - Hand-written digit MNIST: [handwritten_mnist_training](https://drive.google.com/file/d/1R7gvFYTrtH75cV7qDg_zaQJ5J8ccIZCV/view?usp=sharing) & 
- [handwritten_mnist_label](https://drive.google.com/file/d/1miFdEi1X8Fr6hZx9_9UbWOmC8MPS27AJ/view?usp=sharing)
-  - Fashion MNIST: [handwritten_mnist_training](https://drive.google.com/file/d/1rEDOowWbCvKFPphJMtoSW0UHvEZYAmxV/view?usp=sharing) & [fashion_mnist_label](https://drive.google.com/file/d/1miFdEi1X8Fr6hZx9_9UbWOmC8MPS27AJ/view?usp=sharing)
+  - Hand-written digit MNIST: 
+      - training data:[handwritten_mnist_training](https://drive.google.com/file/d/1R7gvFYTrtH75cV7qDg_zaQJ5J8ccIZCV/view?usp=sharing)
+      - label data: [handwritten_mnist_label](https://drive.google.com/file/d/1miFdEi1X8Fr6hZx9_9UbWOmC8MPS27AJ/view?usp=sharing)
+  - Fashion MNIST: 
+      - training data: [handwritten_mnist_training](https://drive.google.com/file/d/1rEDOowWbCvKFPphJMtoSW0UHvEZYAmxV/view?usp=sharing)
+      - label data:  [fashion_mnist_label](https://drive.google.com/file/d/1miFdEi1X8Fr6hZx9_9UbWOmC8MPS27AJ/view?usp=sharing)
 #### Pre-trained DNN
 - Use pre-trained DNN that has high accuracy. Example:
   - Hand-written digit MNIST: [handwritten_mnist_model](https://drive.google.com/file/d/1eBmWjM3HPp2Ci3e6dhd7iMNYCik2Se8q/view?usp=sharing)
