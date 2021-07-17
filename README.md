@@ -58,6 +58,6 @@ pip install -r requirements.txt
 python3 main.py
 ```
 #### View Result
-- To view summary: open folder `results\hpba\result_summary`
-- To access generated advs: open folder `results\hpba\data`
-- To access trained autoencode: open folder `resuts\hpba\autoencoder`
+- To view summary: open folder `results/hpba/result_summary`
+- To access generated advs: open folder `results/hpba/data`
+- To access trained autoencode: open folder `resuts/hpba/autoencoder`
