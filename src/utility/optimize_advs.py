@@ -75,7 +75,7 @@ def optimize_batch(classifier, generated_advs, origin_images, generated_advs_0_2
                                                                          classifier=classifier,
                                                                          diff_pixels=diff_pixels,
                                                                          num_class=num_class)
-    print(diff_pixel_arrs)
+    # print(diff_pixel_arrs)
     smooth_advs_0_255 = recover_batch(classifier=classifier, generated_advs=generated_advs,
                                       origin_images=origin_images,
                                       generated_advs_0_255=generated_advs_0_255,

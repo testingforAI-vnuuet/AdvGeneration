@@ -66,7 +66,10 @@ class feature_ranker:
 
     @staticmethod
     def random_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
-        return [random.shuffle(diff_i) for diff_i in diff_pixels], None
+        for index in range(len(diff_pixels)):
+            random.shuffle(diff_pixels[index])
+        return diff_pixels, None
+        # return [random.shuffle(diff_i) for diff_i in diff_pixels], None
     @staticmethod
     def jsma_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
         dF_t = []
