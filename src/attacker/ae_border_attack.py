@@ -121,8 +121,6 @@ class AutoencoderBorder:
                                      loss=loss(self.classifier, self.target_vector, self.origin_images, self.weight))
             self.end_time = time.time()
 
-            return
-
         else:
             logger.debug(
                 'not found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
