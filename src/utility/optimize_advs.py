@@ -108,11 +108,11 @@ def optimize_batch(classifier, generated_advs, origin_images, generated_advs_0_2
 def recover_batch(classifier, generated_advs, origin_images, generated_advs_0_255, origin_images_0_255, target_label,
                   step, diff_pixel_arrs=None):
     # make all diff_pixel arr to same length
-    padded_diff_pixels = padd_to_arrs(diff_pixel_arrs, padded_value=attack_config.total_element_a_data, d_type=int)
+    padded_diff_pixels = padd_to_arrs(diff_pixel_arrs, padded_value=784, d_type=int)
 
     # adding to new pixel for each image
-    padded_generated_advs_0_255 = padd_to_arrs(generated_advs_0_255, max_length=attack_config.total_element_a_data + 1)
-    padded_origin_images_0_255 = padd_to_arrs(origin_images_0_255, max_length=attack_config.total_element_a_data + 1)
+    padded_generated_advs_0_255 = padd_to_arrs(generated_advs_0_255, max_length=784 + 1)
+    padded_origin_images_0_255 = padd_to_arrs(origin_images_0_255, max_length=784 + 1)
     old_padded_generated_advs_0_255 = np.array(padded_generated_advs_0_255)
     recover_speed = [[] for _ in range(len(padded_diff_pixels))]
     max_diff_lenth = max(map(len, diff_pixel_arrs))
@@ -125,7 +125,7 @@ def recover_batch(classifier, generated_advs, origin_images, generated_advs_0_25
             recover_speed[index].append(step)
 
         predictions = classifier.predict(
-            padded_generated_advs_0_255[:, :-1].reshape(-1, *attack_config.input_shape) / 255.)
+            padded_generated_advs_0_255[:, :-1].reshape(-1, 28, 28, 1) / 255.)
 
         predictions = np.argmax(predictions, axis=1)
         unrecovered_adv_indexes = np.where(predictions != target_label)[0]
