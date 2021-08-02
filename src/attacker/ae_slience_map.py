@@ -268,7 +268,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     l0_l2_txt += '\n before: '
     l0_l2_txt += '\n ' + f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
     l0_l2_txt += '\n' + str(weight_result)
-    f = open('./result/ae4dnn/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
+    f = open('./result/ae_slience_map/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
     f.write(l0_l2_txt)
     f.close()
     logger.debug('ok')
