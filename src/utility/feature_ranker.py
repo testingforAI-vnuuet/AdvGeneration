@@ -74,9 +74,9 @@ class feature_ranker:
     def coi_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
         dF_t = feature_ranker.compute_gradient_batch(inputs=tf.convert_to_tensor(generated_advs.reshape(-1, 28, 28, 1)),
                                                      classifier=classifier, target_neuron=target_label)
-
+        dF_t = dF_t.reshape(-1, np.prod(generated_advs[0].shape))
         score_matrices = dF_t * generated_advs
-        score_matrices = score_matrices.reshape(-1, np.prod(generated_advs[0].shape))
+        score_matrices = score_matrices
 
         ranking_results = []
         value_results = []
