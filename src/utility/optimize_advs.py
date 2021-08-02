@@ -23,7 +23,7 @@ def optimize_advs(classifier, generated_advs, origin_images, target_label, step,
     smooth_advs_0_255s = np.round(generated_advs * 255).reshape((-1, total_element))
 
     new_smooth_advs = []
-    batch_size = len(generated_advs)
+    batch_size = 2000
     for epoch in range(epoches):
         print(f'epoch to optimize: {epoch + 1}/{epoches}')
         if len(new_smooth_advs) != 0:
