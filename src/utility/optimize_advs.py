@@ -69,12 +69,13 @@ def optimize_batch(classifier, generated_advs, origin_images, generated_advs_0_2
     for index in range(batch_size):
         compare = generated_advs_0_255[index] == origin_images_0_255[index]
         diff_pixels.append(np.where(compare == False)[0])
-    diff_pixel_arrs, diff_value_arrs = feature_ranker.random_ranking_batch(generated_advs=generated_advs,
+    diff_pixel_arrs, _ = feature_ranker.random_ranking_batch(generated_advs=generated_advs,
                                                                          origin_images=origin_images,
                                                                          target_label=target_label,
                                                                          classifier=classifier,
                                                                          diff_pixels=diff_pixels,
                                                                          num_class=num_class)
+    print(diff_pixel_arrs)
     smooth_advs_0_255 = recover_batch(classifier=classifier, generated_advs=generated_advs,
                                       origin_images=origin_images,
                                       generated_advs_0_255=generated_advs_0_255,
