@@ -1,4 +1,5 @@
 import enum
+import random
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -63,6 +64,9 @@ class feature_ranker:
         gradient = tape.gradient(predictions_at_target_neuron, inputs)
         return gradient.numpy()
 
+    @staticmethod
+    def random_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
+        return [random.shuffle(diff_i) for diff_i in diff_pixels]
     @staticmethod
     def jsma_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
         dF_t = []
