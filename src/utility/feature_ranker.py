@@ -45,73 +45,70 @@ class feature_ranker:
         return gradient
 
     @staticmethod
-    def find_important_features_of_a_sample(input_image: np.ndarray,
-                                            n_rows: int, n_cols: int, n_channels: int, n_important_features: int,
-                                            algorithm: enum.Enum,
-                                            gradient_label: int,
-                                            classifier: keras.Sequential):
-        """Apply ABS algorithm to find the most important features.
+    def compute_gradient_batch(inputs: tf.Tensor, target_neuron: int, classifier: tf.keras.Sequential):
+        '''
 
-        Args:
-            n_rows: a positive number
-            n_cols: a positive number
-            n_channels: a positive number
-            n_important_features: a positive number
-            input_image: shape = `[height, width, channel`]
-            algorithm:
-            classifier:
-            gradient_label: any label
-        Returns:
-            positions: ndarray (shape=`[row, col, channel`])
-        """
-        input_image = input_image.copy()  # avoid modifying on the original one
-        gradient = feature_ranker.compute_gradient_wrt_features(
-            input=tf.convert_to_tensor([input_image]),
-            target_neuron=gradient_label,
-            classifier=classifier)
-        important_features = np.ndarray(shape=(1, 3), dtype=int)
-        foundSet = {}
+        :param inputs:
+        :type inputs:
+        :param target_neuron:
+        :type target_neuron:
+        :param classifier:
+        :type classifier:
+        :return:
+        :rtype:
+        '''
+        with tf.GradientTape() as tape:
+            tape.watch(inputs)
+            predictions_at_target_neuron = classifier(inputs)[:, target_neuron]
+        gradient = tape.gradient(predictions_at_target_neuron, inputs)
+        return gradient.numpy()
 
-        # find the position of the highest value in the gradient
-        for idx in range(0, n_important_features):
-            max_row = max_col = max_channel = None
-            max_value = -99999999
-            for rdx in range(0, n_rows):
-                for cdx in range(0, n_cols):
-                    for chdx in range(0, n_channels):
-                        changed = False
-                        hash = rdx + cdx * 1.3243 + chdx * 1.53454
-                        if hash in foundSet:
-                            continue
-                        if algorithm == RANKING_ALGORITHM.ABS:
-                            grad = gradient[rdx, cdx, chdx]
-                            if np.abs(grad) > max_value:
-                                max_value = np.abs(grad)
-                                changed = True
-                        elif algorithm == RANKING_ALGORITHM.CO:
-                            grad = gradient[rdx, cdx, chdx]
-                            if grad > max_value:
-                                max_value = grad
-                                changed = True
-                        elif algorithm == RANKING_ALGORITHM.COI:
-                            feature_value = input_image[rdx, cdx, chdx]
-                            grad = gradient[rdx, cdx, chdx]
-                            if grad * feature_value > max_value:
-                                max_value = grad * feature_value
-                                changed = True
-                        if changed:
-                            foundSet[hash] = 0
-                            max_row = rdx
-                            max_col = cdx
-                            max_channel = chdx
+    @staticmethod
+    def jsma_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
+        dF_t = []
+        dF_rest = []
+        num_elements = np.prod(generated_advs[0].shape)
+        for i in range(num_class):
+            dF_i = feature_ranker.compute_gradient_batch(
+                inputs=tf.convert_to_tensor(generated_advs.reshape((-1, 28, 28, 1))),
+                classifier=classifier, target_neuron=target_label)
+            if i != target_label:
+                dF_rest.append(dF_i.reshape((-1, num_elements)))
+            else:
+                dF_t = dF_i.reshape((-1, num_elements))
+        dF_rest = np.asarray(dF_rest)
+        dF_rest = np.rollaxis(dF_rest, axis=1, start=0)
+        dF_t = np.asarray(dF_t)
+        advs_flatten = generated_advs.reshape((-1, num_elements))
+        oris_flatten = origin_images.reshape((-1, num_elements))
+        SXs = []
 
-            # after iterating all features
-            if max_row is not None:
-                important_features = np.append(important_features, [[max_row, max_col, max_channel]], axis=0)
-                input_image[max_row, max_col, max_channel] = np.max(gradient) + 2
+        for index in range(np.prod(generated_advs[0].shape)):
+            dF_t_i = dF_t[:, index]
+            sum_dF_rest_i = np.sum(dF_rest[:, :, index], axis=1)
+            compare = advs_flatten[:, index] > oris_flatten[:, index]
+            compare_opposite = ~ compare
+            compare = np.array(compare, dtype=int)
 
-        important_features = np.delete(important_features, 0, axis=0)  # the first row is redundant
-        return important_features
+            positive_rank = abs(dF_t_i) * abs(sum_dF_rest_i)
+            negative_rank = np.zeros_like(positive_rank)
+
+            init = np.array(positive_rank)
+            init[compare is True and (dF_t_i < 0 or sum_dF_rest_i > 0)] = negative_rank[
+                compare is True and dF_t_i < 0 and sum_dF_rest_i > 0]
+            init[compare is False and (dF_t_i > 0 or sum_dF_rest_i < 0)] = negative_rank[
+                compare is False and (dF_t_i > 0 or sum_dF_rest_i < 0)]
+            SXs.append(init)
+
+        SXs = np.asarray(SXs).T
+        ranking_results = []
+        value_results = []
+        for index in range(len(diff_pixels)):
+            SX = SXs[index][diff_pixels[index]]
+            a_argsort = np.argsort(SX)
+            ranking_results.append(np.array(diff_pixels[index])[a_argsort])
+            value_results.append(SX[a_argsort])
+        return np.asarray(ranking_results), np.asarray(value_results)
 
     @staticmethod
     def find_important_features_of_samples(input_images: np.ndarray,

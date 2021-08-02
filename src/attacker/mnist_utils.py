@@ -109,6 +109,14 @@ def compute_l2_V2(adv: np.ndarray,
         ori = ori / 255
     return np.linalg.norm(adv.reshape(-1) - ori.reshape(-1))
 
+def compute_distance(data_1: np.ndarray, data_2: np.ndarray):
+    result_l0, result_l2 = [], []
+    for data_1_i, data_2_i in zip(data_1, data_2):
+        result_l0.append(compute_l0_V2(data_1_i, data_2_i))
+        result_l2.append(compute_l2_V2(data_1_i, data_2_i))
+
+    return np.asarray(result_l0), np.asarray(result_l2)
+
 
 def L2(gen, test):
     gen = gen.flatten()

@@ -163,8 +163,13 @@ if __name__ == '__main__':
 
     pre_softmax_classifier = tf.keras.models.Model(inputs=classifier.input,
                                                    outputs=classifier.get_layer('pre_softmax_layer').output)
-    ranker = slience_ranking(classifier_name=classifier_name, classifier=pre_softmax_classifier,
-                             data_name=MNIST_DATA_NAME,
-                             is_clip_above=True)
-    for i in range(5, 6):
-        ranker.compute_ranking_matrix(saved_image_path=path_to_save, label=i)
+    pre_softmax_classifier.save_weights('Lenet_v2_weights.h5')
+    json_config = pre_softmax_classifier.to_json()
+    with open('Lenet_v2.json', 'w') as json_file:
+        json_file.write(json_config)
+    print(pre_softmax_classifier.summary())
+    # ranker = slience_ranking(classifier_name=classifier_name, classifier=pre_softmax_classifier,
+    #                          data_name=MNIST_DATA_NAME,
+    #                          is_clip_above=True)
+    # for i in range(5, 6):
+    #     ranker.compute_ranking_matrix(saved_image_path=path_to_save, label=i)
