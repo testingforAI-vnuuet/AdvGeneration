@@ -214,7 +214,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 3):
                 attacker = AE4DNN_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                      target_position=target_position, classifier_name=classifier_name,
-                                     weight=weight_value, step=step)
+                                     weight=weight_value, step=step, num_images=4000)
                 attacker.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
                 sucess_rate_i, L0_after, L2_after, smooth_adv_i, L0_before, L2_before = attacker.export_result()
                 weight_result.append(sucess_rate_i)
