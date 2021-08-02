@@ -56,7 +56,7 @@ class AE4DNN_V2:
 
         self.origin_images, self.origin_labels = filter_by_label(self.origin_label, self.trainX, self.trainY)
 
-        self.num_images_for_prediction = len(self.origin_images)
+        self.num_images_for_prediction = 4000
         if is_train is False:
             self.origin_images = np.array(self.origin_images[:self.num_images_for_prediction])
             self.origin_labels = np.array(self.origin_labels[:self.num_images_for_prediction])
@@ -214,7 +214,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 3):
                 attacker = AE4DNN_V2(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                      target_position=target_position, classifier_name=classifier_name,
-                                     weight=weight_value, step=step, num_images=4000)
+                                     weight=weight_value, step=step, num_images=4000, is_train=False)
                 attacker.autoencoder_attack(loss=AE_LOSSES.cross_entropy_loss)
                 sucess_rate_i, L0_after, L2_after, smooth_adv_i, L0_before, L2_before = attacker.export_result()
                 weight_result.append(sucess_rate_i)
