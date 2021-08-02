@@ -237,8 +237,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
                 del attacker
             # weight_result_i.append(weight_result_i_j)
 
-    smooth_adv_speed = np.asarray(smooth_adv_speed)
-    smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
+    # smooth_adv_speed = np.asarray(smooth_adv_speed)
+    # smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
     ranking_type = 'jsma'
     # np.savetxt(f'./result/slience_map/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv',
     #            smooth_adv_speed, delimiter=',')

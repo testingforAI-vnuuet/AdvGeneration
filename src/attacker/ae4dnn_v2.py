@@ -233,8 +233,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
         # weight_result_i = np.average(weight_result_i, axis=0)
         # weight_result.append(weight_result_i)
 
-    smooth_adv_speed = np.asarray(smooth_adv_speed)
-    smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
+    # smooth_adv_speed = np.asarray(smooth_adv_speed)
+    # smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
     ranking_type = 'jsma'
 
     # np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed,
