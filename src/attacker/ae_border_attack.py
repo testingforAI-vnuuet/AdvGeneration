@@ -8,7 +8,7 @@ import time
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
-from utility.filters.filter_advs import smooth_adv_border_V3
+from utility.optimize_advs import optimize_advs
 from utility.statistics import *
 
 tf.config.experimental_run_functions_eagerly(True)
@@ -25,7 +25,7 @@ def combined_function(set1, set2, set3):
 class AutoencoderBorder:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=6.,
-                 num_images=1000):
+                 num_images=1000, is_train=True):
         """
 
         :param origin_label:
@@ -56,8 +56,13 @@ class AutoencoderBorder:
 
         self.origin_images, self.origin_labels = filter_by_label(self.origin_label, self.trainX, self.trainY)
 
-        self.origin_images = np.array(self.origin_images[:self.num_images])
-        self.origin_labels = np.array(self.origin_labels[:self.num_images])
+        self.num_images_for_prediction = 4000
+        if is_train is False:
+            self.origin_images = np.array(self.origin_images[:self.num_images_for_prediction])
+            self.origin_labels = np.array(self.origin_labels[:self.num_images_for_prediction])
+        else:
+            self.origin_images = np.array(self.origin_images[:self.num_images])
+            self.origin_labels = np.array(self.origin_labels[:self.num_images])
 
         logger.debug('shape of origin_images: {shape}'.format(shape=self.origin_images.shape))
         logger.debug('shape of origin_labels: {shape}'.format(shape=self.origin_labels.shape))
@@ -96,7 +101,7 @@ class AutoencoderBorder:
         self.L0_afters = None
         self.L2_befores = None
         self.L2_afters = None
-        self.restored_advs = None
+        self.optimized_adv = None
         logger.debug('init attacking DONE!')
 
     def autoencoder_attack(self, loss):
@@ -155,9 +160,13 @@ class AutoencoderBorder:
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
 
-        self.restored_advs, self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1],
-            self.target_label, step=self.step, return_adv=True)
+        self.optimized_adv = optimize_advs(classifier=self.classifier,
+                                           generated_advs=self.adv_result[:4000],
+                                           origin_images=self.origin_adv_result[:4000],
+                                           target_label=self.target_label,
+                                           step=self.step, num_class=10)
+        self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
+        self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
 
         if self.adv_result is None:
             return
@@ -173,10 +182,9 @@ class AutoencoderBorder:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n'.join(str_smooth_adv)
         if self.adv_result is None or self.adv_result.shape[0] == 0:
-            return 0, [], [], []
-        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv
-
-
+            return 0, [], [], [], [], []
+        return self.adv_result.shape[0] / float(
+            self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv, self.L0_befores, self.L2_befores
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -186,10 +194,12 @@ def run_thread_V2(classifier_name, trainX, trainY):
     result_txt = classifier_name + '\n'
     # AE_LOSS = AE_LOSSES.border_loss
     weight_result = []
-    L0s = []
-    L2s = []
+    L0_afters = []
+    L2_afters = []
+    L0_befores = []
+    L2_befores = []
     smooth_adv_speed = []
-    step = 0.1
+    step = 6
     for weight_index in range(1, 11):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
@@ -199,43 +209,48 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 3):
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                              target_position=target_position, classifier_name=classifier_name,
-                                             weight=weight_value, step=step)
+                                             weight=weight_value, step=step, is_train=False)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
-                sucess_rate_i, L0, L2, smooth_adv_i = attacker.export_result()
-                weight_result_i_j.append(sucess_rate_i)
-                if len(L0) == 0 and sucess_rate_i > 0.0:
-                    L0, L2 = [0] * (round(sucess_rate_i * 1000)), [0] * (round(sucess_rate_i * 1000))
-                    for L0_i, L2_i in zip(L0, L2):
-                        L0s.append(L0_i)
-                        L2s.append(L2_i)
-
-                elif len(L0) != 0:
-                    for L0_i, L2_i in zip(L0, L2):
-                        L0s.append(L0_i)
-                        L2s.append(L2_i)
-                    if len(smooth_adv_i) == 0:
-                        smooth_adv_speed.append([0]*784)
+                sucess_rate_i, L0_after, L2_after, smooth_adv_i, L0_before, L2_before = attacker.export_result()
+                weight_result.append(sucess_rate_i)
+                if len(L0_after) != 0:
+                    for index in range(len(L0_after)):
+                        L0_afters.append(L0_after[index])
+                        L2_afters.append(L2_after[index])
+                        L0_befores.append(L0_before[index])
+                        L2_befores.append(L2_before[index])
+                    smooth_adv_speed.append(smooth_adv_i)
                 del attacker
 
+    ranking_type = 'jsma'
 
+    # np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed,
+    #            delimiter=',')
 
-    smooth_adv_speed = np.asarray(smooth_adv_speed)
-    smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
-    ranking_type = 'jsma_ka'
-    np.savetxt(f'./result/ae_border/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv',
-               smooth_adv_speed, delimiter=',')
+    L0_afters = np.array(L0_afters).flatten()
+    L2_afters = np.array(L2_afters).flatten()
 
-    L0s = np.array(L0s).flatten()
-    L2s = np.array(L2s).flatten()
+    L0_afters = reject_outliers_v2(L0_afters)
+    L2_afters = reject_outliers_v2(L2_afters)
 
-    L0s = reject_outliers_v2(L0s)
-    L2s = reject_outliers_v2(L2s)
-    if L0s.shape[0] == 0:
+    L0_befores = np.array(L0_befores).flatten()
+    L2_befores = np.array(L2_befores).flatten()
+
+    L0_befores = reject_outliers_v2(L0_befores)
+    L2_befores = reject_outliers_v2(L2_befores)
+
+    if L0_afters.shape[0] == 0:
         return
-    min_l0, max_l0, avg_l0 = np.min(L0s), np.max(L0s), np.average(L0s)
-    min_l2, max_l2, avg_l2 = np.min(L2s), np.max(L2s), np.average(L2s)
+    min_l0, max_l0, avg_l0 = np.min(L0_afters), np.max(L0_afters), np.average(L0_afters)
+    min_l2, max_l2, avg_l2 = np.min(L2_afters), np.max(L2_afters), np.average(L2_afters)
 
     l0_l2_txt = f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
+
+    min_l0, max_l0, avg_l0 = np.min(L0_befores), np.max(L0_befores), np.average(L0_befores)
+    min_l2, max_l2, avg_l2 = np.min(L2_befores), np.max(L2_befores), np.average(L2_befores)
+    l0_l2_txt += '\n before: '
+    l0_l2_txt += '\n ' + f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
+    l0_l2_txt += '\n' + str(weight_result)
     f = open('./result/ae_border/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
     f.write(l0_l2_txt)
     f.close()
