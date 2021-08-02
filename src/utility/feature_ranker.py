@@ -69,7 +69,27 @@ class feature_ranker:
         for index in range(len(diff_pixels)):
             random.shuffle(diff_pixels[index])
         return diff_pixels, None
+
+    @staticmethod
+    def coi_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
+        dF_t = feature_ranker.compute_gradient_batch(inputs=generated_advs.reshape(-1, 28, 28, 1),
+                                                     classifier=classifier, target_neuron=target_label)
+
+        score_matrices = dF_t * generated_advs
+        score_matrices = score_matrices.reshape(-1, np.prod(generated_advs[0].shape))
+
+        ranking_results = []
+        value_results = []
+        for index in range(len(diff_pixels)):
+            SX = score_matrices[index][diff_pixels[index]]
+            a_argsort = np.argsort(SX)
+            ranking_results.append(np.array(diff_pixels[index])[a_argsort])
+            value_results.append(SX[a_argsort])
+        return np.asarray(ranking_results), np.asarray(value_results)
+
+
         # return [random.shuffle(diff_i) for diff_i in diff_pixels], None
+
     @staticmethod
     def jsma_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
         dF_t = []

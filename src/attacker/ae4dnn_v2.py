@@ -235,7 +235,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
 
     # smooth_adv_speed = np.asarray(smooth_adv_speed)
     # smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
-    ranking_type = 'jsma'
+    ranking_type = 'coi'
 
     # np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed,
     #            delimiter=',')
