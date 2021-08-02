@@ -188,7 +188,7 @@ class AE4DNN_V2:
             str_smooth_adv = list(map(str, self.smooth_adv))
             result += '\n'.join(str_smooth_adv)
         if self.adv_result is None or self.adv_result.shape[0] == 0:
-            return 0, [], [], []
+            return 0, [], [], [], []
         return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv, self.L0_befores, self.L2_befores
 
 
@@ -303,12 +303,12 @@ if __name__ == '__main__':
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
     thread1.join()
-    thread2.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
