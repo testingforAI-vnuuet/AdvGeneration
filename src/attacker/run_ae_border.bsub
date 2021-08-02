@@ -1,6 +1,6 @@
 
-#BSUB -e std.error
-#BSUB -o std.output
+#BSUB -e std_border.error
+#BSUB -o std_border.output
 #BSUB -q gpu
 export PYTHONPATH=/home/khamd/AdvGeneration/src:$PYTHONPATH
 python3 ae_border_attack.py
