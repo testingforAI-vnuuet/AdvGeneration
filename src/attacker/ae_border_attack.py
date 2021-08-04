@@ -219,7 +219,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                     smooth_adv_speed.append(smooth_adv_i)
                 del attacker
 
-    ranking_type = 'coi'
+    ranking_type = 'jsma_ka'
 
     # np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed,
     #            delimiter=',')

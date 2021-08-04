@@ -138,6 +138,54 @@ class feature_ranker:
         return np.asarray(ranking_results), np.asarray(value_results)
 
     @staticmethod
+    def jsma_ka_ranking_batch(generated_advs, origin_images, target_label, classifier, diff_pixels, num_class):
+        dF_t = []
+        dF_rest = []
+        num_elements = np.prod(generated_advs[0].shape)
+        for i in range(num_class):
+            dF_i = feature_ranker.compute_gradient_batch(
+                inputs=tf.convert_to_tensor(generated_advs.reshape((-1, 28, 28, 1))),
+                classifier=classifier, target_neuron=target_label)
+            if i != target_label:
+                dF_rest.append(dF_i.reshape((-1, num_elements)))
+            else:
+                dF_t = dF_i.reshape((-1, num_elements))
+        dF_rest = np.asarray(dF_rest)
+        dF_rest = np.rollaxis(dF_rest, axis=1, start=0)
+        dF_t = np.asarray(dF_t)
+        advs_flatten = generated_advs.reshape((-1, num_elements))
+        oris_flatten = origin_images.reshape((-1, num_elements))
+        SXs = []
+
+        for index in range(num_elements):
+            dF_t_i = dF_t[:, index]
+            sum_dF_rest_i = np.sum(dF_rest[:, :, index], axis=1)
+            compare = advs_flatten[:, index] > oris_flatten[:, index]
+            compare_opposite = ~ compare
+            compare = np.array(compare, dtype=int)
+            compare_opposite = np.array(compare_opposite, dtype=int)
+
+            positive_rank = abs(dF_t_i) * abs(sum_dF_rest_i)
+            negative_rank = -1 * 1 / (positive_rank + 0.1)
+
+            init = np.array(positive_rank)
+            init[compare is True and (dF_t_i < 0 or sum_dF_rest_i > 0)] = negative_rank[
+                compare is True and dF_t_i < 0 and sum_dF_rest_i > 0]
+            init[compare is False and (dF_t_i > 0 or sum_dF_rest_i < 0)] = negative_rank[
+                compare is False and (dF_t_i > 0 or sum_dF_rest_i < 0)]
+            SXs.append(init)
+
+        SXs = np.asarray(SXs).T
+        ranking_results = []
+        value_results = []
+        for index in range(len(diff_pixels)):
+            SX = SXs[index][diff_pixels[index]]
+            a_argsort = np.argsort(SX)
+            ranking_results.append(np.array(diff_pixels[index])[a_argsort])
+            value_results.append(SX[a_argsort])
+        return np.asarray(ranking_results), np.asarray(value_results)
+
+    @staticmethod
     def find_important_features_of_samples(input_images: np.ndarray,
                                            n_rows: int, n_cols: int, n_channels: int, n_important_features: int,
                                            algorithm: enum.Enum,
