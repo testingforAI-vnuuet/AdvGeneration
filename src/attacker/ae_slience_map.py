@@ -157,12 +157,13 @@ class ae_slience_map:
             cnn_model=self.classifier)
 
         self.end_time = time.time()
-
-        self.optimized_adv = optimize_advs(classifier=self.classifier,
-                                           generated_advs=self.adv_result[:4000],
-                                           origin_images=self.origin_adv_result[:4000],
-                                           target_label=self.target_label,
-                                           step=self.step, num_class=10)
+        #
+        # self.optimized_adv = optimize_advs(classifier=self.classifier,
+        #                                    generated_advs=self.adv_result[:4000],
+        #                                    origin_images=self.origin_adv_result[:4000],
+        #                                    target_label=self.target_label,
+        #                                    step=self.step, num_class=10)
+        self.optimized_adv = self.adv_result
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
         self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
 
@@ -268,10 +269,10 @@ def run_thread_V2(classifier_name, trainX, trainY):
     l0_l2_txt += '\n before: '
     l0_l2_txt += '\n ' + f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
     l0_l2_txt += '\n' + str(weight_result)
-    f = open('./result/ae_slience_map/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
-    f.write(l0_l2_txt)
-    f.close()
-    logger.debug('ok')
+    # f = open('./result/ae_slience_map/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
+    # f.write(l0_l2_txt)
+    # f.close()
+    # logger.debug('ok')
 
 
 class MyThread(threading.Thread):
