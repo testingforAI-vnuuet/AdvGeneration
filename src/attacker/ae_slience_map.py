@@ -207,7 +207,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L2_befores = []
     smooth_adv_speed = []
     step = 6
-    for weight_index in range(1, 11):
+    for weight_index in [0.01, 0.05, 0.5, 0.95, 0.99, 1]:
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
@@ -239,7 +239,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
 
     # smooth_adv_speed = np.asarray(smooth_adv_speed)
     # smooth_adv_speed = np.average(smooth_adv_speed, axis=0)
-    ranking_type = 'jsma_ka'
+    ranking_type = 'jsma'
     # np.savetxt(f'./result/slience_map/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv',
     #            smooth_adv_speed, delimiter=',')
 

@@ -198,7 +198,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L2_befores = []
     smooth_adv_speed = []
     step = 6
-    for weight_index in range(1, 11):
+    for weight_index in [0.01, 0.05, 0.5, 0.95, 0.99, 1]:
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         for origin_label in range(9, 10):
@@ -219,7 +219,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
                     smooth_adv_speed.append(smooth_adv_i)
                 del attacker
 
-    ranking_type = 'jsma_ka'
+    ranking_type = 'jsma'
 
     # np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed,
     #            delimiter=',')
