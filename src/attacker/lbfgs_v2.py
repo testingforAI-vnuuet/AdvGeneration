@@ -5,6 +5,8 @@ import os.path
 import threading
 import time
 
+import numpy as np
+
 from attacker.autoencoder import *
 from attacker.constants import *
 from attacker.mnist_utils import *
@@ -19,7 +21,7 @@ pretrained_model_name = ['Alexnet', 'Lenet_v2', 'vgg13', 'vgg16']
 pre_softmax_layer_name_dict = {pretrained_model_name[0]: 'dense_3', pretrained_model_name[1]: 'pre_softmax_layer',
                                pretrained_model_name[2]: None, pretrained_model_name[3]: None}
 
-
+ranking_type = 'jsma'
 def combined_function(set1, set2, set3):
     return np.array([list(combined) for combined in zip(set1, set2, set3)])
 
@@ -28,7 +30,7 @@ class LBFGS_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=6.,
                  num_images=1000,
-                 pre_softmax_layer_name='pre_softmax_layer', is_train=False):
+                 pre_softmax_layer_name='pre_softmax_layer', is_train=True):
         """
 
         :param origin_label:
@@ -113,6 +115,7 @@ class LBFGS_V2:
         self.L2_afters = None
         self.adv_file_path = os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + 'adv.npy')
         self.ori_file_path = os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + 'ori.npy')
+        self.optimized_adv_path = os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'{ranking_type}_optimized.npy')
         self.optimized_adv = None
         logger.debug('init attacking DONE!')
 
@@ -165,6 +168,7 @@ class LBFGS_V2:
                                            origin_images=self.origin_adv_result,
                                            target_label=self.target_label,
                                            step=self.step, num_class=10)
+        np.save(self.optimized_adv_path, np.asarray(self.optimized_adv_path))
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
         self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
 
@@ -218,8 +222,6 @@ def run_thread_V2(classifier_name, trainX, trainY):
                     smooth_adv_speed.append(smooth_adv_i)
                 del attacker
             # weight_result_i.append(weight_result_i_j)
-
-    ranking_type = 'jsma_ka'
 
     # np.savetxt(f'./result/ae4dnn/{classifier_name}_avg_recover_speed_step={step}{ranking_type}.csv', smooth_adv_speed,
     #            delimiter=',')
