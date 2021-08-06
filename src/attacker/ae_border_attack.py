@@ -206,7 +206,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
             for target_position in range(2, 3):
                 attacker = AutoencoderBorder(origin_label, np.array(trainX), np.array(trainY), cnn_model,
                                              target_position=target_position, classifier_name=classifier_name,
-                                             weight=weight_value, step=step, is_train=True)
+                                             weight=weight_value, step=step, is_train=False)
                 attacker.autoencoder_attack(loss=AE_LOSSES.border_loss)
 
                 sucess_rate_i, L0_after, L2_after, smooth_adv_i, L0_before, L2_before = attacker.export_result()
@@ -249,10 +249,10 @@ def run_thread_V2(classifier_name, trainX, trainY):
     l0_l2_txt += '\n before: '
     l0_l2_txt += '\n ' + f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
     l0_l2_txt += '\n' + str(weight_result)
-    # f = open('./result/ae_border/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
-    # f.write(l0_l2_txt)
-    # f.close()
-    # logger.debug('ok')
+    f = open('./result/ae_border/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
+    f.write(l0_l2_txt)
+    f.close()
+    logger.debug('ok')
 
 
 class MyThread(threading.Thread):
