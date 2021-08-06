@@ -157,7 +157,7 @@ class ae_slience_map:
 
         self.end_time = time.time()
         #
-        if self.adv_result is None or self.adv_result.shape == 0:
+        if self.adv_result is None or self.adv_result.shape[0] == 0:
             self.optimized_adv = np.array([])
             self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = [], [], [], []
             return
