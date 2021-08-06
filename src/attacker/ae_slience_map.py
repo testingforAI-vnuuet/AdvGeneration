@@ -12,7 +12,6 @@ from attacker.losses import AE_LOSSES
 from attacker.mnist_utils import reject_outliers_v2, compute_distance
 from data_preprocessing.mnist import MnistPreprocessing
 from utility.constants import *
-from utility.filters.filter_advs import smooth_adv_border_V3
 from utility.optimize_advs import optimize_advs
 from utility.statistics import *
 
@@ -158,11 +157,16 @@ class ae_slience_map:
 
         self.end_time = time.time()
         #
-        self.optimized_adv = optimize_advs(classifier=self.classifier,
-                                           generated_advs=self.adv_result[:4000],
-                                           origin_images=self.origin_adv_result[:4000],
-                                           target_label=self.target_label,
-                                           step=self.step, num_class=10)
+        if self.adv_result is None or self.adv_result.shape == 0:
+            self.optimized_adv = np.array([])
+            self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = [], [], [], []
+            return
+        else:
+            self.optimized_adv = optimize_advs(classifier=self.classifier,
+                                               generated_advs=self.adv_result[:4000],
+                                               origin_images=self.origin_adv_result[:4000],
+                                               target_label=self.target_label,
+                                               step=self.step, num_class=10)
         # self.optimized_adv = self.adv_result
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
         self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
@@ -192,7 +196,8 @@ class ae_slience_map:
         if self.adv_result is None or self.adv_result.shape[0] == 0:
             return 0, [], [], [], [], []
 
-        return self.adv_result.shape[0] / float(self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv, self.L0_befores, self.L2_befores
+        return self.adv_result.shape[0] / float(
+            self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv, self.L0_befores, self.L2_befores
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -255,7 +260,6 @@ def run_thread_V2(classifier_name, trainX, trainY):
 
     L0_befores = reject_outliers_v2(L0_befores)
     L2_befores = reject_outliers_v2(L2_befores)
-
 
     if L0_afters.shape[0] == 0:
         return
