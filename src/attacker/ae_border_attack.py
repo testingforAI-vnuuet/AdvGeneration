@@ -157,8 +157,12 @@ class AutoencoderBorder:
                                                                              self.generated_candidates,
                                                                              self.target_label,
                                                                              cnn_model=self.classifier)
-
-        self.optimized_adv = optimize_advs(classifier=self.classifier,
+        if self.adv_result is None or self.adv_result.shape == 0:
+            self.optimized_adv = np.array([])
+            self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = [], [], [], []
+            return
+        else:
+            self.optimized_adv = optimize_advs(classifier=self.classifier,
                                            generated_advs=self.adv_result[:4000],
                                            origin_images=self.origin_adv_result[:4000],
                                            target_label=self.target_label,
