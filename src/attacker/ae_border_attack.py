@@ -108,7 +108,7 @@ class AutoencoderBorder:
         ae_trainee = MnistAutoEncoder()
         autoencoder_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name)
 
-        if os.path.isfile(autoencoder_path):
+        if os.path.isfile(autoencoder_path) and False:
             logger.debug(
                 'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
                     origin_label=self.origin_label, target_label=self.target_label))
@@ -137,9 +137,13 @@ class AutoencoderBorder:
             model_checkpoint = ModelCheckpoint(autoencoder_path,
                                                save_best_only=True, monitor='loss',
                                                mode='min')
+            #
+            # history = self.autoencoder.fit(self.origin_images, self.combined_labels, epochs=500, batch_size=512,
+            #                                callbacks=[early_stopping, model_checkpoint], verbose=1)
 
             history = self.autoencoder.fit(self.origin_images, self.combined_labels, epochs=500, batch_size=512,
-                                           callbacks=[early_stopping, model_checkpoint], verbose=1)
+                                           verbose=1)
+            self.autoencoder.save(autoencoder_path)
             self.optimal_epoch = len(history.history['loss'])
             logger.debug('training autoencoder DONE!')
         self.get_border_and_adv()
@@ -162,12 +166,13 @@ class AutoencoderBorder:
             self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = [], [], [], []
             return
         else:
-            self.optimized_adv = optimize_advs(classifier=self.classifier,
-                                           generated_advs=self.adv_result[:4000],
-                                           origin_images=self.origin_adv_result[:4000],
-                                           target_label=self.target_label,
-                                           step=self.step, num_class=10)
-        # self.optimized_adv = self.adv_result
+            print('ok')
+            # self.optimized_adv = optimize_advs(classifier=self.classifier,
+            #                                    generated_advs=self.adv_result[:4000],
+            #                                    origin_images=self.origin_adv_result[:4000],
+            #                                    target_label=self.target_label,
+            #                                    step=self.step, num_class=10)
+        self.optimized_adv = self.adv_result
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
         self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
 
