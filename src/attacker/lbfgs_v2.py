@@ -168,7 +168,7 @@ class LBFGS_V2:
                                            origin_images=self.origin_adv_result,
                                            target_label=self.target_label,
                                            step=self.step, num_class=10)
-        np.save(self.optimized_adv_path, np.asarray(self.optimized_adv_path))
+        np.save(self.optimized_adv_path, np.asarray(self.optimized_adv))
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
         self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
 
