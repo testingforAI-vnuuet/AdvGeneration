@@ -191,8 +191,7 @@ class AutoencoderBorder:
             result += '\n'.join(str_smooth_adv)
         if self.adv_result is None or self.adv_result.shape[0] == 0:
             return 0, [], [], [], [], []
-        return self.adv_result.shape[0] / float(
-            self.num_images), self.L0_afters, self.L2_afters, self.smooth_adv, self.L0_befores, self.L2_befores
+        return self.adv_result.shape[0] / float(len(self.origin_images)), self.L0_afters, self.L2_afters, self.smooth_adv, self.L0_befores, self.L2_befores
 
 
 def run_thread_V2(classifier_name, trainX, trainY):
@@ -209,7 +208,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     smooth_adv_speed = []
     step = 6
     for weight_index in [0.01, 0.05, 0.5, 0.95, 0.99, 1]:
-        weight_value = weight_index * 0.1
+        weight_value = weight_index
         # weight_value = weight_index
         for origin_label in range(9, 10):
             for target_position in range(2, 3):
