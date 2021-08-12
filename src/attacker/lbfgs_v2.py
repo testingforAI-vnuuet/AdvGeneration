@@ -146,6 +146,7 @@ class LBFGS_V2:
         return gen_img
 
     def attack(self):
+        self.start_time = time.time()
         if os.path.isfile(self.adv_file_path):
             self.adv_result = np.load(self.adv_file_path)
             self.origin_adv_result = np.load(self.ori_file_path)
@@ -159,15 +160,16 @@ class LBFGS_V2:
                                                                                  self.generated_candidates,
                                                                                  self.target_label,
                                                                                  cnn_model=self.classifier)
-            np.save(self.adv_file_path, self.adv_result)
-            np.save(self.ori_file_path, self.origin_adv_result)
-
+            # np.save(self.adv_file_path, self.adv_result)
+            # np.save(self.ori_file_path, self.origin_adv_result)
+        self.end_time = time.time()
+        logger.debug('exe time: ' + str(self.end_time - self.start_time))
         logger.debug(f'adv shape: {self.adv_result.shape}')
-        self.optimized_adv = optimize_advs(classifier=self.classifier,
-                                           generated_advs=self.adv_result,
-                                           origin_images=self.origin_adv_result,
-                                           target_label=self.target_label,
-                                           step=self.step, num_class=10)
+        # self.optimized_adv = optimize_advs(classifier=self.classifier,
+        #                                    generated_advs=self.adv_result,
+        #                                    origin_images=self.origin_adv_result,
+        #                                    target_label=self.target_label,
+        #                                    step=self.step, num_class=10)
         np.save(self.optimized_adv_path, np.asarray(self.optimized_adv))
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
         self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
