@@ -84,7 +84,7 @@ class AE4DNN_V2:
         self.file_shared_name = self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
             self.weight).replace('.', ',') + '_' + str(self.num_images)
 
-        self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
+        self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + 'training_test.h5'
         self.result_file_name = self.file_shared_name + 'result' + '.txt'
 
         logger.debug('combining target_labels for autoencoder training')
@@ -165,22 +165,6 @@ class AE4DNN_V2:
 
         logger.debug(f'adv shape {self.adv_result.shape}')
 
-    # def export_dataset_rnn(self):
-    #     labels = []
-    #
-    #     for adv, ori in zip(self.restored_advs, self.origin_adv_result):
-    #         adv_flat = np.round(adv.flatten())
-    #         ori_flat = np.round(ori.flatten() * 255.0)
-    #         label = adv_flat == ori_flat
-    #         label = label.astype(int)
-    #         labels.append(label)
-    #     labels = np.array(labels)
-    #
-    #     np.save(os.path.join(RESULT_FOLDER_PATH, self.method_name,
-    #                          self.file_shared_name + f'step={self.step}_training.npy'), self.adv_result)
-    #     np.save(
-    #         os.path.join(RESULT_FOLDER_PATH, self.method_name, self.file_shared_name + f'step={self.step}_label.npy'),
-    #         labels)
 
     def export_result(self):
         # result = '<=========='
