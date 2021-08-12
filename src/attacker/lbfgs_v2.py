@@ -30,7 +30,7 @@ class LBFGS_V2:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=6.,
                  num_images=1000,
-                 pre_softmax_layer_name='pre_softmax_layer', is_train=True):
+                 pre_softmax_layer_name='pre_softmax_layer', is_train=False):
         """
 
         :param origin_label:
