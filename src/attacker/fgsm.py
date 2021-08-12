@@ -27,7 +27,7 @@ def combined_function(set1, set2, set3):
 class FGSM:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=6.,
-                 num_images=1000,
+                 num_images=4000,
                  pre_softmax_layer_name='pre_softmax_layer'):
         """
 
