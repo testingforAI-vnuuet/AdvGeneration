@@ -24,8 +24,6 @@ def combined_function(set1, set2, set3):
     return np.array([list(combined) for combined in zip(set1, set2, set3)])
 
 
-
-
 class FGSM:
     def __init__(self, origin_label, trainX, trainY, classifier, weight, target_position=2, classifier_name='noname',
                  step=6.,
@@ -87,7 +85,7 @@ class FGSM:
         logger.debug('border_origin_image shape: {shape}'.format(shape=self.border_origin_images.shape))
         self.internal_origin_images = get_internal_images(self.origin_images, border_images=self.border_origin_images)
         logger.debug('internal_origin_image shape: {shape}'.format(shape=self.internal_origin_images.shape))
-        self.file_shared_name = self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
+        self.file_shared_name = 'timetest_' + self.method_name + '_' + classifier_name + f'_{origin_label}_{self.target_label}' + 'weight=' + str(
             self.weight).replace('.', ',') + '_' + str(self.num_images)
 
         # self.autoencoder_file_name = self.file_shared_name + 'autoencoder' + '.h5'
@@ -132,6 +130,7 @@ class FGSM:
         return sign
 
     def attack(self):
+        self.start_time = time.time()
         if os.path.isfile(self.adv_file_path):
             self.adv_result = np.load(self.adv_file_path)
             self.origin_adv_result = np.load(self.ori_file_path)
@@ -147,15 +146,16 @@ class FGSM:
                                                                                  cnn_model=self.classifier)
             np.save(self.adv_file_path, self.adv_result)
             np.save(self.ori_file_path, self.origin_adv_result)
-
+        self.end_time = time.time()
         logger.debug(f'adv shape: {self.adv_result.shape}')
 
         if self.adv_result is None:
             return
         if self.adv_result.shape[0] == 0:
             return
-        self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
-            self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
+        logger.debug('exe time: ' + str(self.end_time - self.start_time))
+        # self.smooth_adv, self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = smooth_adv_border_V3(
+        #     self.classifier, self.adv_result[:-1], self.origin_adv_result[:-1], self.target_label, step=self.step)
 
 
     def export_result(self):
@@ -179,8 +179,8 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L0s = []
     L2s = []
     smooth_adv_speed = []
-    step = 0.1
-    for weight_index in range(1, 11):
+    step = 6
+    for weight_index in range(1, 2):
         weight_value = weight_index * 0.1
         # weight_value = weight_index
         weight_result_i = []
