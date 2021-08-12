@@ -107,7 +107,7 @@ class AutoencoderBorder:
     def autoencoder_attack(self, loss):
         ae_trainee = MnistAutoEncoder()
         autoencoder_path = os.path.join(SAVED_ATTACKER_PATH, self.method_name, self.autoencoder_file_name)
-
+        self.start_time = time.time()
         if os.path.isfile(autoencoder_path) and False:
             logger.debug(
                 'found pre-trained autoencoder for: origin_label = {origin_label}, target_label = {target_label}'.format(
@@ -166,12 +166,12 @@ class AutoencoderBorder:
             self.L0_befores, self.L0_afters, self.L2_befores, self.L2_afters = [], [], [], []
             return
         else:
-            print('ok')
-            # self.optimized_adv = optimize_advs(classifier=self.classifier,
-            #                                    generated_advs=self.adv_result[:4000],
-            #                                    origin_images=self.origin_adv_result[:4000],
-            #                                    target_label=self.target_label,
-            #                                    step=self.step, num_class=10)
+            self.optimized_adv = optimize_advs(classifier=self.classifier,
+                                               generated_advs=self.adv_result[:4000],
+                                               origin_images=self.origin_adv_result[:4000],
+                                               target_label=self.target_label,
+                                               step=self.step, num_class=10)
+        self.end_time = time.time()
         self.optimized_adv = self.adv_result
         self.L0_afters, self.L2_afters = compute_distance(self.optimized_adv, self.origin_adv_result)
         self.L0_befores, self.L2_befores = compute_distance(self.adv_result, self.origin_adv_result)
@@ -182,6 +182,7 @@ class AutoencoderBorder:
             return
 
         logger.debug(f'adv shape {self.adv_result.shape}')
+        logger.debug(f'exe time: ' + str(self.end_time - self.start_time))
 
     def export_result(self):
         # result = '<=========='
@@ -207,7 +208,7 @@ def run_thread_V2(classifier_name, trainX, trainY):
     L2_befores = []
     smooth_adv_speed = []
     step = 6
-    for weight_index in [0.01, 0.05, 0.5, 0.95, 0.99, 1]:
+    for weight_index in [0.5]:
         weight_value = weight_index
         # weight_value = weight_index
         for origin_label in range(9, 10):
@@ -257,10 +258,10 @@ def run_thread_V2(classifier_name, trainX, trainY):
     l0_l2_txt += '\n before: '
     l0_l2_txt += '\n ' + f'L0: {min_l0}, {max_l0}, {avg_l0}\nL2: {min_l2}, {max_l2}, {avg_l2}'
     l0_l2_txt += '\n' + str(weight_result)
-    f = open('./result/ae_border/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
-    f.write(l0_l2_txt)
-    f.close()
-    logger.debug('ok')
+    # f = open('./result/ae_border/' + classifier_name + f'l0_l2_step={step}{ranking_type}.txt', 'w')
+    # f.write(l0_l2_txt)
+    # f.close()
+    # logger.debug('ok')
 
 
 class MyThread(threading.Thread):
@@ -303,12 +304,12 @@ if __name__ == '__main__':
     thread4 = MyThread(pretrained_model_name[3], trainX, trainY)
 
     thread1.start()
-    thread2.start()
+    # thread2.start()
     # thread3.start()
     # thread4.start()
 
     thread1.join()
-    thread2.join()
+    # thread2.join()
     # thread3.join()
     # thread4.join()
 
